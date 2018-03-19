@@ -1,0 +1,22 @@
+// Andrew Naplavkov
+
+#ifndef BARK_TEST_SQL_BUILDER_HPP
+#define BARK_TEST_SQL_BUILDER_HPP
+
+#include <bark/db/sql_builder.hpp>
+#include <bark/geometry/as_binary.hpp>
+#include <boost/lexical_cast.hpp>
+
+TEST_CASE("sql_builder")
+{
+    using namespace bark;
+    using namespace bark::db;
+
+    sql_builder bld(sql_syntax{});
+    bld << param(std::string{"Hello!"}) << param(0) << param("Bark")
+        << param(1.) << param(geometry::as_binary({{-118, 26}, {-111, 33}}));
+    REQUIRE(boost::lexical_cast<std::string>(list(bld.params(), ", ")) ==
+            "Hello!, 0, Bark, 1, 93 bytes");
+}
+
+#endif  // BARK_TEST_SQL_BUILDER_HPP

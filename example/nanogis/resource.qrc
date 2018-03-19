@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/copy.png</file>
+        <file>res/globe.png</file>
+        <file>res/globe_disabled.png</file>
+        <file>res/map.png</file>
+        <file>res/map_disabled.png</file>
+        <file>res/palette.png</file>
+        <file>res/paste.png</file>
+        <file>res/sql.png</file>
+        <file>res/task.png</file>
+        <file>res/task_disabled.png</file>
+        <file>res/undistort.png</file>
+        <file>res/wheel.png</file>
+        <file>res/zoom.png</file>
+    </qresource>
+</RCC>

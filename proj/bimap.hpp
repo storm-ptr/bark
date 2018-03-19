@@ -1,0 +1,47 @@
+// Andrew Naplavkov
+
+#ifndef BARK_PROJ_BIMAP_HPP
+#define BARK_PROJ_BIMAP_HPP
+
+#include <bark/proj/normalize.hpp>
+#include <boost/bimap.hpp>
+#include <boost/bimap/multiset_of.hpp>
+#include <stdexcept>
+#include <string>
+
+namespace bark {
+namespace proj {
+
+class bimap {
+public:
+    void insert(int srid, const std::string& pj)
+    {
+        index_.insert({srid, normalize(pj)});
+    }
+
+    int find_srid(const std::string& pj) const
+    {
+        auto it = index_.right.find(normalize(pj));
+        if (it == index_.right.end())
+            throw std::out_of_range(pj);
+        return it->second;
+    }
+
+    std::string find_proj(int srid) const
+    {
+        auto it = index_.left.find(srid);
+        if (it == index_.left.end())
+            throw std::out_of_range(std::to_string(srid));
+        return it->second;
+    }
+
+private:
+    boost::bimap<boost::bimaps::multiset_of<int>,
+                 boost::bimaps::multiset_of<std::string>>
+        index_;
+};
+
+}  // namespace proj
+}  // namespace bark
+
+#endif  // BARK_PROJ_BIMAP_HPP
