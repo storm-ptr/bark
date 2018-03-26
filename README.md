@@ -13,7 +13,7 @@ Submodules:
 Windows:
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.windows.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.windows.txt)
-- [vmware machine with databases for testing](https://yadi.sk/d/KFRNZBlp3TkeKh)
+- [vmware machine with databases for testing](https://yadi.sk/d/sdEDsIjC3TkeM6)
 - [examlpe/nanogis binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)
 
 Ubuntu: todo
