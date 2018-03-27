@@ -17,3 +17,7 @@ Windows:
 - [examlpe/nanogis binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)
 
 Ubuntu: todo
+
+## example/nanogis
+
+![](https://user-images.githubusercontent.com/3381451/37953194-d484eb90-31aa-11e8-935f-60509acc3246.png)
