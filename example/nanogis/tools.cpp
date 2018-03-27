@@ -48,14 +48,10 @@ QString limited_text(QString text, Qt::AlignmentFlag alignment)
 {
     constexpr int LIMIT = 40;
     if (text.size() > LIMIT) {
-        switch (alignment) {
-            case Qt::AlignLeft:
-                text = text.left(LIMIT) + "...";
-                break;
-            case Qt::AlignRight:
-                text = "..." + text.right(LIMIT);
-                break;
-        }
+        if (alignment == Qt::AlignLeft)
+            text = text.left(LIMIT) + "...";
+        else if (alignment == Qt::AlignRight)
+            text = "..." + text.right(LIMIT);
     }
     return text;
 }

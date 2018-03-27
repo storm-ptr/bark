@@ -102,22 +102,22 @@ T fetch_or_default(provider& pvd, const Sql& sql)
     return fetch_or_default<T>(exec(*pvd.make_command(), sql));
 }
 
-inline auto drop_sql(provider& pvd, const qualified_name& tbl_nm)
+inline sql_builder drop_sql(provider& pvd, const qualified_name& tbl_nm)
 {
     auto res = builder(pvd);
     res << "DROP TABLE " << tbl_nm;
     return res;
 }
 
-inline auto drop(provider& pvd, const qualified_name& tbl_nm)
+inline void drop(provider& pvd, const qualified_name& tbl_nm)
 {
     exec(pvd, drop_sql(pvd, tbl_nm));
 }
 
 template <typename ColumnNames>
-auto select_sql(provider& pvd,
-                const qualified_name& tbl_nm,
-                const ColumnNames& col_nms)
+sql_builder select_sql(provider& pvd,
+                       const qualified_name& tbl_nm,
+                       const ColumnNames& col_nms)
 {
     auto res = builder(pvd);
     auto tbl = pvd.table(tbl_nm);
@@ -127,11 +127,11 @@ auto select_sql(provider& pvd,
 }
 
 template <typename ColumnNames>
-auto select_sql(provider& pvd,
-                const qualified_name& tbl_nm,
-                const ColumnNames& col_nms,
-                size_t offset,
-                size_t limit)
+sql_builder select_sql(provider& pvd,
+                       const qualified_name& tbl_nm,
+                       const ColumnNames& col_nms,
+                       size_t offset,
+                       size_t limit)
 {
     auto res = select_sql(pvd, tbl_nm, col_nms);
     auto tbl = pvd.table(tbl_nm);
@@ -175,10 +175,10 @@ dataset::rowset select(provider& pvd,
 }
 
 template <typename ColumnNames, typename Rows>
-auto insert_sql(provider& pvd,
-                const qualified_name& tbl_nm,
-                const ColumnNames& col_nms,
-                const Rows& rows)
+sql_builder insert_sql(provider& pvd,
+                       const qualified_name& tbl_nm,
+                       const ColumnNames& col_nms,
+                       const Rows& rows)
 {
     auto res = builder(pvd);
     auto tbl = pvd.table(tbl_nm);
