@@ -36,23 +36,24 @@ inline std::vector<bark::db::provider_ptr> make_write_providers()
     using namespace bark::db;
     static const std::string Ip = "192.168.170.128";
     static const std::string Pwd = "E207cGYM";
-    return {
-        std::make_shared<mysql::provider>(Ip, 3306, "mysql", "root", Pwd),
-        std::make_shared<odbc::provider>(
-            "DRIVER=" + odbc_driver({"IBM"}) + ";UID=DB2INST1;PWD=" + Pwd +
-            ";DATABASE=SAMPLE;HOSTNAME=" + Ip + ";"),
-        std::make_shared<odbc::provider>(
-            "DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" +
-            Pwd + ";DATABASE=mysql;SERVER=" + Ip + ";MULTI_STATEMENTS=1;"),
-        std::make_shared<odbc::provider>(
-            "DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) +
-            ";UID=postgres;PWD=" + Pwd + ";DATABASE=postgres;SERVER=" + Ip +
-            ";"),
-        std::make_shared<odbc::provider>("DRIVER=SQL Server;UID=sa;PWD=" + Pwd +
-                                         ";DATABASE=master;SERVER=" + Ip + ";"),
-        std::make_shared<postgres::provider>(
-            Ip, 5432, "postgres", "postgres", Pwd),
-        std::make_shared<sqlite::provider>(R"(.\drop_me.sqlite)")};
+    return {std::make_shared<mysql::provider>(Ip, 3306, "mysql", "root", Pwd),
+            std::make_shared<odbc::provider>(
+                "DRIVER=" + odbc_driver({"IBM"}) + ";UID=DB2INST1;PWD=" + Pwd +
+                ";DATABASE=SAMPLE;HOSTNAME=" + Ip + ";"),
+            std::make_shared<odbc::provider>(
+                "DRIVER=" + odbc_driver({"MySQL", "Unicode"}) +
+                ";UID=root;PWD=" + Pwd + ";DATABASE=mysql;SERVER=" + Ip +
+                ";MULTI_STATEMENTS=1;"),
+            std::make_shared<odbc::provider>(
+                "DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) +
+                ";UID=postgres;PWD=" + Pwd + ";DATABASE=postgres;SERVER=" + Ip +
+                ";"),
+            std::make_shared<odbc::provider>(
+                "DRIVER=" + odbc_driver({"SQL", "Server"}) +
+                ";UID=sa;PWD=" + Pwd + ";DATABASE=master;SERVER=" + Ip + ";"),
+            std::make_shared<postgres::provider>(
+                Ip, 5432, "postgres", "postgres", Pwd),
+            std::make_shared<sqlite::provider>(R"(./drop_me.sqlite)")};
 }
 
 TEST_CASE("db_geometry")
@@ -61,7 +62,7 @@ TEST_CASE("db_geometry")
     static constexpr size_t Limit = 10;
 
     boost::io::ios_flags_saver ifs(std::cout);
-    gdal::provider pvd_from(R"(.\data\mexico.sqlite)");
+    gdal::provider pvd_from(R"(./data/mexico.sqlite)");
     auto lr_from = pvd_from.dir().begin()->first;
     auto tbl_from = pvd_from.table(qualifier(lr_from));
     std::cout << tbl_from << std::endl;
@@ -105,7 +106,7 @@ TEST_CASE("gdal_raster")
     using namespace bark;
     using namespace bark::db;
 
-    gdal::provider pvd(R"(.\data\albers27.tif)");
+    gdal::provider pvd(R"(./data/albers27.tif)");
     auto reg = pvd.dir();
     REQUIRE(!reg.empty());
     auto layer = reg.begin()->first;

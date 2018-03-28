@@ -83,3 +83,5 @@
 
 
 - put bark headers to C:\OSGeo4W64\include\bark
+
+  git clone https://github.com/storm-ptr/bark.git
