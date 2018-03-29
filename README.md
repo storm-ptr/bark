@@ -10,16 +10,21 @@ Submodules:
 
 ## Getting Started
 
-Windows
+windows
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.windows.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.windows.txt)
-- [vmware machine with databases for testing](https://yadi.sk/d/sdEDsIjC3TkeM6)
-- [examlpe/nanogis binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)
+- [examlpe/nanogis executable binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)
 
-Ubuntu
+ubuntu
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.ubuntu.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.ubuntu.txt)
+- [examlpe/nanogis debian package](https://yadi.sk/d/-2z8pLqy3Tsvdd)
+
+vmware
+- [virtual machine with databases for testing](https://yadi.sk/d/sdEDsIjC3TkeM6)
 
 ## example/nanogis
 
 ![](https://user-images.githubusercontent.com/3381451/38042411-f93918b8-32bc-11e8-8be0-433668c62d42.png)
+
+andrew.naplavkov@gmail.com
