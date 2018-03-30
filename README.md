@@ -13,12 +13,23 @@ Submodules:
 windows
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.windows.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.windows.txt)
-- [examlpe/nanogis executable binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)
+- [examlpe/nanogis executable binaries](https://yadi.sk/d/KFRNZBlp3TkeKh)  
+  download, extract and run
+  ```
+  ./nanogis/nanogis.exe
+  ```
 
 ubuntu
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.ubuntu.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.ubuntu.txt)
-- [examlpe/nanogis debian package](https://yadi.sk/d/-2z8pLqy3Tsvdd)
+- [examlpe/nanogis debian package](https://yadi.sk/d/-2z8pLqy3Tsvdd)  
+  download and run
+  ```
+  sudo dpkg -i ./nanogis.1803.deb
+  sudo apt-get -f install
+  nanogis
+  ```
+
 
 vmware
 - [virtual machine with databases for testing](https://yadi.sk/d/sdEDsIjC3TkeM6)
