@@ -10,6 +10,8 @@ matrix:
           packages:
             - libboost-dev
             - libgdal-dev
+          sources:
+            - boost-latest
 
 before_install:
   - git clone https://github.com/catchorg/Catch2.git
