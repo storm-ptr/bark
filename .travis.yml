@@ -8,16 +8,11 @@ matrix:
       addons:
         apt:
           packages:
-            - g++-7
             - libboost-dev
             - libgdal-dev
-      env:
-        - MATRIX_EVAL="CXX=g++-7"
 
 before_install:
-  - eval "${MATRIX_EVAL}"
   - git clone https://github.com/catchorg/Catch2.git
 
 script:
   - g++ -I ".." -I "/usr/include/gdal" -I "/usr/include/mysql" -I "/usr/include/postgresql" ./test/main.cpp ./test/second_translation_unit.cpp -lcurl -lgdal -lmysqlclient -lodbc -lproj -lpq -lspatialite -lsqlite3
-  
