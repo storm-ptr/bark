@@ -68,11 +68,11 @@ private:
             os_ << which<variant_view, decltype(v)>() << v.get();
         }
 
-        void operator()(boost::string_view v) const
+        void operator()(string_view v) const
         {
             os_ << which<variant_view, decltype(v)>()
                 << static_cast<uint64_t>(v.size()) << v
-                << boost::string_view::value_type{0};  // zero terminated
+                << string_view::value_type{0};  // zero terminated
         }
 
         void operator()(blob_view v) const

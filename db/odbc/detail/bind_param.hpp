@@ -6,7 +6,6 @@
 #include <bark/dataset/variant_view.hpp>
 #include <bark/db/odbc/detail/common.hpp>
 #include <bark/unicode.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <memory>
 
@@ -77,7 +76,7 @@ class binding_text : public binding {
     SQLLEN ind_;
 
 public:
-    explicit binding_text(boost::string_view v)
+    explicit binding_text(string_view v)
         : val_(unicode::to_string<SQLWCHAR>(v))
         , ind_(val_.size() * sizeof(SQLWCHAR))
     {
@@ -117,7 +116,7 @@ public:
         return std::make_unique<binding_val<T>>(v);
     }
 
-    binding_holder operator()(boost::string_view v) const
+    binding_holder operator()(string_view v) const
     {
         return std::make_unique<binding_text>(v);
     }

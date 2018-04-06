@@ -34,7 +34,7 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(boost::string_view type_lcase, int scale) override
+    column_type type(string_view type_lcase, int scale) override
     {
         if (any_of({"geometry", "geography"}, equal_to(type_lcase)))
             return column_type::Geometry;
@@ -47,7 +47,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        boost::string_view) override
+                        string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
@@ -72,13 +72,12 @@ public:
 
     column_decoder geometry_decoder() override
     {
-        return [](sql_builder& bld, boost::string_view col_nm) {
+        return [](sql_builder& bld, string_view col_nm) {
             bld << id(col_nm) << ".STAsBinary() AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(boost::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(string_view type_lcase, int srid) override
     {
         return [type = type_lcase.to_string(), srid](sql_builder& bld,
                                                      dataset::variant_view v) {
@@ -89,7 +88,7 @@ public:
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    boost::string_view type_lcase) override
+                    string_view type_lcase) override
     {
         bld << "SELECT COUNT(1), " << type_lcase << "::EnvelopeAggregate("
             << id(col_nm.back()) << ").STAsBinary() FROM " << qualifier(col_nm);
@@ -97,7 +96,7 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       boost::string_view col_nm,
+                       string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
@@ -126,7 +125,7 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 boost::string_view col_nm,
+                                 string_view col_nm,
                                  int srid) override
     {
         auto& scm = reverse_at(tbl.name, 1);

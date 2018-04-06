@@ -22,7 +22,7 @@ inline auto random_name()
     return bark::db::id(os.str());
 }
 
-const auto& odbc_driver(std::initializer_list<boost::string_view> tokens)
+const auto& odbc_driver(std::initializer_list<bark::string_view> tokens)
 {
     using namespace bark;
     static const auto Drivers = db::odbc::drivers();

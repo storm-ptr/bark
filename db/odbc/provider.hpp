@@ -14,7 +14,6 @@
 #include <bark/db/detail/table_guide.hpp>
 #include <bark/db/odbc/command.hpp>
 #include <bark/unicode.hpp>
-#include <boost/utility/string_view.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>

@@ -7,7 +7,6 @@
 #include <bark/db/sql_builder.hpp>
 #include <bark/db/table_def.hpp>
 #include <bark/geometry/geometry.hpp>
-#include <boost/utility/string_view.hpp>
 #include <memory>
 
 namespace bark {
@@ -30,7 +29,7 @@ struct dialect {
     /// SRID
     virtual void projection_sql(sql_builder& bld,
                                 const qualified_name& col_nm,
-                                boost::string_view type_lcase) = 0;
+                                string_view type_lcase) = 0;
 
     /// INDEX_SCHEMA, INDEX_NAME, IS_PRIMARY, COLUMN_NAME, IS_DESCENDING
     virtual void indexes_sql(sql_builder& bld,
@@ -39,14 +38,14 @@ struct dialect {
     /// COUNT, ((XMIN, YMIN, XMAX, YMAX) | EXTENT)
     virtual void extent_sql(sql_builder& bld,
                             const qualified_name& col_nm,
-                            boost::string_view type_lcase) = 0;
+                            string_view type_lcase) = 0;
 
     /// SCHEMA_NAME
     virtual void current_schema_sql(sql_builder& bld) = 0;
 
     virtual void add_geometry_column_sql(sql_builder& bld,
                                          const table_def& tbl,
-                                         boost::string_view col_nm,
+                                         string_view col_nm,
                                          int srid) = 0;
 
     virtual void create_spatial_index_sql(sql_builder& bld,
@@ -55,18 +54,18 @@ struct dialect {
 
     virtual void window_clause(sql_builder& bld,
                                const table_def& tbl,
-                               boost::string_view col_nm,
+                               string_view col_nm,
                                const geometry::box& extent) = 0;
 
     virtual void page_clause(sql_builder& bld, size_t offset, size_t limit) = 0;
 
-    virtual column_type type(boost::string_view type_lcase, int scale) = 0;
+    virtual column_type type(string_view type_lcase, int scale) = 0;
 
     virtual std::string type_name(column_type) = 0;
 
     virtual column_decoder geometry_decoder() = 0;
 
-    virtual column_encoder geometry_encoder(boost::string_view type_lcase,
+    virtual column_encoder geometry_encoder(string_view type_lcase,
                                             int srid) = 0;
 };
 

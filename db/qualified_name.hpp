@@ -5,7 +5,6 @@
 
 #include <bark/common.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/utility/string_view.hpp>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -53,7 +52,7 @@ inline qualified_name id()
 }
 
 template <typename... T>
-auto id(boost::string_view parent, T&&... children)
+auto id(string_view parent, T&&... children)
 {
     auto res = id(std::forward<T>(children)...);
     if (!parent.empty())
@@ -61,7 +60,7 @@ auto id(boost::string_view parent, T&&... children)
     return res;
 }
 
-inline auto id(qualified_name parent, boost::string_view child)
+inline auto id(qualified_name parent, string_view child)
 {
     parent.push_back(child.to_string());
     return parent;

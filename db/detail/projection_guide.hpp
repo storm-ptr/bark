@@ -7,7 +7,6 @@
 #include <bark/proj/bimap.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <exception>
 #include <string>
 
@@ -33,8 +32,7 @@ protected:
         return res;
     }
 
-    int load_projection(const qualified_name& col_nm,
-                        boost::string_view type_lcase)
+    int load_projection(const qualified_name& col_nm, string_view type_lcase)
     {
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().projection_sql(bld, col_nm, type_lcase);

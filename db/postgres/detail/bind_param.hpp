@@ -76,10 +76,9 @@ struct bind_param_visitor : boost::static_visitor<param_holder> {
         return std::make_unique<param_val<T>>(v.get());
     }
 
-    param_holder operator()(boost::string_view v)
+    param_holder operator()(string_view v)
     {
-        return std::make_unique<
-            param_arr<boost::string_view, PGRES_FORMAT_TEXT>>(v);
+        return std::make_unique<param_arr<string_view, PGRES_FORMAT_TEXT>>(v);
     }
 
     param_holder operator()(blob_view v)

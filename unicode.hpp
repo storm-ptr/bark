@@ -4,8 +4,8 @@
 #define BARK_UNICODE_HPP
 
 #include <algorithm>
+#include <bark/common.hpp>
 #include <boost/regex/pending/unicode_iterator.hpp>
-#include <boost/utility/string_view.hpp>
 #include <cwctype>
 #include <iterator>
 #include <string>
@@ -24,7 +24,7 @@ template <typename Unit>
 struct utf8 {
     static_assert(sizeof(Unit) == sizeof(char), "unicode size");
     using decoder = boost::u8_to_u32_iterator<
-        typename boost::basic_string_view<Unit>::const_iterator>;
+        typename basic_string_view<Unit>::const_iterator>;
     using encoder = boost::u32_to_u8_iterator<std::u32string::const_iterator>;
 };
 
@@ -32,14 +32,14 @@ template <typename Unit>
 struct utf16 {
     static_assert(sizeof(Unit) == sizeof(char16_t), "unicode size");
     using decoder = boost::u16_to_u32_iterator<
-        typename boost::basic_string_view<Unit>::const_iterator>;
+        typename basic_string_view<Unit>::const_iterator>;
     using encoder = boost::u32_to_u16_iterator<std::u32string::const_iterator>;
 };
 
 template <typename Unit>
 struct utf32 {
     static_assert(sizeof(Unit) == sizeof(char32_t), "unicode size");
-    using decoder = typename boost::basic_string_view<Unit>::const_iterator;
+    using decoder = typename basic_string_view<Unit>::const_iterator;
     using encoder = std::u32string::const_iterator;
 };
 
@@ -60,7 +60,7 @@ std::basic_string<ToUnit> to_string(Str&& str)
 {
     using decoder = typename detail::utf<Unit>::decoder;
     using encoder = typename detail::utf<ToUnit>::encoder;
-    auto view = boost::basic_string_view<Unit>{std::forward<Str>(str)};
+    auto view = basic_string_view<Unit>{std::forward<Str>(str)};
     auto points = std::u32string{decoder{view.begin()}, decoder{view.end()}};
     return {encoder{points.begin()}, encoder{points.end()}};
 }

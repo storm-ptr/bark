@@ -5,7 +5,6 @@
 
 #include <bark/unicode.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <iostream>
 #include <stdexcept>
 

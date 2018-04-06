@@ -33,7 +33,7 @@ public:
         os_ << std::setw(width_) << std::right << v;
     }
 
-    void operator()(boost::string_view v) const
+    void operator()(string_view v) const
     {
         os_ << std::setw(width_) << std::left << v;
     }
@@ -92,7 +92,7 @@ auto row_value_constructor(const std::ostream& os, const T& rows)
 }
 
 template <typename T>
-size_t column_position(const T& rows, boost::string_view col_nm)
+size_t column_position(const T& rows, string_view col_nm)
 {
     const auto& cols = rows.columns();
     auto it = boost::range::find_if(

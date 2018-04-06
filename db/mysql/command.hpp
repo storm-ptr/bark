@@ -50,7 +50,7 @@ public:
     sql_syntax syntax() override
     {
         db::sql_syntax res{};
-        res.delimiter = [](std::ostream& os, boost::string_view id) {
+        res.delimiter = [](std::ostream& os, string_view id) {
             os << '`' << id << '`';
         };
         return res;
@@ -149,7 +149,7 @@ private:
         stmt_.reset(stmt);
     }
 
-    int prepare(boost::string_view sql)
+    int prepare(string_view sql)
     {
         if (sql_ == sql)
             return 0;

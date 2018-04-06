@@ -14,7 +14,7 @@ namespace odbc {
 
 class command : public db::command {
 public:
-    explicit command(boost::string_view conn_str)
+    explicit command(string_view conn_str)
     {
         using namespace std::chrono;
 
@@ -43,7 +43,7 @@ public:
     {
         db::sql_syntax res{};
         res.delimiter = [quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR)](
-                            std::ostream& os, boost::string_view id) {
+                            std::ostream& os, string_view id) {
             os << quote << id << quote;
         };
         return res;
@@ -129,7 +129,7 @@ private:
                      duration_cast<seconds>(DbTimeout).count());
     }
 
-    void prepare(boost::string_view sql)
+    void prepare(string_view sql)
     {
         if (sql_ == sql)
             return;

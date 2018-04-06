@@ -6,7 +6,6 @@
 #include <bark/common.hpp>
 #include <boost/blank.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/variant.hpp>
 #include <cstdint>
 #include <functional>
@@ -17,11 +16,8 @@ namespace dataset {
 using int64_view = std::reference_wrapper<const int64_t>;
 using double_view = std::reference_wrapper<const double>;
 
-using variant_view = boost::variant<boost::blank,
-                                    int64_view,
-                                    double_view,
-                                    boost::string_view,
-                                    blob_view>;
+using variant_view = boost::
+    variant<boost::blank, int64_view, double_view, string_view, blob_view>;
 
 inline bool is_null(const variant_view& v)
 {

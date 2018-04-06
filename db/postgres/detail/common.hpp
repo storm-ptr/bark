@@ -40,7 +40,7 @@ constexpr auto code_of()
     using namespace boost::mpl;
     return (Oid)at<map<pair<int64_t, int_<PGRES_TYPE_INT8>>,
                        pair<double, int_<PGRES_TYPE_FLOAT8>>,
-                       pair<boost::string_view, int_<PGRES_TYPE_TEXT>>,
+                       pair<string_view, int_<PGRES_TYPE_TEXT>>,
                        pair<blob_view, int_<PGRES_TYPE_BYTEA>>>,
                    T>::type::value;
 }

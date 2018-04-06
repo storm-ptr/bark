@@ -5,7 +5,6 @@
 
 #include <bark/unicode.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/utility/string_view.hpp>
 #include <iostream>
 #include <stdexcept>
 
@@ -29,8 +28,8 @@ protected:
 
 private:
     column_def make_column(const qualified_name& tbl_nm,
-                           boost::string_view name,
-                           boost::string_view type_lcase,
+                           string_view name,
+                           string_view type_lcase,
                            int scale)
     {
         column_def res;
@@ -41,7 +40,7 @@ private:
             as_mixin().prepare_geometry_column(tbl_nm, res, type_lcase);
         else if (column_type::Text == res.type)
             res.decoder = [type = dlct.type_name(res.type)](
-                              sql_builder& bld, boost::string_view col_nm) {
+                              sql_builder& bld, string_view col_nm) {
                 bld << "CAST(" << id(col_nm) << " AS " << type << ") AS "
                     << id(col_nm);
             };

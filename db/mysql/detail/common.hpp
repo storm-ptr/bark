@@ -28,12 +28,11 @@ template <typename T>
 constexpr auto code_of()
 {
     using namespace boost::mpl;
-    return (enum_field_types)
-        at<map<pair<int64_t, int_<MYSQL_TYPE_LONGLONG>>,
-               pair<double, int_<MYSQL_TYPE_DOUBLE>>,
-               pair<boost::string_view, int_<MYSQL_TYPE_STRING>>,
-               pair<blob_view, int_<MYSQL_TYPE_BLOB>>>,
-           T>::type::value;
+    return (enum_field_types)at<map<pair<int64_t, int_<MYSQL_TYPE_LONGLONG>>,
+                                    pair<double, int_<MYSQL_TYPE_DOUBLE>>,
+                                    pair<string_view, int_<MYSQL_TYPE_STRING>>,
+                                    pair<blob_view, int_<MYSQL_TYPE_BLOB>>>,
+                                T>::type::value;
 }
 
 struct connection_deleter {

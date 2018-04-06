@@ -25,7 +25,7 @@ inline geometry::box extent(const column_def& col)
 }
 
 template <typename Columns>
-auto find(Columns&& cols, boost::string_view col_nm)
+auto find(Columns&& cols, string_view col_nm)
 {
     return boost::range::find_if(
         cols,
@@ -35,13 +35,13 @@ auto find(Columns&& cols, boost::string_view col_nm)
 }
 
 template <typename Columns>
-bool contains(Columns&& cols, boost::string_view col_nm)
+bool contains(Columns&& cols, string_view col_nm)
 {
     return db::find(cols, col_nm) != std::end(cols);
 }
 
 template <typename Columns>
-decltype(auto) column(Columns&& cols, boost::string_view col_nm)
+decltype(auto) column(Columns&& cols, string_view col_nm)
 {
     auto it = db::find(cols, col_nm);
     if (it == std::end(cols))

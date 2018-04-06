@@ -66,7 +66,7 @@ inline column_holder bind_column(Oid type)
         case PGRES_TYPE_TEXTARRAY:
         case PGRES_TYPE_VARCHAR:
         case PGRES_TYPE_VARCHARARRAY:
-            return std::make_unique<column_arr<boost::string_view>>();
+            return std::make_unique<column_arr<string_view>>();
         case PGRES_TYPE_BYTEA:
             return std::make_unique<column_arr<blob_view>>();
         default:

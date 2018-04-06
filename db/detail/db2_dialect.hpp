@@ -40,7 +40,7 @@ public:
             << " ORDER BY colno";
     }
 
-    column_type type(boost::string_view type_lcase, int scale) override
+    column_type type(string_view type_lcase, int scale) override
     {
         if (is_ogc_type(type_lcase))
             return column_type::Geometry;
@@ -51,7 +51,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        boost::string_view) override
+                        string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
@@ -75,13 +75,12 @@ public:
 
     column_decoder geometry_decoder() override
     {
-        return [](sql_builder& bld, boost::string_view col_nm) {
+        return [](sql_builder& bld, string_view col_nm) {
             bld << "db2gse.ST_AsBinary(" << id(col_nm) << ") AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(boost::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(string_view type_lcase, int srid) override
     {
         return [type = type_lcase.to_string(), srid](sql_builder& bld,
                                                      dataset::variant_view v) {
@@ -92,7 +91,7 @@ public:
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    boost::string_view) override
+                    string_view) override
     {
         auto col = id(col_nm.back());
         bld << "SELECT COUNT(1), MIN(db2gse.ST_MinX(" << col
@@ -103,7 +102,7 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       boost::string_view col_nm,
+                       string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
@@ -132,7 +131,7 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 boost::string_view col_nm,
+                                 string_view col_nm,
                                  int srid) override
     {
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)

@@ -10,7 +10,6 @@
 #include <bark/detail/grid.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
-#include <boost/utility/string_view.hpp>
 #include <cmath>
 #include <initializer_list>
 #include <sstream>
@@ -42,11 +41,11 @@ inline void ogc_projections_sql(sql_builder& bld)
 }
 
 inline void iso_layers_sql(sql_builder& bld,
-                           std::initializer_list<boost::string_view> types)
+                           std::initializer_list<string_view> types)
 {
     bld << "SELECT table_schema, table_name, column_name FROM "
            "information_schema.columns WHERE DATA_TYPE IN ("
-        << list(types, ",", param<boost::string_view>) << ")";
+        << list(types, ",", param<string_view>) << ")";
 }
 
 inline void iso_columns_sql(sql_builder& bld, const qualified_name& tbl_nm)
@@ -62,9 +61,9 @@ inline void iso_columns_sql(sql_builder& bld, const qualified_name& tbl_nm)
  * OpenGIS Document 99-049
  * @see http://www.opengeospatial.org/standards/sfs
  */
-inline bool is_ogc_type(boost::string_view type_lcase)
+inline bool is_ogc_type(string_view type_lcase)
 {
-    static const boost::string_view Prefix = "st_";
+    static const string_view Prefix = "st_";
     if (type_lcase.starts_with(Prefix))
         type_lcase.remove_prefix(Prefix.size());
     return any_of(
@@ -87,7 +86,7 @@ inline bool is_ogc_type(boost::string_view type_lcase)
         equal_to(type_lcase));
 }
 
-inline column_type iso_type(boost::string_view type_lcase, int scale)
+inline column_type iso_type(string_view type_lcase, int scale)
 {
     if ((within(type_lcase)("int") && !within(type_lcase)("interval")) ||
         type_lcase.starts_with("bool"))
@@ -128,7 +127,7 @@ FROM (SELECT ST_ExteriorRing(ST_Envelope()"
 }
 
 inline void ogc_window_clause(sql_builder& bld,
-                              boost::string_view col_nm,
+                              string_view col_nm,
                               const geometry::box& extent)
 {
     using namespace geometry;
@@ -139,7 +138,7 @@ inline void ogc_window_clause(sql_builder& bld,
 
 inline auto ogc_decoder()
 {
-    return [](sql_builder& bld, boost::string_view col_nm) {
+    return [](sql_builder& bld, string_view col_nm) {
         bld << "ST_AsBinary(" << id(col_nm) << ") AS " << id(col_nm);
     };
 }

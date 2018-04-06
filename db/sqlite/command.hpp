@@ -80,7 +80,7 @@ public:
                     os << sqlite3_column_double(stmt_.get(), i);
                     break;
                 case SQLITE_TEXT:
-                    os << boost::string_view{
+                    os << string_view{
                         (char*)sqlite3_column_text(stmt_.get(), i),
                         (size_t)sqlite3_column_bytes(stmt_.get(), i)};
                     break;

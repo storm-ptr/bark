@@ -27,7 +27,7 @@ class provider : private db::detail::cacher<gdal::provider>,
     friend db::detail::cacher<gdal::provider>;
 
 public:
-    explicit provider(boost::string_view file) : file_{file}
+    explicit provider(string_view file) : file_{file}
     {
         if (is_raster())
             frame_ = detail::frame{detail::dataset{file_}};

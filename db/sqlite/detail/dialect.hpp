@@ -32,7 +32,7 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    column_type type(boost::string_view type_lcase, int scale) override
+    column_type type(string_view type_lcase, int scale) override
     {
         return db::detail::is_ogc_type(type_lcase)
                    ? column_type::Geometry
@@ -41,7 +41,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        boost::string_view) override
+                        string_view) override
     {
         db::detail::ogc_projection_sql(bld, col_nm);
     }
@@ -56,14 +56,14 @@ public:
         return db::detail::ogc_decoder();
     }
 
-    column_encoder geometry_encoder(boost::string_view, int srid) override
+    column_encoder geometry_encoder(string_view, int srid) override
     {
         return db::detail::ogc_encoder(srid);
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    boost::string_view) override
+                    string_view) override
     {
         bld << "SELECT COUNT(1), ST_AsBinary(Extent(" << id(col_nm.back())
             << ")) FROM " << qualifier(col_nm);
@@ -71,7 +71,7 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       boost::string_view col_nm,
+                       string_view col_nm,
                        const geometry::box& extent) override
     {
         using namespace geometry;
@@ -105,7 +105,7 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 boost::string_view col_nm,
+                                 string_view col_nm,
                                  int srid) override
     {
         bld << "SELECT AddGeometryColumn(" << param(tbl.name.back()) << ", "

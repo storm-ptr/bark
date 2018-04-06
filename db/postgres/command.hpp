@@ -20,11 +20,11 @@ class command : public db::command,
     friend db::detail::transaction<db::postgres::command>;
 
 public:
-    command(boost::string_view host,
+    command(string_view host,
             int port,
-            boost::string_view db,
-            boost::string_view usr,
-            boost::string_view pwd)
+            string_view db,
+            string_view usr,
+            string_view pwd)
     {
         using namespace std::chrono;
         std::ostringstream con;

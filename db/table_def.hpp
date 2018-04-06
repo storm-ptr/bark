@@ -8,7 +8,6 @@
 #include <bark/db/sql_builder.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <boost/geometry/index/rtree.hpp>
-#include <boost/utility/string_view.hpp>
 #include <functional>
 #include <string>
 #include <vector>
@@ -20,8 +19,7 @@ enum class column_type { Invalid, Blob, Geometry, Integer, Real, Text };
 
 enum class index_type { Invalid, Primary, Secondary };
 
-using column_decoder =
-    std::function<void(sql_builder&, boost::string_view col_nm)>;
+using column_decoder = std::function<void(sql_builder&, string_view col_nm)>;
 
 using column_encoder =
     std::function<void(sql_builder&, dataset::variant_view val)>;
@@ -35,7 +33,7 @@ struct column_def {
     column_type type = column_type::Invalid;
     std::string projection;
 
-    column_decoder decoder = [](sql_builder& bld, boost::string_view col_nm) {
+    column_decoder decoder = [](sql_builder& bld, string_view col_nm) {
         bld << id(col_nm);
     };
 

@@ -28,9 +28,9 @@ public:
                 return std::cref(is_.read<int64_t>());
             case which<variant_view, double_view>():
                 return std::cref(is_.read<double>());
-            case which<variant_view, boost::string_view>(): {
-                auto res = is_.read<boost::string_view>(is_.read<uint64_t>());
-                is_.read<boost::string_view::value_type>();  // zero terminated
+            case which<variant_view, string_view>(): {
+                auto res = is_.read<string_view>(is_.read<uint64_t>());
+                is_.read<string_view::value_type>();  // zero terminated
                 return res;
             }
             case which<variant_view, blob_view>():

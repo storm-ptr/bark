@@ -106,7 +106,7 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
         case MYSQL_TYPE_VAR_STRING:
         case MYSQL_TYPE_VARCHAR:
         case MYSQL_TYPE_YEAR:
-            return std::make_unique<column_arr<boost::string_view>>(bnd);
+            return std::make_unique<column_arr<string_view>>(bnd);
         case MYSQL_TYPE_BLOB:
         case MYSQL_TYPE_LONG_BLOB:
         case MYSQL_TYPE_MEDIUM_BLOB:

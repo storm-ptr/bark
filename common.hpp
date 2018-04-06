@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_COMMON_HPP
-#define BARK_DETAIL_COMMON_HPP
+#ifndef BARK_COMMON_HPP
+#define BARK_COMMON_HPP
 
 #include <algorithm>
 #include <boost/mpl/contains.hpp>
@@ -9,7 +9,7 @@
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/range/adaptor/sliced.hpp>
-#include <boost/utility/string_view.hpp>
+#include <boost/version.hpp>
 #include <chrono>
 #include <cstdint>
 #include <initializer_list>
@@ -19,7 +19,40 @@
 #include <type_traits>
 #include <vector>
 
+#if (BOOST_VERSION < 106100)
+#include <boost/utility/string_ref.hpp>
+#else
+#include <boost/utility/string_view.hpp>
+#endif
+
 namespace bark {
+
+template <typename charT>
+using basic_string_view =
+#if (BOOST_VERSION < 106100)
+    boost::basic_string_ref
+#else
+    boost::basic_string_view
+#endif
+    <typename charT>;
+
+/// Binary Large OBject (BLOB) - contiguous byte storage that can change in size
+struct blob_t : std::vector<uint8_t> {
+    using std::vector<uint8_t>::vector;
+};
+
+struct blob_view : basic_string_view<uint8_t> {
+    using basic_string_view<uint8_t>::basic_string_view;
+
+    blob_view(const uint8_t*) = delete;
+
+    blob_view(const blob_t& blob)
+        : basic_string_view<uint8_t>(blob.data(), blob.size())
+    {
+    }
+};
+
+using string_view = basic_string_view<char>;
 
 constexpr std::chrono::seconds DbTimeout(60);
 constexpr std::chrono::milliseconds CacheTimeout(50);
@@ -33,16 +66,15 @@ std::enable_if_t<std::is_arithmetic<T>::value, T> reversed(T val)
     return val;
 }
 
-inline auto within(boost::string_view rhs)
+inline auto within(string_view rhs)
 {
-    return [rhs](boost::string_view lhs) {
-        return rhs.find(lhs) != std::string::npos;
-    };
+    return
+        [rhs](string_view lhs) { return rhs.find(lhs) != std::string::npos; };
 }
 
-inline auto equal_to(boost::string_view rhs)
+inline auto equal_to(string_view rhs)
 {
-    return [rhs](boost::string_view lhs) { return lhs == rhs; };
+    return [rhs](string_view lhs) { return lhs == rhs; };
 }
 
 template <typename T, typename Predicate>
@@ -148,21 +180,6 @@ which()
     return static_cast<uint8_t>(iterator::pos::value);
 }
 
-/// Binary Large OBject (BLOB) - contiguous byte storage that can change in size
-struct blob_t : std::vector<uint8_t> {
-    using std::vector<uint8_t>::vector;
-};
-
-struct blob_view : boost::basic_string_view<uint8_t> {
-    using boost::basic_string_view<uint8_t>::basic_string_view;
-
-    blob_view(const uint8_t*) = delete;
-
-    blob_view(const blob_t& blob) : basic_string_view{blob.data(), blob.size()}
-    {
-    }
-};
-
 template <typename T>
 std::enable_if_t<is_same<T, blob_t, blob_view>(), std::ostream&> operator<<(
     std::ostream& os,
@@ -196,4 +213,4 @@ inline auto hex(blob_view blob)
 
 }  // namespace bark
 
-#endif  // BARK_DETAIL_COMMON_HPP
+#endif  // BARK_COMMON_HPP

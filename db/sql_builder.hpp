@@ -21,7 +21,7 @@ namespace db {
  * regular identifiers must always be delimited.
  */
 using identifier_delimiter =
-    std::function<void(std::ostream& os, boost::string_view id)>;
+    std::function<void(std::ostream& os, string_view id)>;
 
 /**
  * A parameter marker is a place holder in an SQL statement whose value is
@@ -32,8 +32,9 @@ using parameter_marker =
     std::function<void(std::ostream& os, size_t param_order)>;
 
 struct sql_syntax {
-    identifier_delimiter delimiter =
-        [](std::ostream& os, boost::string_view id) { os << '"' << id << '"'; };
+    identifier_delimiter delimiter = [](std::ostream& os, string_view id) {
+        os << '"' << id << '"';
+    };
 
     parameter_marker marker = [](std::ostream& os, size_t) { os << "?"; };
 };
@@ -79,7 +80,7 @@ public:
 
     auto params() const { return dataset::as_vector(params_.buf()); }
 
-    sql_builder& operator<<(boost::string_view sql)
+    sql_builder& operator<<(string_view sql)
     {
         sql_ << sql;
         return *this;
@@ -127,7 +128,7 @@ private:
 
     struct delimiter_manipulator {
         const identifier_delimiter& delimiter;
-        boost::string_view id;
+        string_view id;
 
         friend std::ostream& operator<<(std::ostream& os,
                                         const delimiter_manipulator& manip)
@@ -143,7 +144,7 @@ private:
     public:
         explicit embedded_param_visitor(std::ostringstream& sql) : sql_(sql) {}
         void operator()(boost::blank) const { sql_ << "NULL"; }
-        void operator()(boost::string_view v) const { sql_ << "'" << v << "'"; }
+        void operator()(string_view v) const { sql_ << "'" << v << "'"; }
         void operator()(blob_view v) const { sql_ << "X'" << hex(v) << "'"; }
 
         template <typename T>

@@ -38,7 +38,7 @@ public:
             << " ORDER BY ordinal_position";
     }
 
-    column_type type(boost::string_view type_lcase, int scale) override
+    column_type type(string_view type_lcase, int scale) override
     {
         if (within(type_lcase)("array"))
             return column_type::Invalid;
@@ -55,7 +55,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        boost::string_view type_lcase) override
+                        string_view type_lcase) override
     {
         if (type_lcase == "geography")
             bld << "SELECT 4326";
@@ -89,8 +89,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     column_decoder geometry_decoder() override { return ogc_decoder(); }
 
-    column_encoder geometry_encoder(boost::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(string_view type_lcase, int srid) override
     {
         if (type_lcase == "geography")
             return [](sql_builder& bld, dataset::variant_view v) {
@@ -102,7 +101,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    boost::string_view type_lcase) override
+                    string_view type_lcase) override
     {
         if (type_lcase == "geography")
             ogc_extent_sql(bld, col_nm);
@@ -113,7 +112,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       boost::string_view col_nm,
+                       string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
@@ -142,7 +141,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 boost::string_view col_nm,
+                                 string_view col_nm,
                                  int srid) override
     {
         auto& scm = reverse_at(tbl.name, 1);

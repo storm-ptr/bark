@@ -8,7 +8,6 @@
 #include <bark/db/table_def_ops.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/range/adaptor/filtered.hpp>
-#include <boost/utility/string_view.hpp>
 #include <sstream>
 
 namespace bark {

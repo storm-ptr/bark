@@ -38,7 +38,7 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(boost::string_view type_lcase, int scale) override
+    column_type type(string_view type_lcase, int scale) override
     {
         if (is_ogc_type(type_lcase))
             return column_type::Geometry;
@@ -51,7 +51,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        boost::string_view) override
+                        string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
@@ -75,21 +75,21 @@ public:
 
     column_decoder geometry_decoder() override { return ogc_decoder(); }
 
-    column_encoder geometry_encoder(boost::string_view, int srid) override
+    column_encoder geometry_encoder(string_view, int srid) override
     {
         return ogc_encoder(srid);
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    boost::string_view) override
+                    string_view) override
     {
         ogc_extent_sql(bld, col_nm);
     }
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       boost::string_view col_nm,
+                       string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
@@ -118,7 +118,7 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 boost::string_view col_nm,
+                                 string_view col_nm,
                                  int srid) override
     {
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)

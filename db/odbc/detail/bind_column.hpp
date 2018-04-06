@@ -6,7 +6,6 @@
 #include <bark/dataset/ostream.hpp>
 #include <bark/db/odbc/detail/common.hpp>
 #include <bark/unicode.hpp>
-#include <boost/utility/string_view.hpp>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
@@ -112,10 +111,8 @@ public:
             if (SQL_NULL_DATA == ind_)
                 os << boost::blank{};
             else
-                os << unicode::to_string<char>(
-                    boost::basic_string_view<SQLWCHAR>{
-                        (SQLWCHAR*)buf_.data(),
-                        (size_t)len_ / sizeof(SQLWCHAR)});
+                os << unicode::to_string<char>(basic_string_view<SQLWCHAR>{
+                    (SQLWCHAR*)buf_.data(), (size_t)len_ / sizeof(SQLWCHAR)});
         }
         return r;
     }

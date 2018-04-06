@@ -33,7 +33,7 @@ struct bind_param_visitor : boost::static_visitor<int> {
         return sqlite3_bind_double(stmt, order, double(v.get()));
     }
 
-    int operator()(boost::string_view v)
+    int operator()(string_view v)
     {
         return sqlite3_bind_text(
             stmt, order, v.data(), int(v.size()), SQLITE_TRANSIENT);

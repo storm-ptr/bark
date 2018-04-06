@@ -125,8 +125,7 @@ protected:
         return fetch_or_default<std::string>(as_mixin(), bld);
     }
 
-    rtree load_tiles(const qualified_name& col_nm,
-                     boost::string_view type_lcase)
+    rtree load_tiles(const qualified_name& col_nm, string_view type_lcase)
     {
         auto bld = builder(as_mixin());
         as_dialect().extent_sql(bld, col_nm, type_lcase);
@@ -149,7 +148,7 @@ protected:
 
     void prepare_geometry_column(const qualified_name& tbl_nm,
                                  column_def& col,
-                                 boost::string_view type_lcase)
+                                 string_view type_lcase)
     {
         auto col_nm = id(tbl_nm, col.name);
         auto srid = as_mixin().load_projection(col_nm, type_lcase);

@@ -33,8 +33,7 @@ public:
     }
 
     template <typename T>
-    std::enable_if_t<is_same<T, boost::string_view, blob_view>()> operator()(
-        T v)
+    std::enable_if_t<is_same<T, string_view, blob_view>()> operator()(T v)
     {
         bnd_.buffer_type = code_of<T>();
         bnd_.buffer = (char*)v.data();
