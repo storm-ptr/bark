@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/storm-ptr/bark.svg?branch=master)](https://travis-ci.org/storm-ptr/bark)
+
 ## Introduction
 
 Bark is a geospatial, cross-platform, C++ 14, header only library.
