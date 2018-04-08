@@ -63,7 +63,7 @@ public:
     }
 
     template <typename T>
-    decltype(auto) operator>>(T& val)
+    blob_istream& operator>>(T& val)
     {
         val = read<T>();
         return *this;

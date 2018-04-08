@@ -64,33 +64,30 @@ public:
     int format() override { return Format; }
 };
 
-struct bind_param_visitor : boost::static_visitor<param_holder> {
-    param_holder operator()(boost::blank)
-    {
-        return std::make_unique<param_null>();
-    }
+struct bind_param_visitor : boost::static_visitor<param*> {
+    param* operator()(boost::blank) const { return new param_null{}; }
 
     template <typename T>
-    param_holder operator()(std::reference_wrapper<const T> v)
+    param* operator()(std::reference_wrapper<const T> v) const
     {
-        return std::make_unique<param_val<T>>(v.get());
+        return new param_val<T>{v.get()};
     }
 
-    param_holder operator()(string_view v)
+    param* operator()(string_view v) const
     {
-        return std::make_unique<param_arr<string_view, PGRES_FORMAT_TEXT>>(v);
+        return new param_arr<string_view, PGRES_FORMAT_TEXT>{v};
     }
 
-    param_holder operator()(blob_view v)
+    param* operator()(blob_view v) const
     {
-        return std::make_unique<param_arr<blob_view, PGRES_FORMAT_BINARY>>(v);
+        return new param_arr<blob_view, PGRES_FORMAT_BINARY>{v};
     }
 };
 
 inline param_holder bind_param(dataset::variant_view param)
 {
     bind_param_visitor visitor;
-    return boost::apply_visitor(visitor, param);
+    return param_holder{boost::apply_visitor(visitor, param)};
 }
 
 }  // namespace detail

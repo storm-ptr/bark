@@ -3,7 +3,7 @@
 #ifndef BARK_DB_SQL_BUILDER_HPP
 #define BARK_DB_SQL_BUILDER_HPP
 
-#include <bark/dataset/ostream.hpp>
+#include <bark/dataset/rowset.hpp>
 #include <bark/db/qualified_name.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <functional>
@@ -39,9 +39,10 @@ struct sql_syntax {
     parameter_marker marker = [](std::ostream& os, size_t) { os << "?"; };
 };
 
-inline sql_syntax embeded_params(const sql_syntax& syntax)
+inline sql_syntax embeded_params(sql_syntax syntax)
 {
-    return {syntax.delimiter, {}};
+    syntax.marker = parameter_marker{};
+    return syntax;
 }
 
 namespace detail {
@@ -70,7 +71,7 @@ detail::param_manipulator<T> param(const T& val)
  */
 class sql_builder {
 public:
-    explicit sql_builder(const sql_syntax& syntax) : syntax_{syntax}
+    explicit sql_builder(sql_syntax syntax) : syntax_{std::move(syntax)}
     {
         sql_.imbue(std::locale::classic());
         sql_.precision(std::numeric_limits<double>::max_digits10);
@@ -88,8 +89,8 @@ public:
 
     sql_builder& operator<<(const qualified_name& name)
     {
-        sql_ << list(name, ".", [&](auto& item) {
-            return delimiter_manipulator{syntax_.delimiter, item};
+        sql_ << list(name, ".", [&](string_view id) {
+            return identifier_manipulator{id, syntax_.delimiter};
         });
         return *this;
     }
@@ -126,12 +127,12 @@ private:
     dataset::ostream params_;
     size_t param_counter_ = 0;
 
-    struct delimiter_manipulator {
-        const identifier_delimiter& delimiter;
+    struct identifier_manipulator {
         string_view id;
+        const identifier_delimiter& delimiter;
 
         friend std::ostream& operator<<(std::ostream& os,
-                                        const delimiter_manipulator& manip)
+                                        const identifier_manipulator& manip)
         {
             manip.delimiter(os, manip.id);
             return os;

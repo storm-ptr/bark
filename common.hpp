@@ -34,7 +34,7 @@ using basic_string_view =
 #else
     boost::basic_string_view
 #endif
-    <typename charT>;
+    <charT>;
 
 /// Binary Large OBject (BLOB) - contiguous byte storage that can change in size
 struct blob_t : std::vector<uint8_t> {

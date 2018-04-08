@@ -18,12 +18,12 @@ namespace bark {
 namespace dataset {
 namespace detail {
 
-class align_visitor : public boost::static_visitor<void> {
+class cell_visitor : public boost::static_visitor<void> {
     std::ostream& os_;
     size_t width_;
 
 public:
-    align_visitor(std::ostream& os, size_t width) : os_(os), width_(width) {}
+    cell_visitor(std::ostream& os, size_t width) : os_(os), width_(width) {}
 
     void operator()(boost::blank) const { os_ << std::setw(width_) << ""; }
 
@@ -39,33 +39,33 @@ public:
     }
 };
 
-struct align_manipulator {
-    size_t width;
+struct cell_manipulator {
     variant_view view;
+    size_t width;
 
     friend std::ostream& operator<<(std::ostream& os,
-                                    const align_manipulator& manip)
+                                    const cell_manipulator& manip)
     {
         os << std::setw(1) << "";
-        boost::apply_visitor(align_visitor{os, manip.width}, manip.view);
+        boost::apply_visitor(cell_visitor{os, manip.width}, manip.view);
         return os << std::setw(1) << "";
     }
 };
 
 template <typename Row>
-struct row_value_manipulator {
-    const std::vector<size_t>& widths;
+struct row_manipulator {
     const Row& row;
+    const std::vector<size_t>& widths;
 
     friend std::ostream& operator<<(std::ostream& os,
-                                    const row_value_manipulator& manip)
+                                    const row_manipulator& manip)
     {
-        return os << list(boost::combine(manip.widths, manip.row),
+        return os << list(boost::combine(manip.row, manip.widths),
                           "|",
                           [](const auto& pair) {
-                              return align_manipulator{
-                                  boost::get<0>(pair),
-                                  dataset::variant_view{boost::get<1>(pair)}};
+                              return cell_manipulator{
+                                  dataset::variant_view{boost::get<0>(pair)},
+                                  boost::get<1>(pair)};
                           });
     }
 };
@@ -73,35 +73,30 @@ struct row_value_manipulator {
 template <typename T>
 auto row_value_constructor(const std::ostream& os, const T& rows)
 {
-    auto width = [&os](const auto& v) {
+    auto width = [&](const auto& v) {
         std::ostringstream ss;
         ss.copyfmt(os);
         ss << v;
         return ss.str().size();
     };
-
     auto widths = back_constructor<std::vector<size_t>>(rows.columns(), width);
     for (const auto& row : rows)
-        for (const auto& pair : boost::combine(widths, row))
-            boost::get<0>(pair) =
-                std::max<>(boost::get<0>(pair), width(boost::get<1>(pair)));
-
-    return [widths = std::move(widths)](const auto& row) {
-        return row_value_manipulator<decltype(row)>{widths, row};
+        for (const auto& pair : boost::combine(row, widths))
+            boost::get<1>(pair) =
+                std::max<>(width(boost::get<0>(pair)), boost::get<1>(pair));
+    return [=](const auto& row) {
+        return detail::row_manipulator<decltype(row)>{row, widths};
     };
 }
 
-template <typename T>
-size_t column_position(const T& rows, string_view col_nm)
+template <typename ColumnNames>
+size_t column_position(const ColumnNames& cols, string_view col)
 {
-    const auto& cols = rows.columns();
-    auto it = boost::range::find_if(
-        cols,
-        [col_nm, equal_to = unicode::case_insensitive_equal_to{}](auto& col) {
-            return equal_to(col_nm, col);
-        });
+    auto it = boost::range::find_if(cols, [&](const auto& item) {
+        return unicode::case_insensitive_equal_to{}(col, item);
+    });
     if (it == cols.end())
-        throw std::out_of_range(col_nm.to_string());
+        throw std::out_of_range(col.to_string());
     return std::distance(cols.begin(), it);
 }
 
@@ -117,12 +112,14 @@ inline std::ostream& operator<<(std::ostream& os, const rowset& rows)
               << std::setfill('-') << as_row(line) << "\n"
               << std::setfill(' ') << list(rows, "\n", as_row);
 }
+
 template <typename ColumnNames>
 rowset select(const ColumnNames& cols, const rowset& rows)
 {
-    auto positions = back_constructor<std::vector<size_t>>(
-        cols,
-        [&rows](auto& col) { return detail::column_position(rows, col); });
+    auto positions =
+        back_constructor<std::vector<size_t>>(cols, [&](const auto& col) {
+            return detail::column_position(rows.columns(), col);
+        });
 
     ostream os;
     for (const auto& row : rows)

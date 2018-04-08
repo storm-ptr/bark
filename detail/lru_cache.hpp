@@ -9,7 +9,7 @@
 #include <bark/detail/linked_hash_map.hpp>
 #include <bark/detail/lockable.hpp>
 #include <boost/any.hpp>
-#include <boost/core/noncopyable.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 #include <cstdint>
 #include <functional>

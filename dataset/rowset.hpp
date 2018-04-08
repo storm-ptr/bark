@@ -5,7 +5,6 @@
 
 #include <bark/dataset/detail/iterator.hpp>
 #include <bark/dataset/ostream.hpp>
-#include <boost/container/small_vector.hpp>
 #include <string>
 #include <vector>
 
@@ -17,12 +16,12 @@ inline auto as_vector(blob_view buf)
     using iterator = detail::iterator<variant_view>;
     iterator begin{buf.data()};
     iterator end{buf.data() + buf.size()};
-    return std::vector<variant_view>{begin, end};
+    return std::vector<variant_view>(begin, end);
 }
 
 class rowset {
 public:
-    using tuple = boost::container::small_vector<variant_view, 16>;
+    using tuple = std::vector<variant_view>;
     using iterator = detail::iterator<tuple>;
 
     rowset(std::vector<std::string> cols, blob_t buf)
@@ -48,7 +47,7 @@ private:
 
 inline auto as_vector(const rowset& rows)
 {
-    return std::vector<rowset::tuple>{rows.begin(), rows.end()};
+    return std::vector<rowset::tuple>(rows.begin(), rows.end());
 }
 
 }  // namespace dataset

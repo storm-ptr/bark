@@ -3,8 +3,8 @@
 #ifndef BARK_DETAIL_LOCKABLE_HPP
 #define BARK_DETAIL_LOCKABLE_HPP
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/noncopyable.hpp>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>

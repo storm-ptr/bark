@@ -3,8 +3,7 @@
 #ifndef BARK_DB_MYSQL_DETAIL_COMMON_HPP
 #define BARK_DB_MYSQL_DETAIL_COMMON_HPP
 
-#include <boost/predef/os.h>
-#if BOOST_OS_WINDOWS
+#ifdef _WIN32
 #include <winsock2.h>
 // strictly ordered
 #include <windows.h>

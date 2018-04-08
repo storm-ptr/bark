@@ -5,7 +5,7 @@
 
 #include <bark/common.hpp>
 #include <bark/detail/curl/common.hpp>
-#include <boost/core/noncopyable.hpp>
+#include <boost/noncopyable.hpp>
 #include <mutex>
 #include <string>
 #include <unordered_map>

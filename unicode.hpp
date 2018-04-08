@@ -44,7 +44,7 @@ struct utf32 {
 };
 
 template <typename Unit>
-using utf = typename std::conditional_t<
+using utf = std::conditional_t<
     sizeof(Unit) == sizeof(char),
     utf8<Unit>,
     std::conditional_t<sizeof(Unit) == sizeof(char16_t),

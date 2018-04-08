@@ -7,7 +7,11 @@ matrix:
     - os: linux
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - ubuntugis
           packages:
+            - g++-7
             - libboost-dev
             - libgdal-dev
 
@@ -15,4 +19,4 @@ before_install:
   - git clone https://github.com/catchorg/Catch2.git
 
 script:
-  - g++ -I ".." -I "/usr/include/gdal" -I "/usr/include/mysql" -I "/usr/include/postgresql" -I "../Catch2/single_include" ./test/main.cpp ./test/second_translation_unit.cpp -lcurl -lgdal -lmysqlclient -lodbc -lproj -lpq -lspatialite -lsqlite3
+  - g++-7 -std=c++14 -I ".." -I "../Catch2/single_include/" -I "/usr/include/gdal" -I "/usr/include/mysql" -I "/usr/include/postgresql" ./test/main.cpp ./test/second_translation_unit.cpp -lcurl -lgdal -lmysqlclient -lodbc -lproj -lpq -lspatialite -lsqlite3

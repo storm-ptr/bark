@@ -27,11 +27,9 @@ inline geometry::box extent(const column_def& col)
 template <typename Columns>
 auto find(Columns&& cols, string_view col_nm)
 {
-    return boost::range::find_if(
-        cols,
-        [col_nm, equal_to = unicode::case_insensitive_equal_to{}](auto&& col) {
-            return equal_to(col_nm, col.name);
-        });
+    return boost::range::find_if(cols, [col_nm](auto&& col) {
+        return unicode::case_insensitive_equal_to{}(col_nm, col.name);
+    });
 }
 
 template <typename Columns>

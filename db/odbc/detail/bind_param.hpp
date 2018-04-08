@@ -103,38 +103,29 @@ public:
     SQLLEN* ind() override { return &ind_; }
 };
 
-class binding_visitor : public boost::static_visitor<binding_holder> {
+class binding_visitor : public boost::static_visitor<binding*> {
 public:
-    binding_holder operator()(const boost::blank&) const
-    {
-        return std::make_unique<binding_null>();
-    }
+    binding* operator()(boost::blank) const { return new binding_null{}; }
 
     template <typename T>
-    binding_holder operator()(std::reference_wrapper<const T> v) const
+    binding* operator()(std::reference_wrapper<const T> v) const
     {
-        return std::make_unique<binding_val<T>>(v);
+        return new binding_val<T>{v};
     }
 
-    binding_holder operator()(string_view v) const
-    {
-        return std::make_unique<binding_text>(v);
-    }
+    binding* operator()(string_view v) const { return new binding_text{v}; }
 
-    binding_holder operator()(blob_view v) const
-    {
-        return std::make_unique<binding_blob>(v);
-    }
+    binding* operator()(blob_view v) const { return new binding_blob{v}; }
 };
 
 inline binding_holder bind_param(const dataset::variant_view* param)
 {
     if (param) {
         binding_visitor visitor;
-        return boost::apply_visitor(visitor, *param);
+        return binding_holder{boost::apply_visitor(visitor, *param)};
     }
     else
-        return std::make_unique<binding_stub>();
+        return binding_holder{new binding_stub{}};
 }
 
 }  // namespace detail

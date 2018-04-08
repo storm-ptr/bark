@@ -3,8 +3,8 @@
 #ifndef BARK_DETAIL_LINKED_HASH_MAP_HPP
 #define BARK_DETAIL_LINKED_HASH_MAP_HPP
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/noncopyable.hpp>
 #include <list>
 #include <unordered_map>
 
