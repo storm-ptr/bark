@@ -15,8 +15,6 @@ matrix:
             - libboost-dev
             - libgdal-dev
 
-before_install:
-  - git clone https://github.com/catchorg/Catch2.git
-
 script:
-  - g++-7 -std=c++14 -I ".." -I "../Catch2/single_include/" -I "/usr/include/gdal" -I "/usr/include/mysql" -I "/usr/include/postgresql" ./test/main.cpp ./test/second_translation_unit.cpp -lcurl -lgdal -lmysqlclient -lodbc -lproj -lpq -lspatialite -lsqlite3
+  - wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
+  - g++-7 -std=c++14 -I ".." -I "." -I "/usr/include/gdal" -I "/usr/include/mysql" -I "/usr/include/postgresql" ./test/main.cpp ./test/second_translation_unit.cpp -lcurl -lgdal -lmysqlclient -lodbc -lproj -lpq -lspatialite -lsqlite3
