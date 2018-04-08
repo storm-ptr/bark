@@ -9,7 +9,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - ubuntugis
+            - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
           packages:
             - g++-7
             - libboost-dev
