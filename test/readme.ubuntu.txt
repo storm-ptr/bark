@@ -1,8 +1,13 @@
-odbc
+- install odbc drivers
+
   ibm db2: download and extract
   mssql: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
   mysql: https://dev.mysql.com/downloads/connector/odbc/
   postgres: apt-get install odbc-postgresql
+
+
+
+- check
 
 cat /etc/odbcinst.ini
 [ODBC Driver 17 for SQL Server]
@@ -36,24 +41,15 @@ Debug=0
 CommLog=1
 UsageCount=1
 
-put file https://github.com/philsquared/Catch/blob/master/single_include/catch.hpp
-  to <include> path
 
-compile and run main.cpp
 
-g++\
- -I "../.."\
- -I "/usr/include/gdal"\
- -I "/usr/include/mysql"\
- -I "/usr/include/postgresql"\
- ./main.cpp\
- ./second_translation_unit.cpp\
- -lcurl\
- -lgdal\
- -lmysqlclient\
- -lodbc\
- -lproj\
- -lpq\
- -lspatialite\
- -lsqlite3\
+- start the virtual machine with databases
+
+
+
+- run
+
+make -f ./makefile.ubuntu CFLAGS+=-DBARK_TEST_DATABASE
+
+./test
 

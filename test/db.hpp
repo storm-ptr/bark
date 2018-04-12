@@ -26,11 +26,18 @@ const auto& odbc_driver(std::initializer_list<bark::string_view> tokens)
 {
     using namespace bark;
     static const auto Drivers = db::odbc::drivers();
-    return *boost::range::find_if(Drivers, [tokens](const auto& drv) {
+    auto it = boost::range::find_if(Drivers, [tokens](const auto& drv) {
         return all_of(tokens, within(drv));
     });
+    if (it == boost::end(Drivers)) {
+        std::ostringstream os;
+        os << "ODBC driver not found: " << list(tokens, ", ");
+        throw std::runtime_error(os.str());
+    }
+    return *it;
 }
 
+#ifdef BARK_TEST_DATABASE
 inline std::vector<bark::db::provider_ptr> make_write_providers()
 {
     using namespace bark::db;
@@ -55,6 +62,13 @@ inline std::vector<bark::db::provider_ptr> make_write_providers()
                 Ip, 5432, "postgres", "postgres", Pwd),
             std::make_shared<sqlite::provider>(R"(./drop_me.sqlite)")};
 }
+#else
+inline std::vector<bark::db::provider_ptr> make_write_providers()
+{
+    using namespace bark::db;
+    return {std::make_shared<sqlite::provider>(R"(./drop_me.sqlite)")};
+}
+#endif
 
 TEST_CASE("db_geometry")
 {

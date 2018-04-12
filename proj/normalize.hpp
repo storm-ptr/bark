@@ -4,14 +4,19 @@
 #define BARK_PROJ_NORMALIZE_HPP
 
 #include <bark/proj/detail/projection.hpp>
+#include <boost/algorithm/string.hpp>
+#include <exception>
 #include <string>
 
 namespace bark {
 namespace proj {
 
-inline std::string normalize(const std::string& pj)
-{
-    return pj.empty() ? std::string{} : detail::projection{pj}.get_def();
+inline std::string normalize(const std::string& pj) try {
+    return pj.empty() ? std::string{}
+                      : boost::trim_copy(detail::projection{pj}.get_def());
+}
+catch (const std::exception&) {
+    return boost::trim_copy(pj);
 }
 
 }  // namespace proj
