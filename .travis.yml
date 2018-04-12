@@ -5,7 +5,6 @@ dist: trusty
 matrix:
   include:
     - os: linux
-      env: CXX=g++-7
       addons:
         apt:
           sources:
@@ -20,5 +19,5 @@ matrix:
 script:
   - wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd ./test
-  - make -f ./makefile.ubuntu
+  - make -f ./makefile.ubuntu CXX=g++-7
   - ./test
