@@ -17,7 +17,8 @@ matrix:
             - libproj-dev
 
 script:
+  - cd ..
   - wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
-  - cd ./test
+  - cd ./bark/test
   - make -f ./makefile.ubuntu CXX=g++-7
   - ./test
