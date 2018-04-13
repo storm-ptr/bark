@@ -20,8 +20,6 @@
     action##_act_->setIconVisibleInMenu(true);              \
     connect(action##_act_, &QAction::triggered, this, &tree_view::action##_slot)
 
-Q_DECLARE_METATYPE(Qt::CheckState);
-
 tree_view::tree_view(QWidget* parent) : QTreeView(parent), model_(nullptr)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);

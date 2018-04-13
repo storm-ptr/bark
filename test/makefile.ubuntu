@@ -1,4 +1,4 @@
-CFLAGS+=-Wall -std=c++14
+CXXFLAGS+=-Wall -std=c++14
 EXECUTABLE=run_me
 INCLUDEPATH=../.. /usr/include/gdal /usr/include/mysql /usr/include/postgresql
 INCFLAGS=$(foreach x, $(INCLUDEPATH), -I$x)
@@ -14,7 +14,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $@  $(LDFLAGS)
 
 .cpp.o:
-	$(CXX) -c $(CFLAGS) $(INCFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(INCFLAGS) $< -o $@
 
 test: all
 	./$(EXECUTABLE)

@@ -24,5 +24,5 @@ script:
   - make -f ./makefile.ubuntu test CXX=g++-7
   - make -f ./makefile.ubuntu clean
   - cd ../example/nanogis
-  - qmake -qt=qt5 QMAKE_CXX=g++-7 QMAKE_CC=g++-7 QMAKE_LINK=g++-7 QMAKE_CXXFLAGS+=-std=c++14 QMAKE_CFLAGS+=-std=c++14
-  - make CXX=g++-7 CC=g++-7 LINK=g++-7 CXXFLAGS+=-std=c++14 CFLAGS+=-std=c++14 CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - qmake -qt=qt5 QMAKE_CXX=g++-7 QMAKE_CC=g++-7 QMAKE_LINK=g++-7
+  - make CXX=g++-7 CC=g++-7 LINK=g++-7 CXXFLAGS+=-fPIC CFLAGS+=-fPIC

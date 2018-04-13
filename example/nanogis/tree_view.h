@@ -84,7 +84,7 @@ private:
         QVector<bark::qt::layer> res;
         for (auto& idx : model_.match({},
                                       Qt::CheckStateRole,
-                                      QVariant::fromValue(Qt::Checked),
+                                      Qt::Checked,
                                       -1,
                                       Qt::MatchRecursive)) {
             auto lr = model_.get_layer(idx);
