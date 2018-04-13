@@ -49,7 +49,4 @@ UsageCount=1
 
 - run
 
-make -f ./makefile.ubuntu CFLAGS+=-DBARK_TEST_DATABASE
-
-./test
-
+make -f ./makefile.ubuntu test CFLAGS+=-DBARK_TEST_DATABASE

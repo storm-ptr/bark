@@ -1,28 +1,12 @@
-INC_BARK_AND_CATCH=../..
-INC_GDAL=/usr/include/gdal
-INC_MYSQL=/usr/include/mysql
-INC_POSTGRES=/usr/include/postgresql
-INC_ALL=$(INC_BARK_AND_CATCH) $(INC_GDAL) $(INC_MYSQL) $(INC_POSTGRES)
-INCFLAGS=$(foreach x, $(INC_ALL), -I$x)
-
-LD_CURL=curl
-LD_GDAL=gdal
-LD_MYSQL=mysqlclient
-LD_ODBC=odbc
-LD_PROJ=proj
-LD_POSTGRES=pq
-LD_SPATIALITE=spatialite
-LD_SQLITE=sqlite3
-LD_ALL=$(LD_CURL) $(LD_GDAL) $(LD_MYSQL) $(LD_ODBC) $(LD_PROJ) $(LD_POSTGRES) $(LD_SPATIALITE) $(LD_SQLITE)
-LDFLAGS+=$(foreach x, $(LD_ALL), -l$x)
-
 CFLAGS+=-Wall -std=c++14
-
-SOURCES=main.cpp second_translation_unit.cpp
-
+EXECUTABLE=run_me
+INCLUDEPATH=../.. /usr/include/gdal /usr/include/mysql /usr/include/postgresql
+INCFLAGS=$(foreach x, $(INCLUDEPATH), -I$x)
+LIBS=curl gdal mysqlclient odbc proj pq spatialite sqlite3
+LDFLAGS+=$(foreach x, $(LIBS), -l$x)
 OBJECTS=$(SOURCES:.cpp=.o)
-
-EXECUTABLE=test
+SOURCES=main.cpp second_translation_unit.cpp
+SQLITE_DB=drop_me.sqlite
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -32,5 +16,8 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $(INCFLAGS) $< -o $@
 
+test: all
+	./$(EXECUTABLE)
+
 clean:
-	rm -rf *.o $(EXECUTABLE)
+	rm -rf *.o $(EXECUTABLE) $(SQLITE_DB)

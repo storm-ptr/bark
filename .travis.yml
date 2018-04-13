@@ -20,5 +20,5 @@ script:
   - cd ..
   - wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd ./bark/test
-  - make -f ./makefile.ubuntu CXX=g++-7
-  - ./test
+  - make -f ./makefile.ubuntu test CXX=g++-7
+  - make -f ./makefile.ubuntu clean
