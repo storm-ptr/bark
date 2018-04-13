@@ -17,7 +17,7 @@ task_widget::task_widget(QWidget* parent, task_ptr tsk)
     tools->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton),
                      "close",
                      this,
-                     &task_widget::close_slot);
+                     SLOT(close_slot()));
     edit_ = new QPlainTextEdit;
     QPalette palette;
     palette.setColor(QPalette::Base, Qt::black);

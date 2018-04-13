@@ -9,6 +9,7 @@
 #include <QFuture>
 #include <QList>
 #include <QModelIndex>
+#include <QTimerEvent>
 #include <QUrl>
 #include <QVariant>
 #include <QVector>

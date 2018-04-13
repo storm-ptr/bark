@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QPointF>
 #include <QString>
+#include <QTimerEvent>
 #include <QVector>
 #include <QWidget>
 #include <bark/qt/common.hpp>

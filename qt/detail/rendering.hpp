@@ -33,7 +33,8 @@ QVector<canvas> mock_rendering(const layer& lr,
         tf.inplace_forward(wkb);
 
     auto ext = envelope(geom_from_wkb(wkb.data()));
-    auto margin = QMargins{} + lr.pen.width();
+    QMargins margin{};
+    margin += lr.pen.width();
     auto wnd = frm | intersect(ext) | resize(margin);
     if (wnd.size.isEmpty())
         return {};
@@ -48,7 +49,8 @@ inline QVector<canvas> geometry_rendering(const layer& lr,
                                           const frame& frm)
 {
     auto tf = proj::transformer{projection(lr), frm.projection};
-    auto margin = QMargins{} + lr.pen.width();
+    QMargins margin{};
+    margin += lr.pen.width();
     auto wnd = frm | intersect(tf.forward(tl)) | resize(margin);
     if (wnd.size.isEmpty())
         return {};

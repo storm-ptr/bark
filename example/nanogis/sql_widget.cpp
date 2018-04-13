@@ -16,11 +16,11 @@ sql_widget::sql_widget(QWidget* parent, bark::qt::link lnk)
     tools->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton),
                      "close",
                      this,
-                     &sql_widget::close_slot);
+                     SLOT(close_slot()));
     tools->addAction(style()->standardIcon(QStyle::SP_MediaPlay),
                      "run",
                      this,
-                     &sql_widget::run_slot);
+                     SLOT(run_slot()));
     auto title = new QLabel(lnk_.uri.toDisplayString(QUrl::DecodeReserved));
     edit_ = new QPlainTextEdit;
     edit_->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
