@@ -82,11 +82,8 @@ private:
     QVector<bark::qt::layer> match_checked(Filter filter) const
     {
         QVector<bark::qt::layer> res;
-        for (auto& idx : model_.match({},
-                                      Qt::CheckStateRole,
-                                      Qt::Checked,
-                                      -1,
-                                      Qt::MatchRecursive)) {
+        for (auto& idx : model_.match(
+                 {}, Qt::CheckStateRole, Qt::Checked, -1, Qt::MatchRecursive)) {
             auto lr = model_.get_layer(idx);
             if (lr && lr->provider && filter(*lr))
                 res.push_back(*lr);

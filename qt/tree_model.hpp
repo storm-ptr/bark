@@ -33,6 +33,7 @@ public:
     friend QDataStream& operator<<(QDataStream& os, const tree_model& that);
     friend QDataStream& operator>>(QDataStream& is, tree_model& that);
 
+    // override
     int columnCount(const QModelIndex&) const override;
 
     QVariant data(const QModelIndex&,
@@ -51,6 +52,7 @@ public:
     bool setData(const QModelIndex&,
                  const QVariant&,
                  int role = Qt::EditRole) override;
+
     bool removeRows(int position,
                     int rows,
                     const QModelIndex& parent = {}) override;

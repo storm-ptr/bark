@@ -78,7 +78,7 @@
 
 - install Qt libraries and Qt Creator
 
-  https://www.qt.io/download-open-source/#section-2
+  https://www.qt.io/download
 
 
 

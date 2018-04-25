@@ -23,7 +23,7 @@ public:
     {
         auto it = index_.right.find(normalize(pj));
         if (it == index_.right.end())
-            throw std::out_of_range(pj);
+            throw std::out_of_range("projection: " + pj);
         return it->second;
     }
 
@@ -31,7 +31,7 @@ public:
     {
         auto it = index_.left.find(srid);
         if (it == index_.left.end())
-            throw std::out_of_range(std::to_string(srid));
+            throw std::out_of_range("srid: " + std::to_string(srid));
         return it->second;
     }
 

@@ -49,4 +49,6 @@ UsageCount=1
 
 - run
 
-make -f ./makefile.ubuntu test CFLAGS+=-DBARK_TEST_DATABASE
+make -f ./makefile.ubuntu test CXXFLAGS+=-DBARK_TEST_DATABASE
+
+make -f ./makefile.ubuntu clean

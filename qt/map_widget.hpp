@@ -27,7 +27,7 @@ class rendering_task;
 
 /**
  * The class receives events from the window system and represent a cartography
- * interface on the screen.
+ * interface on the screen (panning, zooming).
  */
 class map_widget : public QWidget {
 public:

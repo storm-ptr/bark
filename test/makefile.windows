@@ -1,0 +1,22 @@
+CXXFLAGS=/EHsc /bigobj /std:c++latest /D_HAS_AUTO_PTR_ETC=1 $(CXXFLAGS)
+EXECUTABLE=run_me.exe
+INCLUDE=..\..\;$(INCLUDE)
+LIB=..\..\..\lib;$(LIB)
+LIBS=gdal_i.lib libcurl.lib libmysql.lib libpq.lib odbc32.lib proj_i.lib spatialite_i.lib sqlite3_i.lib
+OBJECTS=$(SOURCES:.cpp=.obj)
+SOURCES=main.cpp second_translation_unit.cpp
+SQLITE_DB=drop_me.sqlite
+
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) /Fe:$(EXECUTABLE) $(OBJECTS) $(LIBS)
+
+.cpp.obj:
+	$(CXX) -c $(CXXFLAGS) $<
+
+test: all
+	$(EXECUTABLE)
+
+clean:
+	del *.obj *.exp *.lib $(EXECUTABLE) $(SQLITE_DB)

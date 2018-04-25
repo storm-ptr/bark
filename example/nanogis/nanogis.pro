@@ -4,7 +4,7 @@ HEADERS = *.h
 RESOURCES = resource.qrc
 CONFIG += c++14
 
-windows:INCLUDEPATH += C:\Programs\OSGeo4W64\include
+windows:INCLUDEPATH += ../../..
 
 unix:INCLUDEPATH +=\
   ../../..\
@@ -12,7 +12,7 @@ unix:INCLUDEPATH +=\
   /usr/include/mysql\
   /usr/include/postgresql\
 
-windows:LIBS += -LC:\Programs\OSGeo4W64\lib\
+windows:LIBS += -L../../../../lib\
   -lgdal_i\
   -llibcurl\
   -llibmysql\
@@ -31,4 +31,3 @@ unix:LIBS +=\
   -lpq\
   -lspatialite\
   -lsqlite3\
-
