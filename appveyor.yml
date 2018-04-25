@@ -1,5 +1,11 @@
 os: Visual Studio 2017
 
+environment:
+  matrix:
+  - QT: C:\Qt\5.10.1\msvc2017_64
+    PLATFORM: amd64
+    COMPILER: msvc
+
 platform: x64
 
 configuration: Release
@@ -14,23 +20,23 @@ shallow_clone: true
 clone_depth: 1
 
 install:
-  - ps: mkdir C:\temp | out-null
-  - ps: mkdir $env:OSGEO4W_ROOT | out-null
+  - mkdir C:\temp
+  - mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 build_script:
-  - ps: cd ./example/nanogis
-  - ps: qmake -qt=qt5
-  - ps: make CXXFLAGS+=-fPIC CFLAGS+=-fPIC
-  - ps: cd ../..
+  - cd ./example/nanogis
+  - qmake -qt=qt5
+  - make CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - cd ../..
 
 test_script:
-  - ps: cd ..
-  - ps: curl https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
-  - ps: cd ./bark/test
-  - ps: nmake -f ./makefile.windows test
-  - ps: nmake -f ./makefile.windows clean
-  - ps: cd ..
+  - cd ..
+  - ps: (new-object net.webclient).DownloadFile("https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp")
+  - cd ./bark/test
+  - nmake -f ./makefile.windows test
+  - nmake -f ./makefile.windows clean
+  - cd ..
