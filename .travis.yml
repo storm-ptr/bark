@@ -2,21 +2,34 @@ language: cpp
 sudo: true
 dist: trusty
 
+addons_shortcuts:
+  addons_dev: &dev
+    apt:
+      sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntugis/ppa'
+      packages:
+        - libboost-dev
+        - libgdal-dev
+        - libproj-dev
+        - qt5-default
+
 matrix:
   include:
     - os: linux
-    - env: COMPILER=g++-7
-      addons:
+      env: COMPILER=g++-7
+      addons: *dev
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ubuntugis/ppa'
           packages:
             - g++-7
-            - libboost-dev
-            - libgdal-dev
-            - libproj-dev
-            - qt5-default
+    - os: linux
+      env: COMPILER=clang++-5.0
+      addons: *dev
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
 
 script:
   - cd ..
