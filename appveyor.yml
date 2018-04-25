@@ -19,7 +19,7 @@ clone_depth: 1
 
 install:
   - mkdir C:\temp
-  - mkdir $env:OSGEO4W_ROOT
+  - ps: mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
