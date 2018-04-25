@@ -1,15 +1,11 @@
 os: Visual Studio 2017
 
-environment:
-  OSGEO4W_ROOT: C:\\OSGeo4W64
-  matrix:
-  - QT: C:\Qt\5.10.1\msvc2017_64
-    PLATFORM: amd64
-    COMPILER: msvc
-
 platform: x64
 
 configuration: Release
+
+environment:
+  OSGEO4W_ROOT: C:\\OSGeo4W64
 
 matrix:
   fast_finish: true
@@ -18,6 +14,8 @@ shallow_clone: true
 clone_depth: 1
 
 install:
+  - set QTDIR=C:\Qt\5.10.1\msvc2017_64
+  - '%QTDIR%\bin\qtenv2.bat'
   - mkdir C:\temp
   - ps: mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
@@ -33,7 +31,7 @@ build_script:
 
 test_script:
   - cd ..
-  - ps: (new-object net.webclient).DownloadFile("https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp")
+  - ps: wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd ./bark/test
   - nmake -f ./makefile.windows test
   - nmake -f ./makefile.windows clean
