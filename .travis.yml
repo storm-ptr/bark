@@ -27,3 +27,4 @@ script:
   - cd ../example/nanogis
   - qmake -qt=qt5 QMAKE_CXX=${COMPILER} QMAKE_CC=${COMPILER} QMAKE_LINK=${COMPILER}
   - make CXX=${COMPILER} CC=${COMPILER} LINK=${COMPILER} CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - cd ../..
