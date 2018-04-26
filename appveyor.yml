@@ -15,13 +15,13 @@ clone_depth: 1
 
 install:
   - mkdir C:\temp
-  - ps: mkdir $env:OSGEO4W_ROOT
+  - mkdir %OSGEO4W_ROOT%
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-  - 'set INCLUDE=%INCLUDE%;C:\Libraries\boost_1_66_0'
+  - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_66_0;%INCLUDE%'
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
