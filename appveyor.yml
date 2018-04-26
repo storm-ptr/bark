@@ -21,6 +21,7 @@ install:
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - 'set INCLUDE=%INCLUDE%;C:\Libraries\boost_1_66_0'
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
