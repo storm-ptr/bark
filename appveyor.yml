@@ -24,12 +24,12 @@ install:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
-  - qmake -qt=qt5
-  - nmake CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - qmake
+  - nmake
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%/..
   - ps: wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd %APPVEYOR_BUILD_FOLDER%/test
-  - nmake /f ./makefile.windows test
-  - nmake /f ./makefile.windows clean
+  - nmake /f makefile.windows test
+  - nmake /f makefile.windows clean
