@@ -26,7 +26,7 @@ install:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
-  - qmake -qt=qt5
+  - qmake.exe -qt=qt5
   - make CXXFLAGS+=-fPIC CFLAGS+=-fPIC
 
 test_script:
