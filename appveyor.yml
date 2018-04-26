@@ -15,9 +15,9 @@ clone_depth: 1
 
 install:
   - mkdir %OSGEO4W_ROOT%
-  - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe --directory-prefix="$env:OSGEO4W_ROOT"
+  - ps: wget --directory-prefix="$env:OSGEO4W_ROOT" http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
   - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT%
-  - ps: wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp --directory-prefix="$env:OSGEO4W_ROOT\include"
+  - ps: wget --directory-prefix="$env:OSGEO4W_ROOT\include" https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
