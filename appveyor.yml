@@ -22,6 +22,7 @@ install:
   - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_66_0;%INCLUDE%'
+  - 'set LIB=%OSGEO4W_ROOT%\lib;%LIB%'
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
