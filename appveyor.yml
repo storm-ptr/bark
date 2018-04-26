@@ -15,7 +15,6 @@ clone_depth: 1
 
 install:
   - set QTDIR=C:\Qt\5.10.1\msvc2017_64
-  - set PATH=%PATH%;%QTDIR%\bin
   - '%QTDIR%\bin\qtenv2.bat'
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - mkdir C:\temp
@@ -26,7 +25,7 @@ install:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
-  - qmake.exe -qt=qt5
+  - '%QTDIR%\bin\qmake.exe' -qt=qt5
   - make CXXFLAGS+=-fPIC CFLAGS+=-fPIC
 
 test_script:
