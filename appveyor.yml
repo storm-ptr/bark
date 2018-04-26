@@ -16,7 +16,7 @@ clone_depth: 1
 install:
   - set QTDIR=C:\Qt\5.10.1\msvc2017_64
   - '%QTDIR%\bin\qtenv2.bat'
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
   - mkdir C:\temp
   - ps: mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
@@ -30,5 +30,5 @@ test_script:
   - cd %APPVEYOR_BUILD_FOLDER%/..
   - ps: wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd %APPVEYOR_BUILD_FOLDER%/test
-  - nmake -f ./makefile.windows test
-  - nmake -f ./makefile.windows clean
+  - nmake /f ./makefile.windows test
+  - nmake /f ./makefile.windows clean
