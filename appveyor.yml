@@ -16,7 +16,7 @@ clone_depth: 1
 install:
   - set QTDIR=C:\Qt\5.10.1\msvc2017_64
   - '%QTDIR%\bin\qtenv2.bat'
-  - "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\SetEnv.cmd" /x64
+  - "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\SetEnv.cmd" -x64
   - mkdir C:\temp
   - ps: mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
