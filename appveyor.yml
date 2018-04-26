@@ -14,9 +14,8 @@ shallow_clone: true
 clone_depth: 1
 
 install:
-  - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-  - set QTDIR=C:\Qt\5.10.1\msvc2017_64
-  - '%QTDIR%\bin\qtenv2.bat'
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
   - mkdir C:\temp
   - ps: mkdir $env:OSGEO4W_ROOT
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
@@ -25,6 +24,8 @@ install:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
+  - qmake -qt=qt5
+  - nmake CXXFLAGS+=-fPIC CFLAGS+=-fPIC
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%/..
