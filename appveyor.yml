@@ -4,13 +4,10 @@ platform: x64
 
 configuration: Release
 
+clone_depth: 1
+
 environment:
   OSGEO4W_ROOT: C:\\OSGeo4W64
-
-matrix:
-  fast_finish: true
-
-clone_depth: 1
 
 install:
   - mkdir %OSGEO4W_ROOT%
