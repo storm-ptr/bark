@@ -1,5 +1,6 @@
-put file https://github.com/philsquared/Catch/blob/master/single_include/catch.hpp
-  to <include> path (C:\Programs\OSGeo4W64\include)
+- start the virtual machine with databases
+
+
 
 - run
 

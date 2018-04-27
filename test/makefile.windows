@@ -1,7 +1,6 @@
 CXXFLAGS=/EHsc /bigobj /std:c++latest /D_HAS_AUTO_PTR_ETC=1 $(CXXFLAGS)
 EXECUTABLE=run_me.exe
 INCLUDE=..\..\;$(INCLUDE)
-LIB=..\..\..\lib;$(LIB)
 LIBS=gdal_i.lib libcurl.lib libmysql.lib libpq.lib odbc32.lib proj_i.lib spatialite_i.lib sqlite3_i.lib
 OBJECTS=$(SOURCES:.cpp=.obj)
 SOURCES=main.cpp second_translation_unit.cpp

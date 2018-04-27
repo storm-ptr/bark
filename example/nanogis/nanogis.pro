@@ -12,7 +12,7 @@ unix:INCLUDEPATH +=\
   /usr/include/mysql\
   /usr/include/postgresql\
 
-windows:LIBS += -L../../../../lib\
+windows:LIBS += -L$$(LIB)\
   -lgdal_i\
   -llibcurl\
   -llibmysql\
