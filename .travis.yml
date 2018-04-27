@@ -26,7 +26,7 @@ matrix:
 script:
   - wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd $TRAVIS_BUILD_DIR/test
-  - make -f ./makefile.ubuntu test CXX=${COMPILER}
+  - make -f ./makefile.ubuntu test CXX=$COMPILER
   - cd $TRAVIS_BUILD_DIR/example/nanogis
-  - qmake -qt=qt5 QMAKE_CXX=${COMPILER} QMAKE_CC=${COMPILER} QMAKE_LINK=${COMPILER}
-  - make CXX=${COMPILER} CC=${COMPILER} LINK=${COMPILER} CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
+  - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
