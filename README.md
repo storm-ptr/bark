@@ -11,6 +11,10 @@ Submodules:
 - proj: WKB reprojection from one coordinate reference system to another
 - qt: visualization of raster and vector geospatial data
 
+## example/nanogis
+
+![](https://user-images.githubusercontent.com/3381451/38042411-f93918b8-32bc-11e8-8be0-433668c62d42.png)
+
 ## Getting Started
 
 windows
@@ -36,9 +40,5 @@ ubuntu
 
 vmware
 - [virtual machine with databases for testing](https://yadi.sk/d/sdEDsIjC3TkeM6)
-
-## example/nanogis
-
-![](https://user-images.githubusercontent.com/3381451/38042411-f93918b8-32bc-11e8-8be0-433668c62d42.png)
 
 andrew.naplavkov@gmail.com
