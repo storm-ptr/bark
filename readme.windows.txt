@@ -1,4 +1,4 @@
-- install OSGeo4W
+- download OSGeo4W
 
   mkdir C:\OSGeo4W64
 
@@ -36,10 +36,10 @@
 
   git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
 
-- install Microsoft Visual C++
+- install Microsoft Visual C++ (Community)
 
   https://www.visualstudio.com/vs/cplusplus/
 
-- install Qt libraries and Qt Creator
+- install Qt libraries and Qt Creator (Open Source)
 
   https://www.qt.io/download
