@@ -43,6 +43,6 @@ artifacts:
 
 deploy:
   provider: GitHub
-  artifact: nanogis.zip
   auth_token:
-    secure: 065444c6053a95917a997f028f02e8a28eed99e2
+    secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
+  artifact: nanogis.zip
