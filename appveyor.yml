@@ -38,7 +38,7 @@ after_build:
   - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\nanogis.zip %NANOGIS_ROOT%
 
 artifacts:
-  - path: %APPVEYOR_BUILD_FOLDER%\example\nanogis.zip
+  - path: $(APPVEYOR_BUILD_FOLDER)\example\nanogis.zip
     name: nanogis.zip
 
 deploy:
