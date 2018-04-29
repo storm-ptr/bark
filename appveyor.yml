@@ -35,10 +35,10 @@ after_build:
   - copy %APPVEYOR_BUILD_FOLDER%\example\nanogis\release\nanogis.exe %NANOGIS_ROOT%
   - windeployqt --no-quick-import --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw %NANOGIS_ROOT%\nanogis.exe
   - copy %OSGEO4W_ROOT%\bin\*.dll %NANOGIS_ROOT%
-  - 7z a %NANOGIS_ROOT%\nanogis.zip %NANOGIS_ROOT%
+  - 7z a nanogis.zip %NANOGIS_ROOT%
 
 artifacts:
-  - path: %NANOGIS_ROOT%\nanogis.zip
+  - path: nanogis.zip
 
 deploy:
   provider: GitHub
