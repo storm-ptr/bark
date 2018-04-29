@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/storm-ptr/bark.svg?branch=master)](https://travis-ci.org/storm-ptr/bark)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/storm-ptr/bark?svg=true&branch=master)](https://ci.appveyor.com/project/storm-ptr/bark/branch/master)
+[![Latest GitHub Release](https://img.shields.io/github/release/storm-ptr/bark.svg)](https://github.com/storm-ptr/bark/releases/latest)
 
 ## Introduction
 
