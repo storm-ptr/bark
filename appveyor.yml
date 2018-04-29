@@ -9,6 +9,7 @@ clone_depth: 1
 environment:
   OSGEO4W_ROOT: C:\\OSGeo4W64
   NANOGIS_ROOT: C:\\nanogis
+  NANOGIS_ARCHIVE: nanogis.windows.zip
 
 install:
   - mkdir %OSGEO4W_ROOT%
@@ -35,14 +36,15 @@ after_build:
   - copy %APPVEYOR_BUILD_FOLDER%\example\nanogis\release\nanogis.exe %NANOGIS_ROOT%
   - windeployqt --no-quick-import --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw %NANOGIS_ROOT%\nanogis.exe > NUL
   - copy %OSGEO4W_ROOT%\bin\*.dll %NANOGIS_ROOT% > NUL
-  - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\nanogis.zip %NANOGIS_ROOT%
+  - del %NANOGIS_ROOT%\boost*.dll > NUL
+  - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
 artifacts:
-  - path: example\nanogis.zip
-    name: nanogis.zip
+  - path: example\$(NANOGIS_ARCHIVE)
+    name: $(NANOGIS_ARCHIVE)
 
 deploy:
   provider: GitHub
   auth_token:
     secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
-  artifact: nanogis.zip
+  artifact: $(NANOGIS_ARCHIVE)
