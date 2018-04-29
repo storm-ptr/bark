@@ -35,7 +35,6 @@ after_build:
   - copy %APPVEYOR_BUILD_FOLDER%\example\nanogis\release\nanogis.exe %NANOGIS_ROOT%
   - windeployqt --no-quick-import --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw %NANOGIS_ROOT%\nanogis.exe > NUL
   - copy %OSGEO4W_ROOT%\bin\*.dll %NANOGIS_ROOT% > NUL
-  - del /Q /F "%NANOGIS_ROOT%\boost*.dll"
   - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\nanogis.windows.zip %NANOGIS_ROOT%
 
 artifacts:
