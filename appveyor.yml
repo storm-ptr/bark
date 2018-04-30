@@ -43,7 +43,7 @@ after_build:
 
 artifacts:
   - path: example\%NANOGIS_ARCHIVE%
-    name: %NANOGIS_ARCHIVE%
+    name: $(NANOGIS_ARCHIVE)
 
 deploy:
   provider: GitHub
