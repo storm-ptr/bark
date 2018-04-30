@@ -6,15 +6,18 @@ configuration: Release
 
 clone_depth: 1
 
+skip_tags: true
+
 environment:
   OSGEO4W_ROOT: C:\OSGeo4W64
   NANOGIS_ROOT: C:\nanogis
+  NANOGIS_ARCHIVE: nanogis.windows.zip
 
 install:
   - mkdir %OSGEO4W_ROOT%
   - ps: Invoke-WebRequest -Uri http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile $env:OSGEO4W_ROOT\osgeo4w-setup-x86_64.exe
   - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
-  - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll
+  - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
   - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
   - call C:\Qt\5.10.1\msvc2017_64\bin\qtenv2.bat
@@ -36,14 +39,14 @@ after_build:
   - copy %APPVEYOR_BUILD_FOLDER%\example\nanogis\release\nanogis.exe %NANOGIS_ROOT%
   - windeployqt --no-quick-import --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw %NANOGIS_ROOT%\nanogis.exe > NUL
   - copy %OSGEO4W_ROOT%\bin\*.dll %NANOGIS_ROOT% > NUL
-  - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\nanogis.windows.zip %NANOGIS_ROOT%
+  - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
 artifacts:
-  - path: example\nanogis.windows.zip
-    name: nanogis.windows.zip
+  - path: example\%NANOGIS_ARCHIVE%
+    name: %NANOGIS_ARCHIVE%
 
 deploy:
   provider: GitHub
   auth_token:
     secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
-  artifact: nanogis.windows.zip
+  artifact: $(NANOGIS_ARCHIVE)
