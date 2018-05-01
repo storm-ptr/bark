@@ -32,26 +32,19 @@ matrix:
             - qt5-default
 
 script:
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
+  - echo -e 'Package: nanogis\nVersion: 0.0.1\nSection: base\nPriority: optional\nArchitecture: amd64\nDepends: libqt5concurrent5, libqt5core5a, libqt5gui5, libqt5widgets5, libgdal20\nMaintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>\nDescription: nanogis\n' > $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
   - wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
   - cd $TRAVIS_BUILD_DIR/test
   - make -f ./makefile.ubuntu test CXX=$COMPILER
   - cd $TRAVIS_BUILD_DIR/example/nanogis
   - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
   - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
   - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
-  - echo "Package: nanogis" > $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Version: 0.0.1" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Section: base" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Priority: optional" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Architecture: amd64" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Depends: libqt5concurrent5, libqt5core5a, libqt5gui5, libqt5widgets5, libgdal20" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
-  - echo "Description: nanogis" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
   - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
 
 deploy:
@@ -59,7 +52,3 @@ deploy:
   api_key: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
   file: $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR.deb
   skip_cleanup: true
-  on:
-    tags: true
-  
-  
