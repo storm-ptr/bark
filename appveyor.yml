@@ -48,5 +48,5 @@ artifacts:
 deploy:
   provider: GitHub
   auth_token:
-    secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
+    secure: eK6200vsXUmBfsFy8CVFVCsgBL+WDOP2j2HHHdbcEo5ToHFBljTDUWDNgFq0U5xw
   artifact: $(NANOGIS_ARCHIVE)

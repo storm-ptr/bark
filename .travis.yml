@@ -1,59 +1,52 @@
 language: cpp
-
 sudo: true
-
 dist: trusty
-
 git:
   depth: 1
-
 branches:
   only:
-    - master
-
+  - master
 env:
   global:
-    - DEB_NAME: nanogis.ubuntu
-    - DEB_ROOT: $TRAVIS_BUILD_DIR/$DEB_NAME 
+  - DEB_NAME: nanogis.ubuntu
+  - DEB_ROOT: "$TRAVIS_BUILD_DIR/$DEB_NAME"
 
 matrix:
   include:
-    - os: linux
-      env: COMPILER=g++-7
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:ubuntugis/ppa'
-          packages:
-            - g++-7
-            - libboost-dev
-            - libgdal-dev
-            - libproj-dev
-            - qt5-default
-
+  - os: linux
+    env: COMPILER=g++-7
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: ppa:ubuntugis/ppa
+        packages:
+        - g++-7
+        - libboost-dev
+        - libgdal-dev
+        - libproj-dev
+        - qt5-default
 script:
-  - wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
-  - cd $TRAVIS_BUILD_DIR/test
-  - make -f ./makefile.ubuntu test CXX=$COMPILER
-  - cd $TRAVIS_BUILD_DIR/example/nanogis
-  - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
-  - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
-  - mkdir $DEB_ROOT
-  - mkdir $DEB_ROOT/usr
-  - mkdir $DEB_ROOT/usr/local
-  - mkdir $DEB_ROOT/usr/local/bin
-  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
-  - mkdir $DEB_ROOT/DEBIAN
-  - cp $TRAVIS_BUILD_DIR/control $DEB_ROOT/DEBIAN
-  - dpkg-deb --build $DEB_ROOT
-
+- wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
+- cd $TRAVIS_BUILD_DIR/test
+- make -f ./makefile.ubuntu test CXX=$COMPILER
+- cd $TRAVIS_BUILD_DIR/example/nanogis
+- qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
+- make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+- mkdir $DEB_ROOT
+- mkdir $DEB_ROOT/usr
+- mkdir $DEB_ROOT/usr/local
+- mkdir $DEB_ROOT/usr/local/bin
+- cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
+- mkdir $DEB_ROOT/DEBIAN
+- cp $TRAVIS_BUILD_DIR/control $DEB_ROOT/DEBIAN
+- dpkg-deb --build $DEB_ROOT
 deploy:
   provider: releases
   file_glob: true
   api_key:
-    secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
-  file: $DEB_NAME.deb
+    secure: aX7E8soOwtFMAhYaSufUVnKX92InQoduRbrqWtp4B/xDrSUwbVhR9/VJ9Tk2KXsgDe0Vsnmh4xEuT6txE15MaCMhKE6l2yOh/+62bNwcP1GEqNMCb8dgr+Jy7ynMijQX9IhgljPZ5JEPdF8k1WB5XWUQNJLjrZP4uc3mAg57TBknlWXCKcrpJcfhOgg7TMoVEi4ybVBaHrHgVNWWk5NcJw7iFApEbNDOk9MahX5xu+O0KN7fXVn0pb8ITbEGGirTkQRthH9uSQrvSPx4Po/iGvgghANim3qNp4iZMGhkH/GpEsSOhCjd34MFYWILZ+q0Do3vw3hhUxiw9Jr8WOzDP4qJpsBtSlsFJfnki1IQUXyJvouA+TkNBUdnUfZgUctrYEoZkvdidfcDpyOhBb2TLuP1hpgFO9H9Yw3scYQVK1ui9VBbNWHs2frFpLjNPrW6tlOzLmfq//foi+9IxAC70uV8Tuu7RPGOthLJa6mT/jOmOxX35MiaVJ0GDiKnsKWTB4H86qZpi0ie61EOwJLh86U88Np/uejXmwQOievMDVMPQOyP9z1sVG54w85hiKO04QAvCyS7sdrvJ0i/vVMF1Elvb2ud3cvo8rTrQ/O91qR8tUnN/+0lFYUqn+C7b3UFPeMMc906RHlD8090mGzM/tzPXMOwEPUD7qQ4KhgzkfM=
+  file: "$DEB_NAME.deb"
   skip_cleanup: true
   on:
     tags: false
