@@ -54,3 +54,12 @@ script:
   - echo "Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
   - echo "Description: nanogis" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
   - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
+
+deploy:
+  provider: releases
+  api_key: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
+  file: $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR.deb
+  skip_cleanup: true
+  on:
+    tags: true
+  
