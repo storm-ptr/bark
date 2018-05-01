@@ -3,9 +3,6 @@ sudo: true
 dist: trusty
 git:
   depth: 1
-branches:
-  only:
-  - master
 env:
   global:
   - DEB_NAME: nanogis.ubuntu
@@ -49,4 +46,4 @@ deploy:
   on:
     tags: true
     repo: storm-ptr/bark
-  
+ 
