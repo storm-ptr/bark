@@ -48,4 +48,4 @@ deploy:
   file: "$DEB_NAME.deb"
   skip_cleanup: true
   on:
-    tags: false
+    tags: true
