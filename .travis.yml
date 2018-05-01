@@ -7,10 +7,6 @@ dist: trusty
 git:
   depth: 1
 
-branches:
-  only:
-    - master
-
 env:
   global:
     - NANOGIS_DEB_DIR: nanogis.ubuntu 
@@ -54,4 +50,3 @@ script:
   - echo "Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
   - echo "Description: nanogis" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
   - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
-
