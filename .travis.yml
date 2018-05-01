@@ -10,7 +10,6 @@ env:
   global:
   - DEB_NAME: nanogis.ubuntu
   - DEB_ROOT: "$TRAVIS_BUILD_DIR/$DEB_NAME"
-
 matrix:
   include:
   - os: linux
@@ -45,7 +44,7 @@ deploy:
   provider: releases
   file_glob: true
   api_key:
-    secure: aX7E8soOwtFMAhYaSufUVnKX92InQoduRbrqWtp4B/xDrSUwbVhR9/VJ9Tk2KXsgDe0Vsnmh4xEuT6txE15MaCMhKE6l2yOh/+62bNwcP1GEqNMCb8dgr+Jy7ynMijQX9IhgljPZ5JEPdF8k1WB5XWUQNJLjrZP4uc3mAg57TBknlWXCKcrpJcfhOgg7TMoVEi4ybVBaHrHgVNWWk5NcJw7iFApEbNDOk9MahX5xu+O0KN7fXVn0pb8ITbEGGirTkQRthH9uSQrvSPx4Po/iGvgghANim3qNp4iZMGhkH/GpEsSOhCjd34MFYWILZ+q0Do3vw3hhUxiw9Jr8WOzDP4qJpsBtSlsFJfnki1IQUXyJvouA+TkNBUdnUfZgUctrYEoZkvdidfcDpyOhBb2TLuP1hpgFO9H9Yw3scYQVK1ui9VBbNWHs2frFpLjNPrW6tlOzLmfq//foi+9IxAC70uV8Tuu7RPGOthLJa6mT/jOmOxX35MiaVJ0GDiKnsKWTB4H86qZpi0ie61EOwJLh86U88Np/uejXmwQOievMDVMPQOyP9z1sVG54w85hiKO04QAvCyS7sdrvJ0i/vVMF1Elvb2ud3cvo8rTrQ/O91qR8tUnN/+0lFYUqn+C7b3UFPeMMc906RHlD8090mGzM/tzPXMOwEPUD7qQ4KhgzkfM=
+    secure: "Dut9nUwtgYTYOKKB/+vQWLrFKwYCfXtoR0Qaxa9hQM/H4kY/hXt9cA1cHr/1v4khj/WKRc8c4MpzA9s2MqLOwNYOGJOeoW2AUI5QCqOq3luz/w2AVGz30+bEs3Ku/o3VIqzcp990gqTo9wfCPJbJnN1I2lsC00ep379w36k/j78udXGYnQ0/XgP9JmxnrNiQ2rvV+FBLJ9ondN9Cw5BEYo1ZYq3i8VokhnnCMM2yk66ePa+vjYNDmrrIs6SZSo00Kyn/h82tIRoB/xMh92KRHMDuZjnaabqvIutVaaYOOOCfaZCfYFFvRCHwI0XwW0nLJz+d/WYqZSixZiUwbxgtSfIZQhcOM1IIfFg/IVsZONfXZ54768Alpn46gTEeBNl9EtAJDPD+qEkrdIs3fD19QAEuwuUhEc9tTXo0EBJZiILcGOZr4SkSM4FQKQoPtcaX90KTQ8e4YOPDYx3tHmM77+SpKo8Q2Sp8OSiv/d5nUoqTyuxzrYkkmSBhNRJVT1CrcfJ+GLf030ZQPkXA6910NjajUKoQEKebdXZDr2Cg9C1yzpQGyettR2nlMl/hnalcqIgYob/LuVRTpKIljczZ5xpxpyHrDqyuZbsMdcRNjOb29rXiSeSx/mNMqiMWAo97PExVpY9Ia5D3nELtn1KBOInIZ2yvymuKkEFkzpfy1Mw="
   file: "$DEB_NAME.deb"
   skip_cleanup: true
   on:
