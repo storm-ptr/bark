@@ -44,7 +44,7 @@ script:
   - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
   - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
   - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
-  - cp $TRAVIS_BUILD_DIR/controle $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
+  - cp $TRAVIS_BUILD_DIR/control $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
   - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
 
 deploy:
