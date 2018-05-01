@@ -1,0 +1,8 @@
+Package: nanogis
+Version: 0.0.1
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: libqt5concurrent5, libqt5core5a, libqt5gui5, libqt5widgets5, libgdal20
+Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>
+Description: nanogis
