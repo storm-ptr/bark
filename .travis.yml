@@ -7,6 +7,10 @@ dist: trusty
 git:
   depth: 1
 
+branches:
+  only:
+    - master
+
 env:
   global:
     - NANOGIS_DEB_DIR: nanogis.ubuntu 
