@@ -7,6 +7,10 @@ dist: trusty
 git:
   depth: 1
 
+env:
+  global:
+    - NANOGIS_DEB_DIR: nanogis.ubuntu 
+
 matrix:
   include:
     - os: linux
@@ -30,3 +34,19 @@ script:
   - cd $TRAVIS_BUILD_DIR/example/nanogis
   - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
   - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
+  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
+  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
+  - touch $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Package: nanogis" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Version: 0.0.1" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Section: base" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Priority: optional" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Architecture: amd64" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Depends: libqt5concurrent5, libqt5core5a, libqt5gui5, libqt5widgets5, libgdal20" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - echo "Description: nanogis" >> $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN/control
+  - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
