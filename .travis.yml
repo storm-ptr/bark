@@ -42,10 +42,11 @@ script:
 - dpkg-deb --build $DEB_ROOT
 deploy:
   provider: releases
-  file_glob: true
   api_key:
     secure: "B1S85anV+0nGpeh0IVc9pA2NQAvc33tSzeLLFHJlMvMjknTOIh4Ik3J+cG3nigAD5T7Hu/6TKv4O7Lo/9kp7anDcKIOXmZZGuFuHrlk9mXHc3lMRpTAO1x5MJgCfnu6ZXFYcvzHynWlRv8PSQMlsTkFl/HgTUnkrSwHvp+VAVdCTrjizyUL5Ee+KmDGPMIs+caqfic90f/yC/eG2r1/qtz0+J2sz4tNoXUuyUZwWvjXCTbwNaxxFI7Vnrz94pUzjxxhrtmkuYaIvAsrVOFktSgtpF7uAcPp2FEKomBcu5sxhKJoAmeDegynmCk9Czm5OYAOzAYR1SuGZsLQA+Z+JT/t23qIE3Ds48rC1D9p8JUUUe9p2ewkHxZTaFK6x0pKsNPK28kQlVAZX4xDLsjBiIKx43P/AzkKCnZdOOtJRP+AwtoMV4gcUY4yOcGUBosJb/R9519XaPbYCrdBI6Iz4cdUrjVOPyCehF3S4URNAQ1QS4yCzOGtGaz6Dc0PeSWRT6+e/fD/qZyEsdMVXmB6F3WRwIgvEyZa27CACXj9uTDgRDU9UK+ETofurfh/csd+52xBslYv4aFnkZd7fbo9Q6Qaalucpcc5lgeyCz09cHyJ07VaRX+zM5ntPyWY1dVQJ7Y4eXlp3s8oaWaqMlVD41+g2LFJQPSQbEfph7n+CnBw="
   file: "$DEB_NAME.deb"
   skip_cleanup: true
   on:
     tags: true
+    repo: storm-ptr/bark
+  
