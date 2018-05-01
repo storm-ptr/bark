@@ -13,7 +13,7 @@ branches:
 
 env:
   global:
-    - NANOGIS_DEB_DIR: nanogis.ubuntu 
+    - NANOGIS_DEB_DIR: $HOME/nanogis.ubuntu 
 
 matrix:
   include:
@@ -38,14 +38,14 @@ script:
   - cd $TRAVIS_BUILD_DIR/example/nanogis
   - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
   - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
-  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/usr/local/bin
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
-  - mkdir $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
-  - cp $TRAVIS_BUILD_DIR/control $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR/DEBIAN
-  - dpkg-deb --build $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR
+  - mkdir $NANOGIS_DEB_DIR
+  - mkdir $NANOGIS_DEB_DIR/usr
+  - mkdir $NANOGIS_DEB_DIR/usr/local
+  - mkdir $NANOGIS_DEB_DIR/usr/local/bin
+  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $NANOGIS_DEB_DIR/usr/local/bin
+  - mkdir $NANOGIS_DEB_DIR/DEBIAN
+  - cp $TRAVIS_BUILD_DIR/control $NANOGIS_DEB_DIR/DEBIAN
+  - dpkg-deb --build $NANOGIS_DEB_DIR
 
 deploy:
   provider: releases
