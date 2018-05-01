@@ -13,7 +13,8 @@ branches:
 
 env:
   global:
-    - NANOGIS_DEB_DIR: $HOME/nanogis.ubuntu 
+    - DEB_NAME: nanogis.ubuntu
+    - DEB_ROOT: $HOME/$DEB_NAME 
 
 matrix:
   include:
@@ -38,17 +39,17 @@ script:
   - cd $TRAVIS_BUILD_DIR/example/nanogis
   - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
   - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
-  - mkdir $NANOGIS_DEB_DIR
-  - mkdir $NANOGIS_DEB_DIR/usr
-  - mkdir $NANOGIS_DEB_DIR/usr/local
-  - mkdir $NANOGIS_DEB_DIR/usr/local/bin
-  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $NANOGIS_DEB_DIR/usr/local/bin
-  - mkdir $NANOGIS_DEB_DIR/DEBIAN
-  - cp $TRAVIS_BUILD_DIR/control $NANOGIS_DEB_DIR/DEBIAN
-  - dpkg-deb --build $NANOGIS_DEB_DIR
+  - mkdir $DEB_ROOT
+  - mkdir $DEB_ROOT/usr
+  - mkdir $DEB_ROOT/usr/local
+  - mkdir $DEB_ROOT/usr/local/bin
+  - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
+  - mkdir $DEB_ROOT/DEBIAN
+  - cp $TRAVIS_BUILD_DIR/control $DEB_ROOT/DEBIAN
+  - dpkg-deb --build $DEB_ROOT
 
 deploy:
   provider: releases
   api_key: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
-  file: $TRAVIS_BUILD_DIR/example/$NANOGIS_DEB_DIR.deb
+  file: $HOME/$DEB_NAME.deb
   skip_cleanup: true
