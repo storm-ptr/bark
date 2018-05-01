@@ -50,6 +50,9 @@ script:
 
 deploy:
   provider: releases
-  api_key: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
+  api_key:
+    secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
   file: $HOME/$DEB_NAME.deb
   skip_cleanup: true
+  on:
+    tags: false
