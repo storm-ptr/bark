@@ -14,7 +14,7 @@ branches:
 env:
   global:
     - DEB_NAME: nanogis.ubuntu
-    - DEB_ROOT: $HOME/$DEB_NAME 
+    - DEB_ROOT: $TRAVIS_BUILD_DIR/$DEB_NAME 
 
 matrix:
   include:
@@ -50,9 +50,10 @@ script:
 
 deploy:
   provider: releases
+  file_glob: true
   api_key:
     secure: tzcnc9R1Spnn0O7c24OZJUi4uYnWXx43Vbicq4PzWRBHeBCuTLveCkKvVnpWVQBF
-  file: $HOME/$DEB_NAME.deb
+  file: $DEB_NAME.deb
   skip_cleanup: true
   on:
     tags: false
