@@ -1,5 +1,5 @@
 language: cpp
-if: tag IS present
+if: tag IS blank
 sudo: true
 dist: trusty
 git:
@@ -43,6 +43,3 @@ deploy:
   api_key:
     secure: fjX8rFCvW66vglC+BsO2QapYHyKrQbe7tBqo1uM/1C/KLNpf7FTHrq00nhQ8useiVl2A89Jof4+uyCcfDXP43HNasmZBX3G3kTw6lmDs/Gjj1kIb+6kOcuDFyE/a2TZp2YJlzc2y8BLOO3PMZxAxxEyCGBctgvohufXxIEJbK3r4Hi/UCwt+KPqvkjV9X84z1DESH/d6ZJgjaI37nfSPCcfkSQLuEtcLfVqVu3JWbhRZgof3gwxSz8D+YLdCIA2YXi/c+f0Op8CaVZz3Vz3j0AdpzQ0qRmcN9XmtrP5V0zhK24JML504Yjbuzftrsbb6y1cvHb6rjtaY1URAXQw9ocsHtZdkUNpfN39RjRoNTld0KYBPKU8deu/j+WFgY0QRMOqIb9veTnGLbBqSjF/oj8hPxscOSzGXvil4tl2s1f6rlWQMPOUREMAgLkOPWJpunbf7G+jUteKZfP2PkkezOl2ZxGSMSpYLs+0QOYYkdCcWyq35p2MlnW/aqu9gjSVlhkGIzFd5AfSOMyjiWTKYl2b1YRt3NNQqpnvnZALK8UmATGO31NwW0C4ptvRvbC6ukhUREnRnuO5NE03H2MPZBfIpiSkiNm64yfdFlCneNdt00qNTc54B1Aq86cv4A0s2luRtulSAbsRjLf62lueyPX6I2yZR+KFFiJzS5eh47OE=
   file: nanogis.ubuntu.deb
-  on:
-    repo: storm-ptr/bark
-    tags: true
