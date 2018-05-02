@@ -6,8 +6,7 @@ git:
   depth: 1
 env:
   global:
-  - DEB_NAME: nanogis.ubuntu
-  - DEB_ROOT: "$TRAVIS_BUILD_DIR/$DEB_NAME"
+  - DEB_ROOT: "$TRAVIS_BUILD_DIR/nanogis.ubuntu"
 matrix:
   include:
   - os: linux
@@ -45,3 +44,4 @@ deploy:
   file: nanogis.ubuntu.deb
   on:
     repo: storm-ptr/bark
+    tags: true
