@@ -44,3 +44,9 @@ after_build:
 artifacts:
   - path: example\%NANOGIS_ARCHIVE%
     name: $(NANOGIS_ARCHIVE)
+
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: eK6200vsXUmBfsFy8CVFVCsgBL+WDOP2j2HHHdbcEo5ToHFBljTDUWDNgFq0U5xw
+  artifact: $(NANOGIS_ARCHIVE)
