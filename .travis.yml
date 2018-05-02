@@ -29,6 +29,7 @@ script:
 - cd $TRAVIS_BUILD_DIR/example/nanogis
 - qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
 - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC
+- cd $TRAVIS_BUILD_DIR
 - mkdir $DEB_ROOT
 - mkdir $DEB_ROOT/usr
 - mkdir $DEB_ROOT/usr/local
