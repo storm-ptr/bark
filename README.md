@@ -21,8 +21,7 @@ Submodules:
 windows
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.windows.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.windows.txt)
-- examlpe/nanogis executable binaries for [windows 10](https://github.com/storm-ptr/bark/releases/latest)
-  download nanogis.windows.zip, extract and run
+- how to run example/nanogis: download [nanogis.windows.zip](https://github.com/storm-ptr/bark/releases/latest), extract and run
   ```
   ./nanogis/vc_redist.x64.exe
   ./nanogis/nanogis.exe
@@ -31,8 +30,7 @@ windows
 ubuntu
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.ubuntu.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.ubuntu.txt)
-- examlpe/nanogis debian package for [ubuntu 14.04](https://github.com/storm-ptr/bark/releases/latest) or [ubuntu 18.04](https://yadi.sk/d/V1coAS6C3VKnGd)
-  download nanogis.ubuntu.1804.deb and run
+- how to run example/nanogis: download debian package for [ubuntu 14.04](https://github.com/storm-ptr/bark/releases/latest) or [ubuntu 18.04](https://yadi.sk/d/V1coAS6C3VKnGd) and run
   ```
   sudo dpkg -i ./nanogis.ubuntu.1804.deb
   sudo apt-get -f install
