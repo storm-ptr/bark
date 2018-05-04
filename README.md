@@ -21,7 +21,7 @@ Submodules:
 windows
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.windows.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.windows.txt)
-- how to run example/nanogis: download [nanogis.windows.zip](https://github.com/storm-ptr/bark/releases/latest), extract and run
+- how to run example/nanogis: download [nanogis.windows.zip](https://github.com/storm-ptr/bark/releases/latest) for windows 10, extract and run
   ```
   ./nanogis/vc_redist.x64.exe
   ./nanogis/nanogis.exe
