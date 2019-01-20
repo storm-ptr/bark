@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Bark is a geospatial, cross-platform, C++ 14, header only library.
+Bark is a geospatial, cross-platform, C++17, header only library.
 
 Submodules:
 - db: reading and writing of raster and vector geospatial data

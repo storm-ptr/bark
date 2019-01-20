@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <atomic>
 #include <bark/db/provider.hpp>
-#include <bark/db/qualified_name.hpp>
 #include <bark/detail/lru_cache.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <bark/proj/bimap.hpp>
@@ -14,11 +13,9 @@
 #include <boost/operators.hpp>
 #include <tuple>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
-template <typename T>
+template <class T>
 class cacher {
     T& as_mixin() { return static_cast<T&>(*this); }
 
@@ -27,13 +24,13 @@ protected:
 
     layer_to_type_map cached_dir()
     {
-        return boost::any_cast<layer_to_type_map>(lru_cache::get_or_load(
+        return std::any_cast<layer_to_type_map>(lru_cache::get_or_load(
             scope_, Registry, [&] { return as_mixin().load_dir(); }));
     }
 
     proj::bimap cached_projection_bimap()
     {
-        return boost::any_cast<proj::bimap>(
+        return std::any_cast<proj::bimap>(
             lru_cache::get_or_load(scope_, ProjectionBimap, [&] {
                 return as_mixin().load_projection_bimap();
             }));
@@ -41,7 +38,7 @@ protected:
 
     table_def cached_table(const qualified_name& tbl_nm)
     {
-        return boost::any_cast<table_def>(lru_cache::get_or_load(
+        return std::any_cast<table_def>(lru_cache::get_or_load(
             scope_, tbl_nm, [&] { return as_mixin().load_table(tbl_nm); }));
     }
 
@@ -61,10 +58,10 @@ protected:
         return res;
     }
 
-    dataset::rowset cached_spatial_objects(const qualified_name& lr_nm,
-                                           const geometry::view& view)
+    rowset cached_spatial_objects(const qualified_name& lr_nm,
+                                  const geometry::view& view)
     {
-        return boost::any_cast<dataset::rowset>(
+        return std::any_cast<rowset>(
             lru_cache::get_or_load(scope_, layer_tile{lr_nm, view.extent}, [&] {
                 return as_mixin().load_spatial_objects(lr_nm, view);
             }));
@@ -72,7 +69,7 @@ protected:
 
     std::string cached_schema()
     {
-        return boost::any_cast<std::string>(lru_cache::get_or_load(
+        return std::any_cast<std::string>(lru_cache::get_or_load(
             scope_, Schema, [&] { return as_mixin().load_current_schema(); }));
     }
 
@@ -115,8 +112,6 @@ private:
     std::atomic<lru_cache::scope_type> scope_;
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_CACHER_HPP

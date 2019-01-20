@@ -8,13 +8,11 @@
 #include <bark/db/odbc/detail/bind_param.hpp>
 #include <bark/unicode.hpp>
 
-namespace bark {
-namespace db {
-namespace odbc {
+namespace bark::db::odbc {
 
 class command : public db::command {
 public:
-    explicit command(string_view conn_str)
+    explicit command(std::string_view conn_str)
     {
         using namespace std::chrono;
 
@@ -43,7 +41,7 @@ public:
     {
         db::sql_syntax res{};
         res.delimiter = [quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR)](
-                            std::ostream& os, string_view id) {
+                            std::ostream& os, std::string_view id) {
             os << quote << id << quote;
         };
         return res;
@@ -72,7 +70,7 @@ public:
         return names;
     }
 
-    bool fetch(dataset::ostream& os) override
+    bool fetch(variant_ostream& os) override
     {
         if (cols_.empty())
             columns();
@@ -129,20 +127,19 @@ private:
                      duration_cast<seconds>(DbTimeout).count());
     }
 
-    void prepare(string_view sql)
+    void prepare(std::string_view sql)
     {
         if (sql_ == sql)
             return;
         reset_stmt(alloc_handle(dbc_, SQL_HANDLE_STMT));
         auto ws = unicode::to_string<SQLWCHAR>(sql);
         check(stmt_, SQLPrepareW(stmt_.get(), (SQLWCHAR*)ws.c_str(), SQL_NTS));
-        sql_ = sql.to_string();
+        sql_ = sql;
     }
 
-    template <typename VariantViews>
-    /*[[nodiscard]]*/ std::vector<detail::binding_holder> bind_params(
-        const VariantViews& params)
-    {
+    template <class VariantViews>
+    [[nodiscard]] std::vector<detail::binding_holder> bind_params(
+        const VariantViews& params) {
         std::vector<detail::binding_holder> res;
         SQLSMALLINT num_params = 0;
         SQLNumParams(stmt_.get(), &num_params);
@@ -194,8 +191,6 @@ private:
     }
 };
 
-}  // namespace odbc
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::odbc
 
 #endif  // BARK_DB_ODBC_COMMAND_HPP

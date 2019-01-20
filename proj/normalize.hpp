@@ -8,8 +8,7 @@
 #include <exception>
 #include <string>
 
-namespace bark {
-namespace proj {
+namespace bark::proj {
 
 inline std::string normalize(const std::string& pj) try {
     return pj.empty() ? std::string{}
@@ -19,7 +18,6 @@ catch (const std::exception&) {
     return boost::trim_copy(pj);
 }
 
-}  // namespace proj
-}  // namespace bark
+}  // namespace bark::proj
 
 #endif  // BARK_PROJ_NORMALIZE_HPP

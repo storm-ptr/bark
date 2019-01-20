@@ -11,11 +11,12 @@ TEST_CASE("sql_builder")
 {
     using namespace bark;
     using namespace bark::db;
+    using namespace std::string_literals;
 
     sql_builder bld(sql_syntax{});
-    bld << param(std::string{"Hello!"}) << param(0) << param("Bark")
-        << param(1.) << param(geometry::as_binary({{-118, 26}, {-111, 33}}));
-    REQUIRE(boost::lexical_cast<std::string>(list(bld.params(), ", ")) ==
+    bld << param{"Hello!"s} << param{0ll} << param{"Bark"} << param{1.}
+        << param{geometry::as_binary({{-118, 26}, {-111, 33}})};
+    REQUIRE(boost::lexical_cast<std::string>(list{bld.params(), ", "}) ==
             "Hello!, 0, Bark, 1, 93 bytes");
 }
 

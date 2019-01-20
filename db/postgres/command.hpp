@@ -7,24 +7,22 @@
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/postgres/detail/bind_column.hpp>
 #include <bark/db/postgres/detail/bind_param.hpp>
-#include <bark/db/postgres/detail/common.hpp>
+#include <bark/db/postgres/detail/utility.hpp>
 #include <sstream>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace postgres {
+namespace bark::db::postgres {
 
 class command : public db::command,
                 private db::detail::transaction<db::postgres::command> {
     friend db::detail::transaction<db::postgres::command>;
 
 public:
-    command(string_view host,
+    command(std::string_view host,
             int port,
-            string_view db,
-            string_view usr,
-            string_view pwd)
+            std::string_view db,
+            std::string_view usr,
+            std::string_view pwd)
     {
         using namespace std::chrono;
         std::ostringstream con;
@@ -99,7 +97,7 @@ public:
         return names;
     }
 
-    bool fetch(dataset::ostream& os) override
+    bool fetch(variant_ostream& os) override
     {
         if (cols_.empty())
             columns();
@@ -109,7 +107,7 @@ public:
         auto row = row_++;
         for (size_t i = 0; i < cols_.size(); ++i) {
             if (PQgetisnull(res_.get(), row, (int)i))
-                os << boost::blank{};
+                os << variant_t{};
             else
                 cols_[i]->write(res_.get(), row, (int)i, os);
         }
@@ -137,8 +135,6 @@ private:
     }
 };
 
-}  // namespace postgres
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::postgres
 
 #endif  // BARK_DB_POSTGRES_COMMAND_HPP

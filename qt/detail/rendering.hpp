@@ -16,11 +16,9 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
-template <typename Geometry>
+template <class Geometry>
 QVector<canvas> mock_rendering(const layer& lr,
                                const Geometry& geom,
                                const frame& frm)
@@ -32,7 +30,7 @@ QVector<canvas> mock_rendering(const layer& lr,
     if (!tf.is_trivial())
         tf.inplace_forward(wkb);
 
-    auto ext = envelope(geom_from_wkb(wkb.data()));
+    auto ext = envelope(geom_from_wkb(wkb));
     QMargins margin{};
     margin += lr.pen.width();
     auto wnd = frm | intersect(ext) | resize(margin);
@@ -40,7 +38,7 @@ QVector<canvas> mock_rendering(const layer& lr,
         return {};
 
     auto map = make<canvas>(wnd);
-    painter{map, lr}(wkb.data());
+    painter{map, lr}(wkb);
     return {map};
 }
 
@@ -55,17 +53,14 @@ inline QVector<canvas> geometry_rendering(const layer& lr,
     if (wnd.size.isEmpty())
         return {};
 
-    auto v = tf.backward(view(frm));
-    auto rows = spatial_objects(lr, {tl, v.scale});
+    auto scale = tf.backward(view(frm)).scale;
+    auto rows = spatial_objects(lr, {tl, scale});
+    auto rng = range(rows);
     if (!tf.is_trivial())
-        for (auto&& row : rows)
-            tf.inplace_forward(const_cast<uint8_t*>(
-                boost::get<bark::blob_view>(row[0]).data()));
+        db::for_each_blob(rng, 0, tf.inplace_forward());
 
     auto map = make<canvas>(wnd);
-    painter paint(map, lr);
-    for (auto& row : rows)
-        paint(boost::get<blob_view>(row[0]).data());
+    db::for_each_blob(rng, 0, painter{map, lr});
     return {map};
 }
 
@@ -80,16 +75,16 @@ inline QVector<canvas> raster_rendering(const layer& lr,
     auto tf = proj::transformer{pj, frm.projection};
     auto v = tf.backward(view(frm));
     auto rows = spatial_objects(lr, {tl, v.scale});
-    for (auto& row : rows) {
-        auto wkb = boost::get<blob_view>(row[0]);
-        auto bbox = envelope(poly_from_wkb(wkb.data()));
+    for (auto& row : range(rows)) {
+        auto wkb = std::get<blob_view>(row[0]);
+        auto bbox = envelope(poly_from_wkb(wkb));
         auto wnd = frm | intersect(tf.forward(bbox));
         if (wnd.size.isEmpty())
             continue;
 
-        auto blob = boost::get<blob_view>(row[1]);
+        auto img = std::get<blob_view>(row[1]);
         canvas map;
-        if (!map.img.loadFromData(blob.data(), uint(blob.size())))
+        if (!map.img.loadFromData((uchar*)img.data(), (int)img.size()))
             throw std::runtime_error("load image error");
         map.frm = frame{} | set_size(map.img) | set_projection(pj) | fit(bbox);
         if (tf.is_trivial())
@@ -126,8 +121,6 @@ catch (const std::exception& e) {
     return mock_rendering(mock_lr, tl, frm);
 }
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_RENDERING_HPP

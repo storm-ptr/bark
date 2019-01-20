@@ -14,9 +14,7 @@
 #include <memory>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace sqlite {
+namespace bark::db::sqlite {
 
 class provider : private db::detail::cacher<db::sqlite::provider>,
                  private db::detail::ddl<db::sqlite::provider>,
@@ -44,8 +42,6 @@ public:
     }
 };
 
-}  // namespace sqlite
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::sqlite
 
 #endif  // BARK_DB_SQLITE_PROVIDER_HPP

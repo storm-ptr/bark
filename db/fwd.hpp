@@ -5,8 +5,7 @@
 
 #include <memory>
 
-namespace bark {
-namespace db {
+namespace bark::db {
 
 enum class layer_type { Invalid, Geometry, Raster };
 
@@ -14,7 +13,6 @@ struct provider;
 
 using provider_ptr = std::shared_ptr<provider>;
 
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_FWD_HPP

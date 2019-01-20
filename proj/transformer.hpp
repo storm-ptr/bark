@@ -3,14 +3,12 @@
 #ifndef BARK_PROJ_TRANSFORMER_HPP
 #define BARK_PROJ_TRANSFORMER_HPP
 
-#include <bark/common.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 #include <bark/proj/detail/projection.hpp>
 #include <bark/proj/detail/stream.hpp>
 #include <bark/proj/detail/transform.hpp>
 
-namespace bark {
-namespace proj {
+namespace bark::proj {
 
 class transformer {
 public:
@@ -65,24 +63,24 @@ public:
         detail::transform(pj_to_, pj_from_, begin, end);
     }
 
-    uint8_t* inplace_forward(uint8_t* wkb) const
+    void inplace_forward(blob_view wkb) const
     {
-        return detail::stream{pj_from_, pj_to_}(wkb);
+        detail::stream{pj_from_, pj_to_}(wkb);
     }
 
-    uint8_t* inplace_forward(blob_t& wkb) const
+    void inplace_backward(blob_view wkb) const
     {
-        return inplace_forward(const_cast<uint8_t*>(wkb.data()));
+        detail::stream{pj_to_, pj_from_}(wkb);
     }
 
-    uint8_t* inplace_backward(uint8_t* wkb) const
+    auto inplace_forward() const
     {
-        return detail::stream{pj_to_, pj_from_}(wkb);
+        return [this](auto... args) { inplace_forward(args...); };
     }
 
-    uint8_t* inplace_backward(blob_t& wkb) const
+    auto inplace_backward() const
     {
-        return inplace_backward(const_cast<uint8_t*>(wkb.data()));
+        return [this](auto... args) { inplace_backward(args...); };
     }
 
 private:
@@ -90,7 +88,6 @@ private:
     detail::projection pj_to_;
 };
 
-}  // namespace proj
-}  // namespace bark
+}  // namespace bark::proj
 
 #endif  // BARK_PROJ_TRANSFORMER_HPP

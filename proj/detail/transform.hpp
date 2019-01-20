@@ -12,9 +12,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace bark {
-namespace proj {
-namespace detail {
+namespace bark::proj::detail {
 
 inline void transform(projPJ pj_from, projPJ pj_to, double* begin, double* end)
 {
@@ -70,8 +68,6 @@ inline geometry::box transformed(projPJ pj_from,
             {*minmax_x.second, *minmax_y.second}};
 }
 
-}  // namespace detail
-}  // namespace proj
-}  // namespace bark
+}  // namespace bark::proj::detail
 
 #endif  // BARK_PROJ_DETAIL_TRANSFORM_HPP

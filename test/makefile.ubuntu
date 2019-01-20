@@ -1,4 +1,4 @@
-CXXFLAGS+=-Wall -std=c++14
+CXXFLAGS+=-Wall -std=c++17 -O2
 EXECUTABLE=run_me
 INCLUDEPATH=../.. /usr/include/gdal /usr/include/mysql /usr/include/postgresql
 INCFLAGS=$(foreach x, $(INCLUDEPATH), -I$x)

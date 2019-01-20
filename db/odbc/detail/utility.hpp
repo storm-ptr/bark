@@ -1,10 +1,10 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_ODBC_DETAIL_COMMON_HPP
-#define BARK_DB_ODBC_DETAIL_COMMON_HPP
+#ifndef BARK_DB_ODBC_DETAIL_UTILITY_HPP
+#define BARK_DB_ODBC_DETAIL_UTILITY_HPP
 
-#include <bark/common.hpp>
 #include <bark/unicode.hpp>
+#include <bark/utility.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/map.hpp>
 #include <iostream>
@@ -15,12 +15,9 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace odbc {
-namespace detail {
+namespace bark::db::odbc::detail {
 
-template <typename T>
+template <class T>
 constexpr SQLSMALLINT c_type_of()
 {
     using namespace boost::mpl;
@@ -29,7 +26,7 @@ constexpr SQLSMALLINT c_type_of()
               T>::type::value;
 }
 
-template <typename T>
+template <class T>
 constexpr SQLSMALLINT sql_type_of()
 {
     using namespace boost::mpl;
@@ -80,7 +77,7 @@ struct buffer {
     std::string to_string() const { return unicode::to_string<char>(data); }
 };
 
-template <typename HandleHolder>
+template <class HandleHolder>
 void check(const HandleHolder& handle, SQLRETURN r)
 {
     std::string msg;
@@ -109,7 +106,7 @@ void check(const HandleHolder& handle, SQLRETURN r)
         std::cout << msg << std::endl;
 }
 
-template <typename HandleHolder>
+template <class HandleHolder>
 SQLHANDLE alloc_handle(const HandleHolder& handle, SQLSMALLINT HandleType)
 {
     SQLHANDLE res = SQL_NULL_HANDLE;
@@ -167,9 +164,6 @@ constexpr SQLSMALLINT SQL_DB2_UNICODE_LONGVARCHAR = -97;
 constexpr SQLSMALLINT SQL_DB2_BLOB = -98;
 constexpr SQLSMALLINT SQL_DB2_CLOB = -99;
 
-}  // namespace detail
-}  // namespace odbc
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::odbc::detail
 
-#endif  // BARK_DB_ODBC_DETAIL_COMMON_HPP
+#endif  // BARK_DB_ODBC_DETAIL_UTILITY_HPP

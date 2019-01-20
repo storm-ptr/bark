@@ -3,36 +3,33 @@
 #ifndef BARK_DB_DETAIL_PROJECTION_GUIDE_HPP
 #define BARK_DB_DETAIL_PROJECTION_GUIDE_HPP
 
-#include <bark/db/detail/common.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/proj/bimap.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
-template <typename T>
+template <class T>
 class projection_guide {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
     proj::bimap load_projection_bimap()
     {
+        proj::bimap res;
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().projections_sql(bld);
         auto rows = fetch_all(as_mixin(), bld);
-        if (rows.empty())
-            return proj::epsg();
-        proj::bimap res;
-        for (auto& row : rows)
+        for (auto& row : range(rows))
             copy(row, res);
-        return res;
+        return res.empty() ? proj::epsg() : res;
     }
 
-    int load_projection(const qualified_name& col_nm, string_view type_lcase)
+    int load_projection(const qualified_name& col_nm,
+                        std::string_view type_lcase)
     {
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().projection_sql(bld, col_nm, type_lcase);
@@ -50,12 +47,12 @@ protected:
     }
 
 private:
-    void copy(const dataset::rowset::tuple& from, proj::bimap& to)
+    void copy(const row_t& from, proj::bimap& to)
     {
         enum columns { Srid, Epsg, Proj4 };
         auto srid = boost::lexical_cast<int>(from[Srid]);
         std::string pj;
-        if (!dataset::is_null(from[Epsg]))
+        if (!is_null(from[Epsg]))
             try {
                 pj = proj::epsg().find_proj(
                     boost::lexical_cast<int>(from[Epsg]));
@@ -72,8 +69,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_PROJECTION_GUIDE_HPP

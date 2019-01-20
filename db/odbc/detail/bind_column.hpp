@@ -3,39 +3,35 @@
 #ifndef BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP
 #define BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP
 
-#include <bark/dataset/ostream.hpp>
-#include <bark/db/odbc/detail/common.hpp>
+#include <bark/db/odbc/detail/utility.hpp>
 #include <bark/unicode.hpp>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace odbc {
-namespace detail {
+namespace bark::db::odbc::detail {
 
 struct column {
     virtual ~column() = default;
     virtual SQLRETURN write(SQLHSTMT stmt,
                             SQLUSMALLINT col,
-                            dataset::ostream& os) = 0;
+                            variant_ostream& os) = 0;
 };
 
 using column_holder = std::unique_ptr<column>;
 
-template <typename T>
+template <class T>
 class column_val : public column {
 public:
     SQLRETURN write(SQLHSTMT stmt,
                     SQLUSMALLINT col,
-                    dataset::ostream& os) override
+                    variant_ostream& os) override
     {
         T val{};
         SQLLEN ind = SQL_NULL_DATA;
         auto r = SQLGetData(stmt, col, c_type_of<T>(), &val, sizeof(val), &ind);
         if (!SQL_SUCCEEDED(r) || SQL_NULL_DATA == ind)
-            os << boost::blank{};
+            os << variant_t{};
         else
             os << val;
         return r;
@@ -45,18 +41,18 @@ public:
 struct get_data_piecewise {
     SQLLEN ind_ = SQL_NULL_DATA;
     SQLLEN len_ = 0;
-    blob_t buf_;
+    blob data_;
 
-    get_data_piecewise() : buf_(SQL_MAX_MESSAGE_LENGTH) {}
+    get_data_piecewise() : data_(SQL_MAX_MESSAGE_LENGTH) {}
 
     SQLRETURN fetch(SQLHSTMT stmt, SQLUSMALLINT col, SQLSMALLINT TargetType)
     {
         len_ = 0;
         while (true) {
-            auto rest = (SQLLEN)buf_.size() - len_;
+            auto rest = (SQLLEN)data_.size() - len_;
             ind_ = 0;
             auto r = SQLGetData(
-                stmt, col, TargetType, buf_.data() + len_, rest, &ind_);
+                stmt, col, TargetType, data_.data() + len_, rest, &ind_);
 
             if (r == SQL_NO_DATA) {
                 ind_ = 0;
@@ -75,8 +71,8 @@ struct get_data_piecewise {
                 break;
             }
 
-            len_ = buf_.size();
-            buf_.resize(buf_.size() + ind_ - rest);
+            len_ = data_.size();
+            data_.resize(data_.size() + ind_ - rest);
         }
         len_ += ind_;
         return SQL_SUCCESS;
@@ -87,14 +83,14 @@ class column_blob : public column, private get_data_piecewise {
 public:
     SQLRETURN write(SQLHSTMT stmt,
                     SQLUSMALLINT col,
-                    dataset::ostream& os) override
+                    variant_ostream& os) override
     {
         auto r = fetch(stmt, col, SQL_C_BINARY);
         if (SQL_SUCCEEDED(r)) {
             if (SQL_NULL_DATA == ind_)
-                os << boost::blank{};
+                os << variant_t{};
             else
-                os << blob_view{buf_.data(), (size_t)len_};
+                os << blob_view{data_.data(), (size_t)len_};
         }
         return r;
     }
@@ -104,15 +100,15 @@ class column_text : public column, private get_data_piecewise {
 public:
     SQLRETURN write(SQLHSTMT stmt,
                     SQLUSMALLINT col,
-                    dataset::ostream& os) override
+                    variant_ostream& os) override
     {
         auto r = fetch(stmt, col, SQL_C_WCHAR);
         if (SQL_SUCCEEDED(r)) {
             if (SQL_NULL_DATA == ind_)
-                os << boost::blank{};
+                os << variant_t{};
             else
-                os << unicode::to_string<char>(basic_string_view<SQLWCHAR>{
-                    (SQLWCHAR*)buf_.data(), (size_t)len_ / sizeof(SQLWCHAR)});
+                os << unicode::to_string<char>(std::basic_string_view<SQLWCHAR>{
+                    (SQLWCHAR*)data_.data(), (size_t)len_ / sizeof(SQLWCHAR)});
         }
         return r;
     }
@@ -174,15 +170,10 @@ inline column_holder bind_column(const stmt_holder& stmt, SQLUSMALLINT col)
         case SQL_LONGVARBINARY:
         case SQL_DB2_BLOB:
             return std::make_unique<column_blob>();
-        default:
-            throw std::runtime_error("ODBC type error: " +
-                                     std::to_string(type));
     }
+    throw std::runtime_error("invalid ODBC type: " + std::to_string(type));
 }
 
-}  // namespace detail
-}  // namespace odbc
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::odbc::detail
 
 #endif  // BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP

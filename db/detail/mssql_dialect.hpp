@@ -3,16 +3,14 @@
 #ifndef BARK_DB_DETAIL_MSSQL_DIALECT_HPP
 #define BARK_DB_DETAIL_MSSQL_DIALECT_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/sql_builder_ops.hpp>
 #include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
 class mssql_dialect : public dialect {
 public:
@@ -21,7 +19,7 @@ public:
         bld << "SELECT spatial_reference_id AS srid, "
                "authorized_spatial_reference_id AS epsg, NULL AS proj4 FROM "
                "sys.spatial_reference_systems WHERE LOWER(authority_name) = "
-            << param("epsg");
+            << param{"epsg"};
     }
 
     void geometries_sql(sql_builder& bld) override
@@ -34,7 +32,7 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(string_view type_lcase, int scale) override
+    column_type type(std::string_view type_lcase, int scale) override
     {
         if (any_of({"geometry", "geography"}, equal_to(type_lcase)))
             return column_type::Geometry;
@@ -47,7 +45,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        string_view) override
+                        std::string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
@@ -56,9 +54,9 @@ public:
             << qualifier(col_nm)
             << ") UNION ALL (SELECT CAST(value AS int) FROM "
                "sys.fn_listextendedproperty("
-            << param("SRID") << ", " << param("Schema") << ", " << param(scm)
-            << ", " << param("Table") << ", " << param(tbl) << ", "
-            << param("Column") << ", " << param(col) << "))";
+            << param{"SRID"} << ", " << param{"Schema"} << ", " << param{scm}
+            << ", " << param{"Table"} << ", " << param{tbl} << ", "
+            << param{"Column"} << ", " << param{col} << "))";
     }
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
@@ -67,28 +65,29 @@ public:
                "is_primary_key, is_descending_key FROM sys.indexes i JOIN "
                "sys.index_columns c ON i.object_id = c.object_id AND "
                "i.index_id = c.index_id WHERE i.object_id = OBJECT_ID("
-            << param(tbl_nm) << ") ORDER BY name, key_ordinal";
+            << param{tbl_nm} << ") ORDER BY name, key_ordinal";
     }
 
     column_decoder geometry_decoder() override
     {
-        return [](sql_builder& bld, string_view col_nm) {
+        return [](sql_builder& bld, std::string_view col_nm) {
             bld << id(col_nm) << ".STAsBinary() AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(string_view type_lcase, int srid) override
+    column_encoder geometry_encoder(std::string_view type_lcase,
+                                    int srid) override
     {
-        return [type = type_lcase.to_string(), srid](sql_builder& bld,
-                                                     dataset::variant_view v) {
-            bld << type << "::STGeomFromWKB(" << param(v) << ", " << srid
+        return [type = std::string{type_lcase}, srid](sql_builder& bld,
+                                                      variant_t v) {
+            bld << type << "::STGeomFromWKB(" << param{v} << ", " << srid
                 << ")";
         };
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    string_view type_lcase) override
+                    std::string_view type_lcase) override
     {
         bld << "SELECT COUNT(1), " << type_lcase << "::EnvelopeAggregate("
             << id(col_nm.back()) << ").STAsBinary() FROM " << qualifier(col_nm);
@@ -96,12 +95,12 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       string_view col_nm,
+                       std::string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
         bld << id(col_nm) << ".Filter("
-            << encode(column(tbl.columns, col_nm), blob) << ") = 1";
+            << encoder{column(tbl.columns, col_nm), blob} << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override
@@ -125,19 +124,19 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 string_view col_nm,
+                                 std::string_view col_nm,
                                  int srid) override
     {
         auto& scm = reverse_at(tbl.name, 1);
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
             << " geometry;\nEXEC sp_addextendedproperty @name = "
-            << param("SRID") << ", @value = " << srid
-            << ",\n\t@level0type = " << param("Schema")
-            << ", @level0name = " << param(scm)
-            << ",\n\t@level1type = " << param("Table")
-            << ", @level1name = " << param(tbl.name.back())
-            << ",\n\t@level2type = " << param("Column")
-            << ", @level2name = " << param(col_nm);
+            << param{"SRID"} << ", @value = " << srid
+            << ",\n\t@level0type = " << param{"Schema"}
+            << ", @level0name = " << param{scm}
+            << ",\n\t@level1type = " << param{"Table"}
+            << ", @level1name = " << param{tbl.name.back()}
+            << ",\n\t@level2type = " << param{"Column"}
+            << ", @level2name = " << param{col_nm};
     }
 
     void create_spatial_index_sql(sql_builder& bld,
@@ -160,8 +159,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_MSSQL_DIALECT_HPP

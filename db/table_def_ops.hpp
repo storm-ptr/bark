@@ -14,8 +14,7 @@
 #include <boost/range/algorithm/search.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
+namespace bark::db {
 
 inline geometry::box extent(const column_def& col)
 {
@@ -24,57 +23,82 @@ inline geometry::box extent(const column_def& col)
     return geometry::envelope(bounds(col.tiles));
 }
 
-template <typename Columns>
-auto find(Columns&& cols, string_view col_nm)
+inline decltype(auto) name(const column_def& col)
 {
-    return boost::range::find_if(cols, [col_nm](auto&& col) {
+    return col.name;
+}
+
+inline bool is_geom(const column_def& col)
+{
+    return col.type == column_type::Geometry;
+}
+
+inline bool is_not_geom(const column_def& col)
+{
+    return !is_geom(col);
+}
+
+inline bool sortable(const column_def& col)
+{
+    switch (col.type) {
+        case column_type::Integer:
+        case column_type::Real:
+        case column_type::Text:
+            return true;
+    }
+    return false;
+}
+
+template <class Columns>
+auto find(Columns&& cols, std::string_view col_nm)
+{
+    return boost::range::find_if(cols, [&](auto& col) {
         return unicode::case_insensitive_equal_to{}(col_nm, col.name);
     });
 }
 
-template <typename Columns>
-bool contains(Columns&& cols, string_view col_nm)
+template <class Columns>
+bool contains(Columns&& cols, std::string_view col_nm)
 {
     return db::find(cols, col_nm) != std::end(cols);
 }
 
-template <typename Columns>
-decltype(auto) column(Columns&& cols, string_view col_nm)
+template <class Columns>
+decltype(auto) column(Columns&& cols, std::string_view col_nm)
 {
     auto it = db::find(cols, col_nm);
     if (it == std::end(cols))
-        throw std::out_of_range(col_nm.to_string());
+        throw std::out_of_range(std::string{col_nm});
     return *it;
 }
 
-template <typename Columns, typename ColumnNames>
+template <class Columns, class ColumnNames>
 auto columns(Columns&& cols, ColumnNames&& col_nms)
 {
-    return back_constructor<std::vector<column_def>>(
-        col_nms, [&cols](auto&& col_nm) { return column(cols, col_nm); });
+    return as<std::vector<column_def>>(
+        col_nms, [&](auto& col_nm) { return column(cols, col_nm); });
 }
 
-template <typename Columns>
+template <class Columns>
 auto column_names(Columns&& cols)
 {
-    return back_constructor<std::vector<std::string>>(
-        cols, [](auto&& col) { return col.name; });
+    return as<std::vector<std::string>>(cols, name);
 }
 
-template <typename LhsColumns, typename RhsColumns>
+template <class LhsColumns, class RhsColumns>
 auto set_difference(LhsColumns&& lhs, RhsColumns&& rhs)
 {
     std::vector<column_def> res;
-    for (auto&& col : lhs)
+    for (auto& col : lhs)
         if (!contains(rhs, col.name))
             res.push_back(col);
     return res;
 }
 
-template <typename Indexes, typename ColumnNames>
+template <class Indexes, class ColumnNames>
 bool indexed(Indexes&& indexes, ColumnNames&& col_nms)
 {
-    return boost::range::find_if(indexes, [&col_nms](auto&& idx) {
+    return boost::range::find_if(indexes, [&](auto& idx) {
                return boost::range::search(
                           idx.columns,
                           col_nms,
@@ -83,11 +107,11 @@ bool indexed(Indexes&& indexes, ColumnNames&& col_nms)
            }) != indexes.end();
 }
 
-template <typename Indexes>
+template <class Indexes>
 auto find_primary(Indexes&& indexes)
 {
     return boost::range::find_if(
-        indexes, [](auto&& idx) { return idx.type == index_type::Primary; });
+        indexes, [](auto& idx) { return idx.type == index_type::Primary; });
 }
 
 inline std::ostream& operator<<(std::ostream& os, const column_def& col)
@@ -102,7 +126,7 @@ inline std::ostream& operator<<(std::ostream& os, const column_def& col)
         if (!col.tiles.empty())
             opts.push_back(geometry::as_text(bounds(col.tiles)));
         if (!opts.empty())
-            os << " (" << list(opts, ", ") << ")";
+            os << " (" << list{opts, ", "} << ")";
     }
     return os;
 }
@@ -118,7 +142,7 @@ inline std::ostream& operator<<(std::ostream& os, const index_def& idx)
 {
     static const char* Types[] = {"INVALID", "PRIMARY", "SECONDARY"};
     return os << Types[(size_t)idx.type] << " INDEX ("
-              << list(idx.columns, ", ") << ")";
+              << list{idx.columns, ", "} << ")";
 }
 
 inline bool operator==(const index_def& lhs, const index_def& rhs)
@@ -130,9 +154,9 @@ inline bool operator==(const index_def& lhs, const index_def& rhs)
 
 inline std::ostream& operator<<(std::ostream& os, const table_def& tbl)
 {
-    os << "TABLE " << tbl.name << " (\n\t" << list(tbl.columns, ",\n\t");
+    os << "TABLE " << tbl.name << " (\n\t" << list{tbl.columns, ",\n\t"};
     if (!tbl.indexes.empty())
-        os << ",\n\t" << list(tbl.indexes, ",\n\t");
+        os << ",\n\t" << list{tbl.indexes, ",\n\t"};
     return os << "\n)";
 }
 
@@ -149,7 +173,6 @@ inline bool operator==(const table_def& lhs, const table_def& rhs)
                                rhs.indexes.end());
 }
 
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_TABLE_DEF_OPS_HPP

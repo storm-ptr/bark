@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_LINKED_HASH_MAP_HPP
-#define BARK_DETAIL_LINKED_HASH_MAP_HPP
+#ifndef BARK_LINKED_HASH_MAP_HPP
+#define BARK_LINKED_HASH_MAP_HPP
 
 #include <boost/functional/hash.hpp>
 #include <boost/noncopyable.hpp>
@@ -9,14 +9,13 @@
 #include <unordered_map>
 
 namespace bark {
-namespace detail {
 
 /**
  * Associative container that maintains insertion order. Complexity of any
  * operation is O(1). Iterators that removed by erase() are invalidated. All
  * other iterators keep their validity.
  */
-template <typename Key, typename Mapped>
+template <class Key, class Mapped>
 class linked_hash_map : private boost::noncopyable {
 public:
     using value_type = std::pair<const Key, Mapped>;
@@ -75,7 +74,6 @@ private:
     index_type idx_;
 };
 
-}  // namespace detail
 }  // namespace bark
 
-#endif  // BARK_DETAIL_LINKED_HASH_MAP_HPP
+#endif  // BARK_LINKED_HASH_MAP_HPP

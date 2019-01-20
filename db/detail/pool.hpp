@@ -10,9 +10,7 @@
 #include <queue>
 #include <thread>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
 /// thread-safe reuse interface to prevent the connection time overhead
 class pool : public std::enable_shared_from_this<pool> {
@@ -24,7 +22,7 @@ public:
         auto self = shared_from_this();
         auto deleter = [self](command* cmd) { self->push(cmd); };
         auto holder = command_holder(nullptr, deleter);
-        std::lock_guard<std::mutex> lock(guard_);
+        std::lock_guard lock{guard_};
         if (commands_.empty())
             holder.reset(alloc_());
         else {
@@ -46,7 +44,7 @@ private:
             return;
         auto holder = command_holder(cmd, std::default_delete<command>());
         cmd->set_autocommit(true);
-        std::lock_guard<std::mutex> lock(guard_);
+        std::lock_guard lock{guard_};
         if (commands_.size() < ConnectionsLimit)
             commands_.emplace(std::move(holder));
     }
@@ -54,8 +52,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_POOL_HPP

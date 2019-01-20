@@ -7,14 +7,12 @@
 #include <QPainterPath>
 #include <QPointF>
 #include <QVector>
-#include <bark/detail/wkb/visitor.hpp>
+#include <bark/detail/wkb.hpp>
 #include <bark/qt/common.hpp>
 #include <boost/none.hpp>
 #include <functional>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
 class painter {
     const frame& frm_;
@@ -34,11 +32,10 @@ public:
         painter_.setBrush(lr.brush);
     }
 
-    const uint8_t* operator()(const uint8_t* wkb)
+    void operator()(blob_view wkb)
     {
         wkb::istream is{wkb};
         wkb::geometry::accept(is, *this);
-        return is.data();
     }
 
     QPointF operator()(double x, double y)
@@ -65,18 +62,18 @@ public:
         sum.addPolygon(item.get());
     }
 
-    template <typename T>
+    template <class T>
     boost::none_t operator()(uint32_t, T)
     {
         return boost::none;
     }
 
-    template <typename T>
+    template <class T>
     void operator()(boost::none_t&, const boost::none_t&, T)
     {
     }
 
-    template <uint32_t Code, typename T>
+    template <uint32_t Code, class T>
     void operator()(wkb::tagged<Code, T>)
     {
     }
@@ -100,15 +97,13 @@ public:
         return boost::none;
     }
 
-    template <typename T>
+    template <class T>
     boost::none_t operator()(const boost::none_t&, T)
     {
         return boost::none;
     }
 };
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_PAINTER_HPP

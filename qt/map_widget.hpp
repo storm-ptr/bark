@@ -17,8 +17,7 @@
 #include <memory>
 #include <string>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 namespace detail {
 
 class rendering_task;
@@ -72,14 +71,13 @@ private:
     void start_rendering();
     QPointF lon_lat(QMouseEvent*) const;
 
-    template <typename Functor>
+    template <class Functor>
     void set_frame(Functor);
 
-    template <typename Functor>
+    template <class Functor>
     void set_future_frame(Functor&&);
 };
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_MAP_WIDGET_HPP

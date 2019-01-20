@@ -3,30 +3,27 @@
 #ifndef BARK_GEOMETRY_DETAIL_ISTREAM_HPP
 #define BARK_GEOMETRY_DETAIL_ISTREAM_HPP
 
-#include <bark/detail/wkb/visitor.hpp>
-#include <bark/geometry/detail/common.hpp>
+#include <bark/detail/wkb.hpp>
+#include <bark/geometry/detail/utility.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <boost/mpl/map.hpp>
 #include <functional>
 
-namespace bark {
-namespace geometry {
-namespace detail {
+namespace bark::geometry::detail {
 
 class istream {
-    wkb::istream is_;
+    wkb::istream data_;
     linestring cached_path_;
 
 public:
     using path_t = std::reference_wrapper<decltype(cached_path_)>;
 
-    explicit istream(const uint8_t* ptr) : is_{ptr} {}
-    const uint8_t* data() const { return is_.data(); };
+    explicit istream(blob_view data) : data_{data} {}
 
-    template <typename T>
+    template <class T>
     auto read()
     {
-        return T::accept(is_, *this);
+        return T::accept(data_, *this);
     }
 
     point operator()(double x, double y) { return {x, y}; }
@@ -43,7 +40,7 @@ public:
         sum.get().push_back(item);
     }
 
-    template <typename T>
+    template <class T>
     typename boost::mpl::at<
         boost::mpl::map<boost::mpl::pair<wkb::path, polygon>,
                         boost::mpl::pair<wkb::point, multi_point>,
@@ -56,7 +53,7 @@ public:
         return {};
     }
 
-    template <typename Sum, typename Item, typename T>
+    template <class Sum, class Item, class T>
     void operator()(Sum& sum, const Item& item, T)
     {
         sum.push_back(item);
@@ -67,12 +64,12 @@ public:
         push_ring(sum, item.get());
     }
 
-    template <uint32_t Code, typename T>
+    template <uint32_t Code, class T>
     void operator()(wkb::tagged<Code, T>)
     {
     }
 
-    template <typename Result, typename T>
+    template <class Result, class T>
     Result operator()(Result&& res, T)
     {
         return std::forward<Result>(res);
@@ -80,15 +77,13 @@ public:
 
     linestring operator()(const path_t& res, wkb::linestring) { return res; }
 
-    template <typename Result>
+    template <class Result>
     geometry operator()(Result&& res, wkb::geometry)
     {
         return std::forward<Result>(res);
     }
 };
 
-}  // namespace detail
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry::detail
 
 #endif  // BARK_GEOMETRY_DETAIL_ISTREAM_HPP

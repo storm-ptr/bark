@@ -7,17 +7,13 @@
 #include <bark/detail/random_index.hpp>
 #include <sstream>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
 /// @see https://msdn.microsoft.com/en-us/library/bb259689.aspx
-struct quad_key_manipulator {
+struct quad_key {
     const tile& tl;
 
-    friend std::ostream& operator<<(std::ostream& os,
-                                    const quad_key_manipulator& that)
+    friend std::ostream& operator<<(std::ostream& os, const quad_key& that)
     {
         for (auto i = that.tl.z; i > 0; i--) {
             char digit = '0';
@@ -35,11 +31,6 @@ struct quad_key_manipulator {
     }
 };
 
-inline quad_key_manipulator quad_key(const tile& tl)
-{
-    return {tl};
-}
-
 class bing_maps : public layer {
     random_index subdomain_{8};
 
@@ -53,7 +44,7 @@ public:
         // &mkt=en-US
         std::ostringstream os;
         os << "http://ecn.t" << char('0' + subdomain_())
-           << ".tiles.virtualearth.net/tiles/r" << quad_key(tl)
+           << ".tiles.virtualearth.net/tiles/r" << quad_key{tl}
            << ".png?g=1&shading=hill&n=z";
         return os.str();
     }
@@ -72,14 +63,11 @@ public:
         // &mkt=en-US
         std::ostringstream os;
         os << "http://ecn.t" << char('0' + subdomain_())
-           << ".tiles.virtualearth.net/tiles/a" << quad_key(tl) << ".jpeg?g=1";
+           << ".tiles.virtualearth.net/tiles/a" << quad_key{tl} << ".jpeg?g=1";
         return os.str();
     }
 };
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_BING_HPP

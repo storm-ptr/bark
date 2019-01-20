@@ -2,20 +2,19 @@
 
 #include "task.h"
 #include <QThreadPool>
-#include <bark/dataset/rowset_ops.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/adaptor/uniqued.hpp>
+#include <optional>
 #include <stdexcept>
 
 task::task() : state_(status::Waiting), output_(&str_) {}
 
 void task::run() try {
     {
-        std::lock_guard<std::mutex> lock{guard_};
+        std::lock_guard lock{guard_};
         switch (state_) {
             case task::status::Waiting:
                 state_ = status::Running;
@@ -29,18 +28,18 @@ void task::run() try {
 
     run_event();
 
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     state_ = status::Successed;
 }
 catch (const std::exception& e) {
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     state_ = status::Failed;
     output_ << e.what() << '\n';
 }
 
 task::status task::state()
 {
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     return state_;
 }
 
@@ -48,7 +47,7 @@ void task::push_output(const QString& msg)
 {
     auto txt = trim_right_copy(msg);
 
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     switch (state_) {
         case task::status::Running:
             if (!txt.isEmpty())
@@ -63,7 +62,7 @@ void task::push_output(const QString& msg)
 
 QString task::pop_output()
 {
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     auto res = trim_right_copy(str_);
     str_.clear();
     return res;
@@ -71,7 +70,7 @@ QString task::pop_output()
 
 void task::cancel()
 {
-    std::lock_guard<std::mutex> lock{guard_};
+    std::lock_guard lock{guard_};
     if (state_ != status::Successed && state_ != status::Failed)
         state_ = status::Canceling;
 }
@@ -81,7 +80,7 @@ void push_output(task& tsk, const std::string& str)
     tsk.push_output(QString::fromStdString(str));
 }
 
-template <typename T>
+template <class T>
 void push_output(task& tsk, const T& val)
 {
     push_output(tsk, boost::lexical_cast<std::string>(val));
@@ -108,7 +107,7 @@ columns_task::columns_task(bark::qt::layer lhs, bark::qt::layer rhs)
 
 void columns_task::run_event()
 {
-    emit columns_sig({lhs_, column_names(lhs_)}, {rhs_, column_names(rhs_)});
+    emit columns_sig({lhs_, attr_names(lhs_)}, {rhs_, attr_names(rhs_)});
 }
 
 deletion_task::deletion_task(bark::qt::layer lr) : lr_{lr} {}
@@ -144,8 +143,8 @@ attributes_task::attributes_task(bark::qt::layer lr, bark::qt::frame frm)
 static auto make_intersects(const bark::geometry::box& ext)
 {
     return [ext](auto&& row) {
-        auto wkb = boost::get<bark::blob_view>(row[0]);
-        auto geom = bark::geometry::geom_from_wkb(wkb.data());
+        auto wkb = std::get<bark::blob_view>(row[0]);
+        auto geom = bark::geometry::geom_from_wkb(wkb);
         auto bbox = bark::geometry::envelope(geom);
         return boost::geometry::intersects(bbox, ext);
     };
@@ -154,6 +153,7 @@ static auto make_intersects(const bark::geometry::box& ext)
 void attributes_task::run_event()
 {
     using namespace bark;
+    using namespace boost::adaptors;
     static constexpr size_t Limit = 10;
 
     push_output(lr_.uri.toDisplayString(QUrl::DecodeReserved));
@@ -163,31 +163,32 @@ void attributes_task::run_event()
     auto v = tf.forward(view(frm_));
     auto intersects = make_intersects(v.extent);
 
-    boost::optional<dataset::rowset> res;
+    std::optional<db::rowset> res;
     for (auto&& tl : tile_coverage(lr_, v)) {
         auto objects = spatial_objects(lr_, {tl, v.scale});
-        auto rows = as_vector(objects);
+        auto rng = range(objects);
         if (res) {
-            if (res->columns() != objects.columns())
+            if (res->columns != objects.columns)
                 throw std::runtime_error("columns mismatch");
-            rows.insert(rows.end(), res->begin(), res->end());
+            for (auto&& row : range(*res))
+                rng.push_back(std::move(row));
         }
-        std::sort(rows.begin(), rows.end());
+        std::sort(rng.begin(), rng.end());
 
         size_t counter = 0;
-        dataset::ostream os;
-        for (auto&& row : rows | boost::adaptors::uniqued |
-                              boost::adaptors::filtered(intersects)) {
-            os << row;
+        db::variant_ostream os;
+        for (auto&& row : rng | uniqued | filtered(intersects)) {
+            for (auto&& cell : row)
+                os << cell;
             if (++counter >= Limit)
                 break;
         }
-        res = dataset::rowset{objects.columns(), std::move(os).buf()};
+        res = db::rowset{std::move(objects.columns), std::move(os.data)};
         if (counter >= Limit)
             break;
     }
     if (res)
-        ::push_output(*this, res.get());
+        ::push_output(*this, *res);
 }
 
 metadata_task::metadata_task(bark::qt::layer lr) : lr_{std::move(lr)} {}

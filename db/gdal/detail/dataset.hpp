@@ -6,21 +6,17 @@
 #include <atomic>
 #include <bark/db/gdal/detail/layer.hpp>
 #include <bark/db/qualified_name.hpp>
-#include <cstdint>
 #include <memory>
 #include <mutex>
 
-namespace bark {
-namespace db {
-namespace gdal {
-namespace detail {
+namespace bark::db::gdal::detail {
 
 class dataset {
 public:
     explicit dataset(const std::string& file)
     {
-        static std::once_flag once_flag;
-        std::call_once(once_flag, [] { GDALAllRegister(); });
+        static std::once_flag flag;
+        std::call_once(flag, GDALAllRegister);
         ds_.reset(GDALOpenEx(file.c_str(), 0, nullptr, nullptr, nullptr));
         check(!!ds_);
     }
@@ -34,9 +30,9 @@ public:
         return detail::projection(srs.get());
     }
 
-    blob_t png() const
+    blob png() const
     {
-        static std::atomic<uint64_t> file_id_{0};
+        static std::atomic_int64_t file_id_{0};
 
         auto drv = GDALGetDriverByName("PNG");
         check(!!drv);
@@ -48,9 +44,9 @@ public:
         }
         vsi_l_offset len(0);
         vsi_holder buf(VSIGetMemFileBuffer(file.c_str(), &len, true));
-        auto begin = (const uint8_t*)buf.get();
-        auto end = begin + len;
-        return {begin, end};
+        auto first = (const std::byte*)buf.get();
+        auto last = first + len;
+        return {first, last};
     }
 
     bool has_layers() const { return GDALDatasetGetLayerCount(ds_.get()) > 0; }
@@ -87,9 +83,6 @@ private:
     dataset_holder ds_;
 };
 
-}  // namespace detail
-}  // namespace gdal
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::gdal::detail
 
 #endif  // BARK_DB_GDAL_DETAIL_DATASET_HPP

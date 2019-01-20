@@ -3,25 +3,21 @@
 #ifndef BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP
 #define BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP
 
-#include <bark/dataset/ostream.hpp>
-#include <bark/db/mysql/detail/common.hpp>
+#include <bark/db/mysql/detail/utility.hpp>
 #include <cstring>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace mysql {
-namespace detail {
+namespace bark::db::mysql::detail {
 
 struct column {
     virtual ~column() = default;
     virtual bool resize() = 0;
-    virtual void write(dataset::ostream&) = 0;
+    virtual void write(variant_ostream&) = 0;
 };
 
 using column_holder = std::unique_ptr<column>;
 
-template <typename T>
+template <class T>
 class column_val : public column {
     my_bool is_null_ = 0;
     T val_ = 0;
@@ -38,21 +34,21 @@ public:
 
     bool resize() override { return false; }
 
-    void write(dataset::ostream& os) override
+    void write(variant_ostream& os) override
     {
         if (is_null_)
-            os << boost::blank{};
+            os << variant_t{};
         else
             os << val_;
     }
 };
 
-template <typename T>
+template <class T>
 class column_arr : public column {
     MYSQL_BIND& bnd_;
     my_bool is_null_ = 0;
     unsigned long len_ = 0;
-    blob_t buf_;
+    blob buf_;
 
 public:
     explicit column_arr(MYSQL_BIND& bnd) : bnd_(bnd)
@@ -73,10 +69,10 @@ public:
         return true;
     }
 
-    void write(dataset::ostream& os) override
+    void write(variant_ostream& os) override
     {
         if (is_null_)
-            os << boost::blank{};
+            os << variant_t{};
         else
             os << T{(typename T::value_type*)buf_.data(), (size_t)len_};
     }
@@ -106,21 +102,16 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
         case MYSQL_TYPE_VAR_STRING:
         case MYSQL_TYPE_VARCHAR:
         case MYSQL_TYPE_YEAR:
-            return std::make_unique<column_arr<string_view>>(bnd);
+            return std::make_unique<column_arr<std::string_view>>(bnd);
         case MYSQL_TYPE_BLOB:
         case MYSQL_TYPE_LONG_BLOB:
         case MYSQL_TYPE_MEDIUM_BLOB:
         case MYSQL_TYPE_TINY_BLOB:
             return std::make_unique<column_arr<blob_view>>(bnd);
-        default:
-            throw std::runtime_error("unsupported MySQL type: " +
-                                     std::to_string(type));
     }
+    throw std::runtime_error("unsupported MySQL type: " + std::to_string(type));
 }
 
-}  // namespace detail
-}  // namespace mysql
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::mysql::detail
 
 #endif  // BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP

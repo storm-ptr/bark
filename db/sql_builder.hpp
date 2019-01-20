@@ -3,9 +3,8 @@
 #ifndef BARK_DB_SQL_BUILDER_HPP
 #define BARK_DB_SQL_BUILDER_HPP
 
-#include <bark/dataset/rowset.hpp>
 #include <bark/db/qualified_name.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <bark/db/rowset_ops.hpp>
 #include <functional>
 #include <limits>
 #include <locale>
@@ -13,15 +12,14 @@
 #include <string>
 #include <vector>
 
-namespace bark {
-namespace db {
+namespace bark::db {
 
 /**
  * An identifier that does not comply with the rules for the format of
  * regular identifiers must always be delimited.
  */
 using identifier_delimiter =
-    std::function<void(std::ostream& os, string_view id)>;
+    std::function<void(std::ostream& os, std::string_view id)>;
 
 /**
  * A parameter marker is a place holder in an SQL statement whose value is
@@ -32,7 +30,7 @@ using parameter_marker =
     std::function<void(std::ostream& os, size_t param_order)>;
 
 struct sql_syntax {
-    identifier_delimiter delimiter = [](std::ostream& os, string_view id) {
+    identifier_delimiter delimiter = [](std::ostream& os, std::string_view id) {
         os << '"' << id << '"';
     };
 
@@ -45,27 +43,20 @@ inline sql_syntax embeded_params(sql_syntax syntax)
     return syntax;
 }
 
-namespace detail {
-
-template <typename T>
-struct param_manipulator {
-    const T& val;
+template <class T>
+struct param {
+    const T& data;
 };
 
-}  // namespace detail
-
-template <typename T>
-detail::param_manipulator<T> param(const T& val)
-{
-    return {val};
-}
+template <class T>
+param(T)->param<T>;
 
 /**
  * Allows to create database independent SQL queries
  * @code{.cpp}
  * sql_builder bld = builder(cmd);
  * bld << "SELECT * FROM " << id("sqlite_master")
- *     << " WHERE " << id("type") << " = " << param("view");
+ *     << " WHERE " << id("type") << " = " << param{"view"};
  * cmd.exec(bld);
  * @endcode
  */
@@ -79,9 +70,15 @@ public:
 
     auto sql() const { return sql_.str(); }
 
-    auto params() const { return dataset::as_vector(params_.buf()); }
+    auto params() const
+    {
+        auto res = row_t{};
+        for (auto is = variant_istream{params_.data}; !is.data.empty();)
+            res.push_back(read(is));
+        return res;
+    }
 
-    sql_builder& operator<<(string_view sql)
+    sql_builder& operator<<(std::string_view sql)
     {
         sql_ << sql;
         return *this;
@@ -89,85 +86,70 @@ public:
 
     sql_builder& operator<<(const qualified_name& name)
     {
-        sql_ << list(name, ".", [&](string_view id) {
-            return identifier_manipulator{id, syntax_.delimiter};
-        });
+        sql_ << list{name, ".", [&](std::string_view id) {
+                         return id_delim{id, syntax_.delimiter};
+                     }};
         return *this;
     }
 
-    template <typename T>
-    sql_builder& operator<<(const detail::param_manipulator<T>& manip)
+    template <class T>
+    sql_builder& operator<<(const param<T>& manip)
     {
         if (syntax_.marker) {
             syntax_.marker(sql_, param_counter_++);
-            params_ << manip.val;
+            params_ << manip.data;
         }
         else
-            embed_param(manip.val);
+            embed_param(manip.data);
         return *this;
     }
 
-    sql_builder& operator<<(
-        const detail::param_manipulator<qualified_name>& manip)
+    sql_builder& operator<<(const param<qualified_name>& manip)
     {
-        return *this << param((sql_builder{syntax_} << manip.val).sql());
+        return *this << param{(sql_builder{syntax_} << manip.data).sql()};
     }
 
-    template <typename T>
-    std::enable_if_t<std::is_arithmetic<T>::value, sql_builder&> operator<<(
-        const T& val)
+    template <class T>
+    if_arithmetic_t<T, sql_builder&> operator<<(const T& data)
     {
-        sql_ << val;
+        sql_ << data;
         return *this;
     }
 
 private:
     const sql_syntax syntax_;
     std::ostringstream sql_;
-    dataset::ostream params_;
+    variant_ostream params_;
     size_t param_counter_ = 0;
 
-    struct identifier_manipulator {
-        string_view id;
+    struct id_delim {
+        std::string_view id;
         const identifier_delimiter& delimiter;
 
-        friend std::ostream& operator<<(std::ostream& os,
-                                        const identifier_manipulator& manip)
+        friend std::ostream& operator<<(std::ostream& os, const id_delim& that)
         {
-            manip.delimiter(os, manip.id);
+            that.delimiter(os, that.id);
             return os;
         }
     };
 
-    class embedded_param_visitor : public boost::static_visitor<void> {
-        std::ostringstream& sql_;
-
-    public:
-        explicit embedded_param_visitor(std::ostringstream& sql) : sql_(sql) {}
-        void operator()(boost::blank) const { sql_ << "NULL"; }
-        void operator()(string_view v) const { sql_ << "'" << v << "'"; }
-        void operator()(blob_view v) const { sql_ << "X'" << hex(v) << "'"; }
-
-        template <typename T>
-        void operator()(std::reference_wrapper<const T> v) const
-        {
-            sql_ << v.get();
-        }
-    };
-
-    void embed_param(const dataset::variant_view& v)
+    void embed_param(const variant_t& v)
     {
-        boost::apply_visitor(embedded_param_visitor{sql_}, v);
+        std::visit(
+            overloaded{[&](std::monostate) { sql_ << "NULL"; },
+                       [&](auto v) { sql_ << v; },
+                       [&](std::string_view v) { sql_ << "'" << v << "'"; },
+                       [&](blob_view v) { sql_ << "X'" << hex{v} << "'"; }},
+            v);
     }
 
-    template <typename T>
-    std::enable_if_t<std::is_arithmetic<T>::value> embed_param(T v)
+    template <class T>
+    if_arithmetic_t<T> embed_param(T v)
     {
         sql_ << v;
     }
 };
 
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_SQL_BUILDER_HPP

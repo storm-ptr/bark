@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_GRID_HPP
-#define BARK_DETAIL_GRID_HPP
+#ifndef BARK_GRID_HPP
+#define BARK_GRID_HPP
 
 #include <bark/geometry/geometry_ops.hpp>
 #include <boost/accumulators/accumulators.hpp>
@@ -10,16 +10,11 @@
 #include <boost/multi_array.hpp>
 
 namespace bark {
-namespace detail {
 
 /// Contiguous XY-coordinates container
 class grid {
 public:
     using value_type = double;
-    using sequence_type = boost::multi_array<value_type, 3>;
-    using kahan_accumulator = boost::accumulators::accumulator_set<
-        value_type,
-        boost::accumulators::stats<boost::accumulators::tag::sum_kahan>>;
 
     grid(const geometry::box& ext, size_t rows, size_t cols)
         : data_{boost::extents[rows][cols][2]}
@@ -50,13 +45,14 @@ public:
     value_type& y(size_t row, size_t col) { return data_[row][col][1]; }
 
 private:
+    using sequence_type = boost::multi_array<value_type, 3>;
+    using kahan_accumulator = boost::accumulators::accumulator_set<
+        value_type,
+        boost::accumulators::stats<boost::accumulators::tag::sum_kahan>>;
+
     sequence_type data_;
 };
 
-}  // namespace detail
-
-using grid = detail::grid;
-
 }  // namespace bark
 
-#endif  // BARK_DETAIL_GRID_HPP
+#endif  // BARK_GRID_HPP

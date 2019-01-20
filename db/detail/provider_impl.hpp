@@ -3,20 +3,18 @@
 #ifndef BARK_DB_DETAIL_PROVIDER_IMPL_HPP
 #define BARK_DB_DETAIL_PROVIDER_IMPL_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/pool.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/provider.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <memory>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
-template <typename T>
+template <class T>
 class provider_impl : public db::provider {
     T& as_mixin() { return static_cast<T&>(*this); }
 
@@ -51,8 +49,8 @@ public:
         return as_mixin().cached_tiles_first(lr_nm, view);
     }
 
-    dataset::rowset spatial_objects(const qualified_name& lr_nm,
-                                    const geometry::view& view) override
+    rowset spatial_objects(const qualified_name& lr_nm,
+                           const geometry::view& view) override
     {
         return as_mixin().cached_spatial_objects(lr_nm, view);
     }
@@ -80,13 +78,15 @@ protected:
     dialect& as_dialect() { return *dialect_.get(); }
 
     layer_to_type_map load_dir() try {
-        layer_to_type_map res;
+        enum columns { Schema, Table, Column };
+        auto res = layer_to_type_map{};
         auto bld = builder(as_mixin());
         as_dialect().geometries_sql(bld);
-        for (auto& row : fetch_all(as_mixin(), bld))
-            res.insert({id(boost::lexical_cast<std::string>(row[0]),
-                           boost::lexical_cast<std::string>(row[1]),
-                           boost::lexical_cast<std::string>(row[2])),
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows))
+            res.insert({id(boost::lexical_cast<std::string>(row[Schema]),
+                           boost::lexical_cast<std::string>(row[Table]),
+                           boost::lexical_cast<std::string>(row[Column])),
                         layer_type::Geometry});
         return res;
     }
@@ -104,16 +104,17 @@ protected:
         return res;
     }
 
-    dataset::rowset load_spatial_objects(const qualified_name& lr_nm,
-                                         const geometry::view& view)
+    rowset load_spatial_objects(const qualified_name& lr_nm,
+                                const geometry::view& view)
     {
         auto tbl = table(qualifier(lr_nm));
         auto col_nm = lr_nm.back();
-        auto it = find(tbl.columns, col_nm);
+        auto it = db::find(tbl.columns, col_nm);
         std::rotate(tbl.columns.begin(), it, std::next(it));
         auto bld = builder(*this);
-        bld << "SELECT " << list(tbl.columns, ", ", decode) << " FROM "
-            << tbl.name << " WHERE ";
+        bld << "SELECT "
+            << list{tbl.columns, ", ", [](auto& col) { return decoder{col}; }}
+            << " FROM " << tbl.name << " WHERE ";
         as_dialect().window_clause(bld, tbl, col_nm, view.extent);
         return fetch_all(*this, bld);
     }
@@ -125,14 +126,14 @@ protected:
         return fetch_or_default<std::string>(as_mixin(), bld);
     }
 
-    rtree load_tiles(const qualified_name& col_nm, string_view type_lcase)
+    rtree load_tiles(const qualified_name& col_nm, std::string_view type_lcase)
     {
         auto bld = builder(as_mixin());
         as_dialect().extent_sql(bld, col_nm, type_lcase);
         auto rows = fetch_all(as_mixin(), bld);
-        auto row = *rows.begin();
+        auto row = range(rows).front();
         auto count = boost::lexical_cast<size_t>(row[0]);
-        geometry::box ext{};
+        auto ext = geometry::box{};
         if (count) {
             if (row.size() > 2)
                 ext = {{boost::lexical_cast<double>(row[1]),
@@ -140,15 +141,15 @@ protected:
                        {boost::lexical_cast<double>(row[3]),
                         boost::lexical_cast<double>(row[4])}};
             else
-                ext = geometry::envelope(geometry::poly_from_wkb(
-                    boost::get<blob_view>(row[1]).data()));
+                ext = geometry::envelope(
+                    geometry::poly_from_wkb(std::get<blob_view>(row[1])));
         }
         return make_tiles(count, ext);
     }
 
     void prepare_geometry_column(const qualified_name& tbl_nm,
                                  column_def& col,
-                                 string_view type_lcase)
+                                 std::string_view type_lcase)
     {
         auto col_nm = id(tbl_nm, col.name);
         auto srid = as_mixin().load_projection(col_nm, type_lcase);
@@ -163,8 +164,6 @@ private:
     dialect_holder dialect_;
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_PROVIDER_IMPL_HPP

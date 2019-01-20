@@ -6,7 +6,7 @@
 #include <QMargins>
 #include <QRectF>
 #include <algorithm>
-#include <bark/db/provider.hpp>
+#include <bark/db/provider_ops.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 #include <bark/proj/normalize.hpp>
 #include <bark/proj/transformer.hpp>
@@ -15,8 +15,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 
 inline auto projection(const layer& lr)
 {
@@ -38,12 +37,10 @@ inline auto script(const layer& from, const link& to)
     return to.provider->script(table(from));
 }
 
-inline auto column_names(const layer& lr)
+inline auto attr_names(const layer& lr)
 {
     return db::column_names(table(lr).columns |
-                            boost::adaptors::filtered([](auto& col) {
-                                return col.type != db::column_type::Geometry;
-                            }));
+                            boost::adaptors::filtered(db::is_not_geom));
 }
 
 inline auto tile_coverage(const layer& lr, const geometry::view& view)
@@ -116,13 +113,13 @@ inline QPointF offset(const frame& lhs, const frame& rhs)
     return forward(rhs, backward(lhs, QPointF{}));
 }
 
-template <typename Functor>
-frame operator|(const frame& frm, Functor fn)
+template <class Functor>
+frame operator|(const frame& frm, Functor f)
 {
-    return fn(frm);
+    return f(frm);
 }
 
-template <typename Size>
+template <class Size>
 auto set_size(Size sz)
 {
     return [=](const frame& frm) {
@@ -141,7 +138,7 @@ inline auto set_projection(std::string pj)
     };
 }
 
-template <typename Point>
+template <class Point>
 auto set_center(Point point)
 {
     return [=](const frame& frm) {
@@ -199,7 +196,6 @@ inline auto undistort(layer lr)
     };
 }
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_COMMON_OPS_HPP

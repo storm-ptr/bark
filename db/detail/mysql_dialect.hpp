@@ -3,15 +3,13 @@
 #ifndef BARK_DB_DETAIL_MYSQL_DIALECT_HPP
 #define BARK_DB_DETAIL_MYSQL_DIALECT_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/sql_builder_ops.hpp>
 #include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
 class mysql_dialect : public dialect {
 public:
@@ -38,7 +36,7 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(string_view type_lcase, int scale) override
+    column_type type(std::string_view type_lcase, int scale) override
     {
         if (is_ogc_type(type_lcase))
             return column_type::Geometry;
@@ -51,7 +49,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        string_view) override
+                        std::string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
@@ -59,42 +57,42 @@ public:
         bld << "(SELECT ST_SRID(" << id(col) << ") FROM " << qualifier(col_nm)
             << " LIMIT 1) UNION ALL (SELECT COLUMN_COMMENT FROM "
                "INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = "
-            << param(scm) << " AND TABLE_NAME = " << param(tbl)
-            << " AND COLUMN_NAME = " << param(col) << ")";
+            << param{scm} << " AND TABLE_NAME = " << param{tbl}
+            << " AND COLUMN_NAME = " << param{col} << ")";
     }
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
         auto& scm = reverse_at(tbl_nm, 1);
         bld << "SELECT NULL, index_name, column_name, index_name = "
-            << param("PRIMARY") << ", collation = " << param("D")
+            << param{"PRIMARY"} << ", collation = " << param{"D"}
             << " FROM information_schema.statistics WHERE table_schema = "
-            << param(scm) << " AND table_name = " << param(tbl_nm.back())
+            << param{scm} << " AND table_name = " << param{tbl_nm.back()}
             << " ORDER BY index_name, seq_in_index";
     }
 
     column_decoder geometry_decoder() override { return ogc_decoder(); }
 
-    column_encoder geometry_encoder(string_view, int srid) override
+    column_encoder geometry_encoder(std::string_view, int srid) override
     {
         return ogc_encoder(srid);
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    string_view) override
+                    std::string_view) override
     {
         ogc_extent_sql(bld, col_nm);
     }
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       string_view col_nm,
+                       std::string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
         bld << "MBRIntersects(" << id(col_nm) << ", "
-            << encode(column(tbl.columns, col_nm), blob) << ") = 1";
+            << encoder{column(tbl.columns, col_nm), blob} << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override
@@ -118,11 +116,11 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 string_view col_nm,
+                                 std::string_view col_nm,
                                  int srid) override
     {
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
-            << " GEOMETRY NOT NULL COMMENT " << param(std::to_string(srid));
+            << " GEOMETRY NOT NULL COMMENT " << param{std::to_string(srid)};
     }
 
     void create_spatial_index_sql(sql_builder& bld,
@@ -139,8 +137,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_MYSQL_DIALECT_HPP

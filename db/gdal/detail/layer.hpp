@@ -3,13 +3,10 @@
 #ifndef BARK_DB_GDAL_DETAIL_LAYER_HPP
 #define BARK_DB_GDAL_DETAIL_LAYER_HPP
 
-#include <bark/db/detail/common.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/table_def.hpp>
 
-namespace bark {
-namespace db {
-namespace gdal {
-namespace detail {
+namespace bark::db::gdal::detail {
 
 class layer {
 public:
@@ -81,9 +78,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace gdal
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::gdal::detail
 
 #endif  // BARK_DB_GDAL_DETAIL_LAYER_HPP

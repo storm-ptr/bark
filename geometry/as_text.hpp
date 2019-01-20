@@ -3,77 +3,63 @@
 #ifndef BARK_GEOMETRY_AS_TEXT_HPP
 #define BARK_GEOMETRY_AS_TEXT_HPP
 
-#include <bark/common.hpp>
 #include <bark/geometry/geometry.hpp>
+#include <bark/utility.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <ostream>
 
-namespace bark {
-namespace geometry {
+namespace bark::geometry {
 
-using boost::geometry::wkt;
+template <class T>
+struct wkt {
+    const T& val;
 
-namespace detail {
+    friend std::ostream& operator<<(std::ostream& os, const wkt& that)
+    {
+        return os << boost::geometry::wkt(that.val);
+    }
+};
 
-template <typename T>
-using wkt_manipulator = decltype(wkt(std::declval<T>()));
+template <class T>
+wkt(T)->wkt<T>;
 
-struct wkt_manipulator_geometry_collection {
+struct make_wkt {
+    template <class T>
+    constexpr auto operator()(const T& val) const
+    {
+        return wkt<T>{val};
+    };
+};
+
+template <>
+struct wkt<geometry_collection> {
     const geometry_collection& val;
 
-    friend std::ostream& operator<<(
-        std::ostream& os,
-        const wkt_manipulator_geometry_collection& manip)
+    friend std::ostream& operator<<(std::ostream& os, const wkt& that)
     {
-        return os << "GEOMETRYCOLLECTION("
-                  << list(manip.val, ",", [](auto& item) { return wkt(item); })
+        return os << "GEOMETRYCOLLECTION(" << list{that.val, ",", make_wkt{}}
                   << ")";
     }
 };
 
-using wkt_manipulator_geometry =
-    boost::variant<wkt_manipulator<point>,
-                   wkt_manipulator<linestring>,
-                   wkt_manipulator<polygon>,
-                   wkt_manipulator<multi_point>,
-                   wkt_manipulator<multi_linestring>,
-                   wkt_manipulator<multi_polygon>,
-                   wkt_manipulator_geometry_collection>;
+template <>
+struct wkt<geometry> {
+    const geometry& val;
 
-struct wkt_visitor : boost::static_visitor<wkt_manipulator_geometry> {
-    template <typename T>
-    wkt_manipulator_geometry operator()(const T& val) const
+    friend std::ostream& operator<<(std::ostream& os, const wkt& that)
     {
-        return wkt(val);
-    }
-
-    wkt_manipulator_geometry operator()(
-        const boost::recursive_wrapper<geometry_collection>& val) const
-    {
-        return wkt_manipulator_geometry_collection{val.get()};
+        boost::apply_visitor([&os](const auto& val) { os << make_wkt{}(val); },
+                             that.val);
+        return os;
     }
 };
 
-}  // namespace detail
-
-inline auto wkt(const geometry_collection& val)
-{
-    return detail::wkt_manipulator_geometry_collection{val};
-}
-
-inline auto wkt(const geometry& val)
-{
-    return boost::apply_visitor(detail::wkt_visitor{}, val);
-}
-
-template <typename T>
+template <class T>
 auto as_text(const T& val)
 {
-    return boost::lexical_cast<std::string>(wkt(val));
+    return boost::lexical_cast<std::string>(wkt{val});
 }
 
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_AS_TEXT_HPP

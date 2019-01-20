@@ -4,16 +4,12 @@
 #define BARK_QT_DETAIL_TREE_HPP
 
 #include <bark/qt/common.hpp>
-#include <boost/blank.hpp>
-#include <boost/variant.hpp>
 #include <memory>
 #include <vector>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
-using node = boost::variant<boost::blank, link, layer_def>;
+using node = std::variant<std::monostate, link, layer_def>;
 
 struct tree : std::enable_shared_from_this<tree> {
     tree* parent = nullptr;
@@ -21,8 +17,6 @@ struct tree : std::enable_shared_from_this<tree> {
     node data;
 };
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_TREE_HPP

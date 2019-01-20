@@ -12,9 +12,7 @@
 #include <memory>
 #include <mutex>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
 inline bool tiny(const geometry::box& tile, const geometry::view& view)
 {
@@ -34,7 +32,7 @@ public:
 
     canvas get_recent()
     {
-        std::lock_guard<std::mutex> lock{guard_};
+        std::lock_guard lock{guard_};
         return {frm_, img_};
     }
 
@@ -73,7 +71,7 @@ public:
 
     void cancel()
     {
-        std::lock_guard<std::mutex> lock{guard_};
+        std::lock_guard lock{guard_};
         is_canceled_ = true;
     }
 
@@ -87,7 +85,7 @@ private:
 
     void check()
     {
-        std::lock_guard<std::mutex> lock{guard_};
+        std::lock_guard lock{guard_};
         if (is_canceled_)
             throw cancel_exception{};
     }
@@ -97,7 +95,7 @@ private:
         for (auto& map : maps) {
             if (map.img.isNull())
                 continue;
-            std::lock_guard<std::mutex> lock{guard_};
+            std::lock_guard lock{guard_};
             if (img_.isNull())
                 img_ = make<QImage>(frm_);
             QPainter painter{&img_};
@@ -107,8 +105,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_RENDERING_TASK_HPP

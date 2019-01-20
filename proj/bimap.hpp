@@ -9,11 +9,12 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace proj {
+namespace bark::proj {
 
 class bimap {
 public:
+    bool empty() const { return index_.empty(); }
+
     void insert(int srid, const std::string& pj)
     {
         index_.insert({srid, normalize(pj)});
@@ -41,7 +42,6 @@ private:
         index_;
 };
 
-}  // namespace proj
-}  // namespace bark
+}  // namespace bark::proj
 
 #endif  // BARK_PROJ_BIMAP_HPP

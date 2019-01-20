@@ -3,18 +3,18 @@
 #ifndef BARK_GEOMETRY_DETAIL_GRAMMAR_HPP
 #define BARK_GEOMETRY_DETAIL_GRAMMAR_HPP
 
-#include <bark/geometry/detail/common.hpp>
+#include <bark/geometry/detail/utility.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <type_traits>
 
-#define BARK_GEOMETRY_GRAMMAR_CTOR(T)                                          \
-    template <typename Dumb = result_type,                                     \
-              std::enable_if_t<std::is_same<Dumb, T>::value, void*> = nullptr> \
-    grammar() : grammar::base_type(T##_tagged_text)                            \
-    {                                                                          \
-        init();                                                                \
+#define BARK_GEOMETRY_GRAMMAR_CTOR(T)                                     \
+    template <class Dumb = result_type,                                   \
+              std::enable_if_t<std::is_same_v<Dumb, T>, void*> = nullptr> \
+    grammar() : grammar::base_type(T##_tagged_text)                       \
+    {                                                                     \
+        init();                                                           \
     }
 
 #define BARK_GEOMETRY_GRAMMAR_CHAIN_DO(item, actor) \
@@ -23,18 +23,16 @@
 #define BARK_GEOMETRY_GRAMMAR_CHAIN(item) \
     BARK_GEOMETRY_GRAMMAR_CHAIN_DO(item, phoenix::push_back(qi::_val, qi::_1))
 
-namespace bark {
-namespace geometry {
-namespace detail {
+namespace bark::geometry::detail {
 
 namespace phoenix = boost::phoenix;
 namespace qi = boost::spirit::qi;
 
-template <typename T>
+template <class T>
 using rule = qi::rule<const char*, T(), qi::blank_type>;
 
 /// BNF Productions for Two-Dimension Geometry WKT
-template <typename T>
+template <class T>
 class grammar : public qi::grammar<const char*, T(), qi::blank_type> {
     using result_type = T;
 
@@ -99,8 +97,6 @@ public:
     BARK_GEOMETRY_GRAMMAR_CTOR(geometry_collection);
 };
 
-}  // namespace detail
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry::detail
 
 #endif  // BARK_GEOMETRY_DETAIL_GRAMMAR_HPP

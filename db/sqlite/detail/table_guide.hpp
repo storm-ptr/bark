@@ -8,12 +8,9 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace sqlite {
-namespace detail {
+namespace bark::db::sqlite::detail {
 
-template <typename T>
+template <class T>
 class table_guide {
     T& as_mixin() { return static_cast<T&>(*this); }
 
@@ -32,15 +29,16 @@ protected:
 private:
     void load_columns(table_def& tbl)
     {
-        auto& dlct = as_mixin().as_dialect();
+        auto& dial = as_mixin().as_dialect();
         auto bld = builder(as_mixin());
         bld << "PRAGMA TABLE_INFO(" << tbl.name << ")";
-        for (auto& row : fetch_all(as_mixin(), bld)) {
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows)) {
             column_def col;
             col.name = boost::lexical_cast<std::string>(row[1]);
             auto type_lcase =
                 unicode::to_lower(boost::lexical_cast<std::string>(row[2]));
-            col.type = dlct.type(type_lcase, -1);
+            col.type = dial.type(type_lcase, -1);
             if (col.type == column_type::Geometry)
                 as_mixin().prepare_geometry_column(tbl.name, col, type_lcase);
             if (col.type == column_type::Invalid)
@@ -55,12 +53,13 @@ private:
 
     void load_primary_index(table_def& tbl)
     {
-        index_def idx;
+        auto idx = index_def{};
         idx.type = index_type::Primary;
         auto bld = builder(as_mixin());
         bld << "PRAGMA TABLE_INFO(" << tbl.name << ")";
-        for (auto& row : fetch_all(as_mixin(), bld)) {
-            if (dataset::is_null(row[5]))
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows)) {
+            if (is_null(row[5]))
                 continue;
             auto key = boost::lexical_cast<int>(row[5]);  // one-based
             if (key == 0)
@@ -74,22 +73,24 @@ private:
 
     index_def load_index(const qualified_name& idx_nm)
     {
+        auto res = index_def{};
         auto bld = builder(as_mixin());
         bld << "PRAGMA INDEX_INFO(" << idx_nm << ")";
-        index_def idx;
-        idx.type = index_type::Secondary;
-        for (auto& row : fetch_all(as_mixin(), bld))
-            resize_and_assign(idx.columns,
+        res.type = index_type::Secondary;
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows))
+            resize_and_assign(res.columns,
                               boost::lexical_cast<int>(row[0]),
                               boost::lexical_cast<std::string>(row[2]));
-        return idx;
+        return res;
     }
 
     void load_indexes(table_def& tbl)
     {
         auto bld = builder(as_mixin());
         bld << "PRAGMA INDEX_LIST(" << tbl.name << ")";
-        for (auto& row : fetch_all(as_mixin(), bld)) {
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows)) {
             auto idx = load_index(id(boost::lexical_cast<std::string>(row[1])));
             if (!idx.columns.empty() && !indexed(tbl.indexes, idx.columns))
                 tbl.indexes.push_back(std::move(idx));
@@ -101,9 +102,10 @@ private:
         auto bld = builder(as_mixin());
         bld << "SELECT f_geometry_column FROM geometry_columns WHERE "
                "spatial_index_enabled AND LOWER(f_table_name) = LOWER("
-            << param(tbl.name.back()) << ")";
-        for (auto& row : fetch_all(as_mixin(), bld)) {
-            index_def idx;
+            << param{tbl.name.back()} << ")";
+        auto rows = fetch_all(as_mixin(), bld);
+        for (auto& row : range(rows)) {
+            auto idx = index_def{};
             idx.type = index_type::Secondary;
             idx.columns.push_back(boost::lexical_cast<std::string>(row[0]));
             tbl.indexes.push_back(std::move(idx));
@@ -111,9 +113,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace sqlite
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::sqlite::detail
 
 #endif  // BARK_DB_SQLITE_DETAIL_TABLE_GUIDE_HPP

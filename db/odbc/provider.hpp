@@ -18,9 +18,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace odbc {
+namespace bark::db::odbc {
 
 class provider : private db::detail::cacher<db::odbc::provider>,
                  private db::detail::ddl<db::odbc::provider>,
@@ -76,8 +74,6 @@ inline auto drivers()
     return res;
 }
 
-}  // namespace odbc
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::odbc
 
 #endif  // BARK_DB_ODBC_PROVIDER_HPP

@@ -7,14 +7,11 @@
 #include <QString>
 #include <bark/qt/detail/adapt.hpp>
 #include <bark/qt/detail/tree_ops.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <unordered_map>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
-template <typename T>
+template <class T>
 T read(QDataStream& is)
 {
     T res;
@@ -24,53 +21,38 @@ T read(QDataStream& is)
 
 inline QDataStream& operator<<(QDataStream& os, const node& v)
 {
-    class visitor : public boost::static_visitor<QDataStream&> {
-        QDataStream& os_;
-
-    public:
-        visitor(QDataStream& os) : os_(os) {}
-
-        result_type operator()(const boost::blank&) const
-        {
-            return os_ << which<node, boost::blank>();
-        }
-
-        result_type operator()(const link& lnk) const
-        {
-            return os_ << which<node, link>() << lnk.uri;
-        }
-
-        result_type operator()(const layer_def& lr) const
-        {
-            return os_ << which<node, layer_def>() << adapt(lr.name)
-                       << static_cast<quint8>(lr.state) << lr.pen << lr.brush;
-        }
-    };
-    return boost::apply_visitor(visitor(os), v);
+    os << static_cast<quint8>(v.index());
+    std::visit(overloaded{[&](const std::monostate&) {},
+                          [&](const link& v) { os << v.uri; },
+                          [&](const layer_def& v) {
+                              os << adapt(v.name)
+                                 << static_cast<quint8>(v.state) << v.pen
+                                 << v.brush;
+                          }},
+               v);
+    return os;
 }
 
 template <>
 inline node read<node>(QDataStream& is)
 {
-    switch (read<uint8_t>(is)) {
-        case which<node, boost::blank>(): {
-            return boost::blank{};
-        }
-        case which<node, link>(): {
+    switch (read<quint8>(is)) {
+        case variant_index<node, std::monostate>():
+            return {};
+        case variant_index<node, link>(): {
             link lnk;
             is >> lnk.uri;
             return lnk;
         }
-        case which<node, layer_def>(): {
+        case variant_index<node, layer_def>(): {
             layer_def lr;
             lr.name = adapt(read<QStringList>(is));
             lr.state = static_cast<Qt::CheckState>(read<quint8>(is));
             is >> lr.pen >> lr.brush;
             return lr;
         }
-        default:
-            throw std::runtime_error("invalid node");
     }
+    throw std::runtime_error("invalid node");
 }
 
 inline QDataStream& operator<<(QDataStream& os, const tree& tr)
@@ -94,8 +76,6 @@ inline std::shared_ptr<tree> read<std::shared_ptr<tree>>(QDataStream& is)
     return res;
 }
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_TREE_IO_HPP

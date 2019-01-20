@@ -3,15 +3,12 @@
 #ifndef BARK_DB_SQLITE_DETAIL_DIALECT_HPP
 #define BARK_DB_SQLITE_DETAIL_DIALECT_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark {
-namespace db {
-namespace sqlite {
-namespace detail {
+namespace bark::db::sqlite::detail {
 
 class dialect : public db::detail::dialect {
 public:
@@ -32,7 +29,7 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    column_type type(string_view type_lcase, int scale) override
+    column_type type(std::string_view type_lcase, int scale) override
     {
         return db::detail::is_ogc_type(type_lcase)
                    ? column_type::Geometry
@@ -41,7 +38,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        string_view) override
+                        std::string_view) override
     {
         db::detail::ogc_projection_sql(bld, col_nm);
     }
@@ -56,14 +53,14 @@ public:
         return db::detail::ogc_decoder();
     }
 
-    column_encoder geometry_encoder(string_view, int srid) override
+    column_encoder geometry_encoder(std::string_view, int srid) override
     {
         return db::detail::ogc_encoder(srid);
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    string_view) override
+                    std::string_view) override
     {
         bld << "SELECT COUNT(1), ST_AsBinary(Extent(" << id(col_nm.back())
             << ")) FROM " << qualifier(col_nm);
@@ -71,7 +68,7 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       string_view col_nm,
+                       std::string_view col_nm,
                        const geometry::box& extent) override
     {
         using namespace geometry;
@@ -79,10 +76,10 @@ public:
         if (indexed(tbl.indexes, cols))
             bld << "rowid IN (SELECT pkid FROM "
                 << db::detail::index_name(tbl.name, cols)
-                << " WHERE xmax >= " << param(left(extent))
-                << " AND xmin <= " << param(right(extent))
-                << " AND ymax >= " << param(bottom(extent))
-                << " AND ymin <= " << param(top(extent)) << ")";
+                << " WHERE xmax >= " << param{left(extent)}
+                << " AND xmin <= " << param{right(extent)}
+                << " AND ymax >= " << param{bottom(extent)}
+                << " AND ymin <= " << param{top(extent)} << ")";
         else
             db::detail::ogc_window_clause(bld, col_nm, extent);
     }
@@ -105,11 +102,11 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 string_view col_nm,
+                                 std::string_view col_nm,
                                  int srid) override
     {
-        bld << "SELECT AddGeometryColumn(" << param(tbl.name.back()) << ", "
-            << param(col_nm) << ", " << srid << ", " << param("GEOMETRY")
+        bld << "SELECT AddGeometryColumn(" << param{tbl.name.back()} << ", "
+            << param{col_nm} << ", " << srid << ", " << param{"GEOMETRY"}
             << ")";
     }
 
@@ -117,8 +114,8 @@ public:
                                   const table_def& tbl,
                                   const index_def& idx) override
     {
-        bld << "SELECT CreateSpatialIndex(" << param(tbl.name.back()) << ", "
-            << param(idx.columns.front()) << ")";
+        bld << "SELECT CreateSpatialIndex(" << param{tbl.name.back()} << ", "
+            << param{idx.columns.front()} << ")";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override
@@ -127,9 +124,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace sqlite
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::sqlite::detail
 
 #endif  // BARK_DB_SQLITE_DETAIL_DIALECT_HPP

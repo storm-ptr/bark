@@ -6,13 +6,10 @@
 #include <bark/db/command.hpp>
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/sqlite/detail/bind_param.hpp>
-#include <bark/db/sqlite/detail/common.hpp>
 #include <boost/algorithm/string.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace sqlite {
+namespace bark::db::sqlite {
 
 class command : public db::command,
                 private db::detail::transaction<db::sqlite::command> {
@@ -50,7 +47,7 @@ public:
             check(con_, sqlite3_exec(con_.get(), sql.c_str(), 0, 0, 0));
         }
         else {
-            for (size_t i = 0; i < params.size(); ++i)
+            for (int i = 0; i < (int)params.size(); ++i)
                 check(con_, detail::bind_param(params[i], stmt_.get(), i));
             step();
         }
@@ -66,7 +63,7 @@ public:
         return res;
     }
 
-    bool fetch(dataset::ostream& os) override
+    bool fetch(variant_ostream& os) override
     {
         if (!stmt_)
             return false;
@@ -80,17 +77,17 @@ public:
                     os << sqlite3_column_double(stmt_.get(), i);
                     break;
                 case SQLITE_TEXT:
-                    os << string_view{
+                    os << std::string_view{
                         (char*)sqlite3_column_text(stmt_.get(), i),
                         (size_t)sqlite3_column_bytes(stmt_.get(), i)};
                     break;
                 case SQLITE_BLOB:
                     os << blob_view{
-                        (uint8_t*)sqlite3_column_blob(stmt_.get(), i),
+                        (std::byte*)sqlite3_column_blob(stmt_.get(), i),
                         (size_t)sqlite3_column_bytes(stmt_.get(), i)};
                     break;
                 default:
-                    os << boost::blank{};
+                    os << variant_t{};
             }
         step();
         return true;
@@ -117,8 +114,6 @@ private:
     }
 };
 
-}  // namespace sqlite
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::sqlite
 
 #endif  // BARK_DB_SQLITE_COMMAND_HPP

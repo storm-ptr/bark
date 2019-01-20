@@ -5,47 +5,45 @@
 
 #include <bark/geometry/detail/ostream.hpp>
 #include <bark/geometry/geometry.hpp>
+#include <bark/utility.hpp>
 
-namespace bark {
-namespace geometry {
+namespace bark::geometry {
 namespace detail {
 
-inline auto convert(const box& v)
-{
-    polygon res;
-    boost::geometry::convert(v, res);
-    return res;
-}
+struct converter {
+    auto operator()(const box& v) const
+    {
+        polygon res;
+        boost::geometry::convert(v, res);
+        return res;
+    }
 
-inline auto convert(const multi_box& v)
-{
-    multi_polygon res;
-    for (auto& item : v)
-        res.push_back(convert(item));
-    return res;
-}
+    auto operator()(const multi_box& v) const
+    {
+        return as<multi_polygon>(v, *this);
+    }
+};
 
 }  // namespace detail
 
-template <typename T>
-blob_t as_binary(const T& v)
+template <class T>
+blob as_binary(const T& v)
 {
     detail::ostream os;
     os << v;
-    return std::move(os).buf();
+    return std::move(os.data);
 }
 
-inline blob_t as_binary(const box& v)
+inline auto as_binary(const box& v)
 {
-    return as_binary(detail::convert(v));
+    return as_binary(detail::converter{}(v));
 }
 
-inline blob_t as_binary(const multi_box& v)
+inline auto as_binary(const multi_box& v)
 {
-    return as_binary(detail::convert(v));
+    return as_binary(detail::converter{}(v));
 }
 
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_AS_BINARY_HPP

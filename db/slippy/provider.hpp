@@ -3,18 +3,15 @@
 #ifndef BARK_DB_SLIPPY_PROVIDER_HPP
 #define BARK_DB_SLIPPY_PROVIDER_HPP
 
-#include <bark/dataset/ostream.hpp>
 #include <bark/db/detail/cacher.hpp>
 #include <bark/db/provider.hpp>
 #include <bark/db/slippy/detail/layers.hpp>
 #include <bark/db/slippy/detail/tile.hpp>
-#include <bark/detail/curl/jobs.hpp>
+#include <bark/detail/curl.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace slippy {
+namespace bark::db::slippy {
 
 class provider : private db::detail::cacher<slippy::provider>,
                  public db::provider {
@@ -50,8 +47,8 @@ public:
         return cached_tiles_first(lr_nm, view);
     }
 
-    dataset::rowset spatial_objects(const qualified_name& lr_nm,
-                                    const geometry::view& view) override
+    rowset spatial_objects(const qualified_name& lr_nm,
+                           const geometry::view& view) override
     {
         return cached_spatial_objects(lr_nm, view);
     }
@@ -89,36 +86,32 @@ private:
         auto tf = detail::tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
         auto tls = detail::tile_coverage(tf.backward(view), lr->zmax());
-        return back_constructor<geometry::multi_box>(
+        return as<geometry::multi_box>(
             tls, [&tf](auto& tl) { return tf.forward(detail::extent(tl)); });
     }
 
-    dataset::rowset load_spatial_objects(const qualified_name& lr_nm,
-                                         const geometry::view& view)
+    rowset load_spatial_objects(const qualified_name& lr_nm,
+                                const geometry::view& view)
     {
         auto tf = detail::tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
         auto tls = detail::tile_coverage(tf.backward(view), lr->zmax());
 
-        curl::jobs<detail::tile> jobs;
+        bark::curl<detail::tile> jobs;
         for (auto& tl : tls)
             jobs.push(tl, lr->url(tl));
 
-        dataset::ostream os;
+        variant_ostream os;
         while (!jobs.empty()) {
-            auto pair = jobs.pop();
-            auto tl = pair.first;
-            auto img = pair.second;
+            auto [tl, img] = jobs.pop();
             auto ext = tf.forward(detail::extent(tl));
-            os << geometry::as_binary(ext) << img << tl.z << tl.x << tl.y
+            os << geometry::as_binary(ext) << *img << tl.z << tl.x << tl.y
                << lr->url(tl);
         }
-        return {{"wkb", "image", "zoom", "x", "y", "url"}, std::move(os).buf()};
+        return {{"wkb", "image", "zoom", "x", "y", "url"}, std::move(os.data)};
     }
 };
 
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy
 
 #endif  // BARK_DB_SLIPPY_PROVIDER_HPP

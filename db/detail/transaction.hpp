@@ -3,11 +3,9 @@
 #ifndef BARK_DB_DETAIL_TRANSACTION_HPP
 #define BARK_DB_DETAIL_TRANSACTION_HPP
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
-template <typename T>
+template <class T>
 class transaction {
     T& as_mixin() { return static_cast<T&>(*this); }
 
@@ -32,8 +30,6 @@ private:
     bool autocommit_ = true;
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_TRANSACTION_HPP

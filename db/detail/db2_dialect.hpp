@@ -3,15 +3,13 @@
 #ifndef BARK_DB_DETAIL_DB2_DIALECT_HPP
 #define BARK_DB_DETAIL_DB2_DIALECT_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/sql_builder_ops.hpp>
 #include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
 class db2_dialect : public dialect {
 public:
@@ -20,7 +18,7 @@ public:
         bld << "SELECT srs_id, organization_coordsys_id, NULL FROM "
                "db2gse.st_spatial_reference_systems WHERE LOWER(organization) "
                "= "
-            << param("epsg");
+            << param{"epsg"};
     }
 
     void geometries_sql(sql_builder& bld) override
@@ -32,15 +30,15 @@ public:
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
         auto& scm = reverse_at(tbl_nm, 1);
-        bld << "SELECT colname, (CASE typeschema WHEN " << param("SYSIBM")
-            << " THEN typename WHEN " << param("DB2GSE")
-            << " THEN typename ELSE RTRIM(typeschema) || " << param(".")
+        bld << "SELECT colname, (CASE typeschema WHEN " << param{"SYSIBM"}
+            << " THEN typename WHEN " << param{"DB2GSE"}
+            << " THEN typename ELSE RTRIM(typeschema) || " << param{"."}
             << " || typename END), scale FROM syscat.columns WHERE tabschema = "
-            << param(scm) << " AND tabname = " << param(tbl_nm.back())
+            << param{scm} << " AND tabname = " << param{tbl_nm.back()}
             << " ORDER BY colno";
     }
 
-    column_type type(string_view type_lcase, int scale) override
+    column_type type(std::string_view type_lcase, int scale) override
     {
         if (is_ogc_type(type_lcase))
             return column_type::Geometry;
@@ -51,47 +49,48 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        string_view) override
+                        std::string_view) override
     {
         auto& col = col_nm.back();
         auto& tbl = reverse_at(col_nm, 1);
         auto& scm = reverse_at(col_nm, 2);
         bld << "SELECT srs_id FROM db2gse.st_geometry_columns WHERE "
                "table_schema = "
-            << param(scm) << " AND table_name = " << param(tbl)
-            << " AND column_name = " << param(col);
+            << param{scm} << " AND table_name = " << param{tbl}
+            << " AND column_name = " << param{col};
     }
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
         auto& scm = reverse_at(tbl_nm, 1);
         bld << "SELECT RTRIM(i.indschema), i.indname, colname, uniquerule = "
-            << param("P") << ", colorder = " << param("D")
+            << param{"P"} << ", colorder = " << param{"D"}
             << " FROM syscat.indexes i JOIN syscat.indexcoluse "
                "USING(indschema, indname) WHERE tabschema = "
-            << param(scm) << " AND tabname = " << param(tbl_nm.back())
+            << param{scm} << " AND tabname = " << param{tbl_nm.back()}
             << " ORDER BY 1, 2, colseq";
     }
 
     column_decoder geometry_decoder() override
     {
-        return [](sql_builder& bld, string_view col_nm) {
+        return [](sql_builder& bld, std::string_view col_nm) {
             bld << "db2gse.ST_AsBinary(" << id(col_nm) << ") AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(string_view type_lcase, int srid) override
+    column_encoder geometry_encoder(std::string_view type_lcase,
+                                    int srid) override
     {
-        return [type = type_lcase.to_string(), srid](sql_builder& bld,
-                                                     dataset::variant_view v) {
-            bld << "db2gse." << type << "(CAST(" << param(v)
+        return [type = std::string{type_lcase}, srid](sql_builder& bld,
+                                                      variant_t v) {
+            bld << "db2gse." << type << "(CAST(" << param{v}
                 << " AS blob(100M)), " << srid << ")";
         };
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    string_view) override
+                    std::string_view) override
     {
         auto col = id(col_nm.back());
         bld << "SELECT COUNT(1), MIN(db2gse.ST_MinX(" << col
@@ -102,12 +101,12 @@ public:
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       string_view col_nm,
+                       std::string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
         bld << "db2gse.EnvelopesIntersect(" << id(col_nm) << ", "
-            << encode(column(tbl.columns, col_nm), blob) << ") = 1";
+            << encoder{column(tbl.columns, col_nm), blob} << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override
@@ -131,13 +130,13 @@ public:
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 string_view col_nm,
+                                 std::string_view col_nm,
                                  int srid) override
     {
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
             << " db2gse.st_geometry;\nCALL "
                "db2gse.st_register_spatial_column(\n\tNULL,\n\t"
-            << param(id(tbl.name.back())) << ",\n\t" << param(id(col_nm))
+            << param{id(tbl.name.back())} << ",\n\t" << param{id(col_nm)}
             << ",\n\t(SELECT srs_name FROM db2gse.st_spatial_reference_systems "
                "WHERE srs_id = "
             << srid << "),\n\t?,\n\t?)";
@@ -158,8 +157,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_DB2_DIALECT_HPP

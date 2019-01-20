@@ -25,10 +25,10 @@ TEST_CASE("proj")
     for (auto&& wkt1 : Wkt) {
         auto wkb(as_binary(geom_from_text(wkt1)));
         latlong_to_mercator.inplace_forward(wkb);
-        auto wkt2 = as_text(geom_from_wkb(wkb.data()));
+        auto wkt2 = as_text(geom_from_wkb(wkb));
         REQUIRE(wkt1 != wkt2);
         latlong_to_mercator.inplace_backward(wkb);
-        REQUIRE(wkt1 == as_text(geom_from_wkb(wkb.data())));
+        REQUIRE(wkt1 == as_text(geom_from_wkb(wkb)));
     }
 
     auto bbox = box{{0, 80}, {1, 81}};

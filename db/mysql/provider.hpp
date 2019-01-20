@@ -13,9 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace mysql {
+namespace bark::db::mysql {
 
 class provider : private db::detail::cacher<db::mysql::provider>,
                  private db::detail::ddl<db::mysql::provider>,
@@ -41,8 +39,6 @@ public:
     }
 };
 
-}  // namespace mysql
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::mysql
 
 #endif  // BARK_DB_MYSQL_PROVIDER_HPP

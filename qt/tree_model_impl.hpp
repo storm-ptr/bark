@@ -5,14 +5,13 @@
 #define BARK_QT_TREE_MODEL_IMPL_HPP
 
 #include <QtConcurrent/QtConcurrentRun>
-#include <bark/common.hpp>
 #include <bark/qt/detail/tree_io.hpp>
 #include <bark/qt/detail/tree_ops.hpp>
 #include <bark/qt/tree_model.hpp>
+#include <bark/utility.hpp>
 #include <exception>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 
 inline tree_model::tree_model(QObject* parent) : QAbstractItemModel(parent)
 {
@@ -76,13 +75,12 @@ inline void tree_model::timerEvent(QTimerEvent* event)
     }
 }
 
-inline boost::optional<link> tree_model::get_link(const QModelIndex& idx) const
+inline std::optional<link> tree_model::get_link(const QModelIndex& idx) const
 {
     return detail::get_link(to_ptr(idx));
 }
 
-inline boost::optional<layer> tree_model::get_layer(
-    const QModelIndex& idx) const
+inline std::optional<layer> tree_model::get_layer(const QModelIndex& idx) const
 {
     return detail::get_layer(to_ptr(idx));
 }
@@ -186,11 +184,10 @@ inline QDataStream& operator>>(QDataStream& is, tree_model& that)
     that.root_ = root;
     that.endInsertRows();
     for (auto& child : that.root_->children)
-        that.link_by_uri(boost::get<link>(child->data).uri);
+        that.link_by_uri(std::get<link>(child->data).uri);
     return is;
 }
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_TREE_MODEL_IMPL_HPP

@@ -1,13 +1,11 @@
 // Andrew Naplavkov
 
-#ifndef BARK_GEOMETRY_DETAIL_COMMON_HPP
-#define BARK_GEOMETRY_DETAIL_COMMON_HPP
+#ifndef BARK_GEOMETRY_DETAIL_UTILITY_HPP
+#define BARK_GEOMETRY_DETAIL_UTILITY_HPP
 
 #include <bark/geometry/geometry.hpp>
 
-namespace bark {
-namespace geometry {
-namespace detail {
+namespace bark::geometry::detail {
 
 inline void push_ring(polygon& poly, const linestring& ring)
 {
@@ -17,8 +15,6 @@ inline void push_ring(polygon& poly, const linestring& ring)
         poly.inners().emplace_back(ring.begin(), ring.end());
 }
 
-}  // namespace detail
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry::detail
 
-#endif  // BARK_GEOMETRY_DETAIL_COMMON_HPP
+#endif  // BARK_GEOMETRY_DETAIL_UTILITY_HPP

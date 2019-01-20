@@ -78,7 +78,7 @@ private:
     QAction* terminal_act_;
     QAction* undistort_act_;
 
-    template <typename Filter>
+    template <class Filter>
     QVector<bark::qt::layer> match_checked(Filter filter) const
     {
         QVector<bark::qt::layer> res;

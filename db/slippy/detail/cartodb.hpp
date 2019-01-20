@@ -7,10 +7,7 @@
 #include <bark/detail/random_index.hpp>
 #include <sstream>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
 class cartodb : public layer {
     random_index subdomain_{4};
@@ -30,9 +27,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_CARTODB_HPP

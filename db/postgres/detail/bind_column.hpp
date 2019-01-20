@@ -3,31 +3,28 @@
 #ifndef BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP
 #define BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP
 
-#include <bark/dataset/ostream.hpp>
-#include <bark/db/postgres/detail/common.hpp>
-#include <boost/detail/endian.hpp>
+#include <bark/db/postgres/detail/utility.hpp>
+#include <bark/db/rowset_ops.hpp>
+#include <boost/predef/other/endian.h>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace postgres {
-namespace detail {
+namespace bark::db::postgres::detail {
 
 struct column {
     virtual ~column() = default;
-    virtual void write(PGresult*, int row, int col, dataset::ostream&) = 0;
+    virtual void write(PGresult*, int row, int col, variant_ostream&) = 0;
 };
 
 using column_holder = std::unique_ptr<column>;
 
-template <typename T>
+template <class T>
 struct column_val : column {
-    void write(PGresult* rows, int row, int col, dataset::ostream& os) override
+    void write(PGresult* rows, int row, int col, variant_ostream& os) override
     {
         auto val = *(const T*)PQgetvalue(rows, row, col);
-#if defined BOOST_LITTLE_ENDIAN
+#if defined BOOST_ENDIAN_LITTLE_BYTE
         os << reversed(val);
-#elif defined BOOST_BIG_ENDIAN
+#elif defined BOOST_ENDIAN_BIG_BYTE
         os << val;
 #else
 #error byte order error
@@ -35,9 +32,9 @@ struct column_val : column {
     }
 };
 
-template <typename T>
+template <class T>
 struct column_arr : column {
-    void write(PGresult* rows, int row, int col, dataset::ostream& os) override
+    void write(PGresult* rows, int row, int col, variant_ostream& os) override
     {
         os << T{(const typename T::value_type*)PQgetvalue(rows, row, col),
                 (size_t)PQgetlength(rows, row, col)};
@@ -66,18 +63,13 @@ inline column_holder bind_column(Oid type)
         case PGRES_TYPE_TEXTARRAY:
         case PGRES_TYPE_VARCHAR:
         case PGRES_TYPE_VARCHARARRAY:
-            return std::make_unique<column_arr<string_view>>();
+            return std::make_unique<column_arr<std::string_view>>();
         case PGRES_TYPE_BYTEA:
             return std::make_unique<column_arr<blob_view>>();
-        default:
-            throw std::runtime_error("Postgres type error: " +
-                                     std::to_string(type));
     }
+    throw std::runtime_error("invalid Postgres type: " + std::to_string(type));
 }
 
-}  // namespace detail
-}  // namespace postgres
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::postgres::detail
 
 #endif  // BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP

@@ -4,46 +4,42 @@
 #define BARK_UNICODE_HPP
 
 #include <algorithm>
-#include <bark/common.hpp>
 #include <boost/regex/pending/unicode_iterator.hpp>
 #include <cwctype>
 #include <iterator>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
-namespace bark {
-namespace unicode {
+namespace bark::unicode {
 namespace detail {
 
-template <typename Str>
+template <class Str>
 using unit_t = typename std::iterator_traits<decltype(
     std::begin((std::declval<Str>())))>::value_type;
 
-template <typename Unit>
+template <class Unit>
 struct utf8 {
-    static_assert(sizeof(Unit) == sizeof(char), "unicode size");
     using decoder = boost::u8_to_u32_iterator<
-        typename basic_string_view<Unit>::const_iterator>;
+        typename std::basic_string_view<Unit>::const_iterator>;
     using encoder = boost::u32_to_u8_iterator<std::u32string::const_iterator>;
 };
 
-template <typename Unit>
+template <class Unit>
 struct utf16 {
-    static_assert(sizeof(Unit) == sizeof(char16_t), "unicode size");
     using decoder = boost::u16_to_u32_iterator<
-        typename basic_string_view<Unit>::const_iterator>;
+        typename std::basic_string_view<Unit>::const_iterator>;
     using encoder = boost::u32_to_u16_iterator<std::u32string::const_iterator>;
 };
 
-template <typename Unit>
+template <class Unit>
 struct utf32 {
-    static_assert(sizeof(Unit) == sizeof(char32_t), "unicode size");
-    using decoder = typename basic_string_view<Unit>::const_iterator;
+    using decoder = typename std::basic_string_view<Unit>::const_iterator;
     using encoder = std::u32string::const_iterator;
 };
 
-template <typename Unit>
+template <class Unit>
 using utf = std::conditional_t<
     sizeof(Unit) == sizeof(char),
     utf8<Unit>,
@@ -55,50 +51,59 @@ using utf = std::conditional_t<
 
 }  // namespace detail
 
-template <typename ToUnit, typename Str, typename Unit = detail::unit_t<Str>>
-std::basic_string<ToUnit> to_string(Str&& str)
+template <class ToUnit, class FromStr>
+std::basic_string<ToUnit> to_string(FromStr&& str)
 {
-    using decoder = typename detail::utf<Unit>::decoder;
+    using from_unit = detail::unit_t<FromStr>;
+    using decoder = typename detail::utf<from_unit>::decoder;
     using encoder = typename detail::utf<ToUnit>::encoder;
-    auto view = basic_string_view<Unit>{std::forward<Str>(str)};
+    auto view = static_cast<std::basic_string_view<from_unit>>(str);
     auto points = std::u32string{decoder{view.begin()}, decoder{view.end()}};
     return {encoder{points.begin()}, encoder{points.end()}};
+}
+
+template <class Str>
+size_t size(Str&& str)
+{
+    using unit = detail::unit_t<Str>;
+    using decoder = typename detail::utf<unit>::decoder;
+    auto view = static_cast<std::basic_string_view<unit>>(str);
+    return std::distance(decoder{view.begin()}, decoder{view.end()});
 }
 
 /**
  * @return lowercase version or unmodified if no lowercase version is listed in
  * the current locale
  */
-template <typename Str, typename Unit = detail::unit_t<Str>>
-std::basic_string<Unit> to_lower(Str&& str)
+template <class Str>
+auto to_lower(Str&& str)
 {
     auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
-    std::transform(wstr.begin(), wstr.end(), wstr.begin(), towlower);
-    return unicode::to_string<Unit>(wstr);
+    std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towlower);
+    return unicode::to_string<detail::unit_t<Str>>(wstr);
 }
 
 /**
  * @return uppercase version or unmodified if no uppercase version is listed in
  * the current locale
  */
-template <typename Str, typename Unit = detail::unit_t<Str>>
-std::basic_string<Unit> to_upper(Str&& str)
+template <class Str>
+auto to_upper(Str&& str)
 {
     auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
-    std::transform(wstr.begin(), wstr.end(), wstr.begin(), towupper);
-    return unicode::to_string<Unit>(wstr);
+    std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towupper);
+    return unicode::to_string<detail::unit_t<Str>>(wstr);
 }
 
 struct case_insensitive_equal_to {
-    template <typename Lhs, typename Rhs>
+    template <class Lhs, class Rhs>
     bool operator()(Lhs&& lhs, Rhs&& rhs) const
     {
-        return unicode::to_lower(std::forward<Lhs>(lhs)) ==
-               unicode::to_lower(std::forward<Rhs>(rhs));
+        return to_lower(std::forward<Lhs>(lhs)) ==
+               to_lower(std::forward<Rhs>(rhs));
     }
 };
 
-}  // namespace unicode
-}  // namespace bark
+}  // namespace bark::unicode
 
 #endif  // BARK_UNICODE_HPP

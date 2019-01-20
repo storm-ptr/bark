@@ -4,56 +4,33 @@
 #define BARK_GEOMETRY_ENVELOPE_HPP
 
 #include <bark/geometry/geometry.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace geometry {
+namespace bark::geometry {
 
-template <typename T>
-auto envelope(const T& val)
+template <class T>
+auto envelope(const T& v)
 {
-    return boost::geometry::return_envelope<box>(val);
+    return boost::geometry::return_envelope<box>(v);
 }
-
-inline box envelope(const geometry_collection&);
 
 inline box envelope(const geometry&);
 
-namespace detail {
-
-struct envelope_visitor : boost::static_visitor<box> {
-    template <typename T>
-    box operator()(const T& val) const
-    {
-        return envelope(val);
-    }
-
-    box operator()(
-        const boost::recursive_wrapper<geometry_collection>& val) const
-    {
-        return envelope(val.get());
-    }
-};
-
-}  // namespace detail
-
-inline box envelope(const geometry_collection& val)
+inline box envelope(const geometry_collection& v)
 {
-    if (val.empty())
-        throw std::runtime_error("envelope error");
-    auto res = envelope(val.front());
-    for (auto it = std::next(val.begin()); it != val.end(); ++it)
+    if (v.empty())
+        throw std::runtime_error("invalid envelope");
+    auto res = envelope(v.front());
+    for (auto it = std::next(v.begin()); it != v.end(); ++it)
         boost::geometry::expand(res, envelope(*it));
     return res;
 }
 
-inline box envelope(const geometry& val)
+inline box envelope(const geometry& v)
 {
-    return boost::apply_visitor(detail::envelope_visitor{}, val);
+    return boost::apply_visitor([](const auto& v) { return envelope(v); }, v);
 }
 
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_ENVELOPE_HPP

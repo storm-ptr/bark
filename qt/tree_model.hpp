@@ -15,18 +15,17 @@
 #include <QVector>
 #include <bark/qt/common.hpp>
 #include <bark/qt/detail/tree.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 
 class tree_model : public QAbstractItemModel {
 public:
     explicit tree_model(QObject* parent);
 
     void link_by_uri(QUrl);
-    boost::optional<link> get_link(const QModelIndex&) const;
-    boost::optional<layer> get_layer(const QModelIndex&) const;
+    std::optional<link> get_link(const QModelIndex&) const;
+    std::optional<layer> get_layer(const QModelIndex&) const;
     void set_layer(const QModelIndex&, const layer&);
     void reset();
 
@@ -68,7 +67,6 @@ private:
     detail::tree* to_ptr(const QModelIndex&) const;
 };
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_TREE_MODEL_HPP

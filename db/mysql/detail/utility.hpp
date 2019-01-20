@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_MYSQL_DETAIL_COMMON_HPP
-#define BARK_DB_MYSQL_DETAIL_COMMON_HPP
+#ifndef BARK_DB_MYSQL_DETAIL_UTILITY_HPP
+#define BARK_DB_MYSQL_DETAIL_UTILITY_HPP
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -9,7 +9,7 @@
 #include <windows.h>
 #endif
 
-#include <bark/common.hpp>
+#include <bark/blob.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/map.hpp>
 #include <cstdint>
@@ -18,20 +18,18 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace mysql {
-namespace detail {
+namespace bark::db::mysql::detail {
 
-template <typename T>
+template <class T>
 constexpr auto code_of()
 {
     using namespace boost::mpl;
-    return (enum_field_types)at<map<pair<int64_t, int_<MYSQL_TYPE_LONGLONG>>,
-                                    pair<double, int_<MYSQL_TYPE_DOUBLE>>,
-                                    pair<string_view, int_<MYSQL_TYPE_STRING>>,
-                                    pair<blob_view, int_<MYSQL_TYPE_BLOB>>>,
-                                T>::type::value;
+    return (
+        enum_field_types)at<map<pair<int64_t, int_<MYSQL_TYPE_LONGLONG>>,
+                                pair<double, int_<MYSQL_TYPE_DOUBLE>>,
+                                pair<std::string_view, int_<MYSQL_TYPE_STRING>>,
+                                pair<blob_view, int_<MYSQL_TYPE_BLOB>>>,
+                            T>::type::value;
 }
 
 struct connection_deleter {
@@ -62,7 +60,7 @@ inline std::string error(MYSQL_STMT* p)
     return mysql_stmt_error(p);
 }
 
-template <typename HandleHolder>
+template <class HandleHolder>
 void check(const HandleHolder& handle, bool condition)
 {
     if (!condition) {
@@ -75,15 +73,12 @@ void check(const HandleHolder& handle, bool condition)
     }
 }
 
-template <typename HandleHolder>
+template <class HandleHolder>
 void check(const HandleHolder& handle, int r)
 {
     check(handle, r == 0);
 }
 
-}  // namespace detail
-}  // namespace mysql
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::mysql::detail
 
-#endif  // BARK_DB_MYSQL_DETAIL_COMMON_HPP
+#endif  // BARK_DB_MYSQL_DETAIL_UTILITY_HPP

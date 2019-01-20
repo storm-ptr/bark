@@ -7,12 +7,9 @@
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/mysql/detail/bind_column.hpp>
 #include <bark/db/mysql/detail/bind_param.hpp>
-#include <bark/db/mysql/detail/common.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace mysql {
+namespace bark::db::mysql {
 
 class command : public db::command,
                 private db::detail::transaction<db::mysql::command> {
@@ -50,7 +47,7 @@ public:
     sql_syntax syntax() override
     {
         db::sql_syntax res{};
-        res.delimiter = [](std::ostream& os, string_view id) {
+        res.delimiter = [](std::ostream& os, std::string_view id) {
             os << '`' << id << '`';
         };
         return res;
@@ -101,7 +98,7 @@ public:
         return names;
     }
 
-    bool fetch(dataset::ostream& os) override
+    bool fetch(variant_ostream& os) override
     {
         if (cols_.empty())
             columns();
@@ -149,20 +146,18 @@ private:
         stmt_.reset(stmt);
     }
 
-    int prepare(string_view sql)
+    int prepare(std::string_view sql)
     {
         if (sql_ == sql)
             return 0;
         reset_stmt(mysql_stmt_init(con_.get()));
         check(con_, !!stmt_);
-        sql_ = sql.to_string();
+        sql_ = sql;
         return mysql_stmt_prepare(
             stmt_.get(), sql.data(), (unsigned long)sql.size());
     }
 };
 
-}  // namespace mysql
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::mysql
 
 #endif  // BARK_DB_MYSQL_COMMAND_HPP

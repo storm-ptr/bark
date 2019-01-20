@@ -1,10 +1,9 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_LOCKABLE_HPP
-#define BARK_DETAIL_LOCKABLE_HPP
+#ifndef BARK_LOCKABLE_HPP
+#define BARK_LOCKABLE_HPP
 
 #include <boost/functional/hash.hpp>
-#include <boost/noncopyable.hpp>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -12,7 +11,6 @@
 #include <unordered_set>
 
 namespace bark {
-namespace detail {
 
 /**
  * The synchronization primitive offering exclusive ownership of the value of
@@ -20,13 +18,12 @@ namespace detail {
  * @see http://www.cplusplus.com/reference/concept/TimedLockable/
  * @see http://codeofthedamned.com/index.php/value-semantics
  */
-template <typename T>
+template <class T>
 class lockable {
 public:
     explicit lockable(T key) : key_{std::move(key)} {}
-
     void lock() { guard().lock(key_); }
-
+    void unlock() { guard().unlock(key_); }
     bool try_lock() { return guard().try_lock(key_); }
 
     template <class Rep, class Period>
@@ -35,12 +32,10 @@ public:
         return guard().try_lock_for(key_, duration);
     }
 
-    void unlock() { guard().unlock(key_); }
-
 private:
     const T key_;
 
-    class lockable_hash_set : private boost::noncopyable {
+    class lockable_hash_set {
     public:
         void lock(const T& key)
         {
@@ -48,6 +43,15 @@ private:
             notifier_.wait(lock, is_free(key));
             if (!data_.insert(key).second)
                 throw std::logic_error("lockable_hash_set");
+        }
+
+        void unlock(const T& key)
+        {
+            {
+                lock_t lock{guard_};
+                data_.erase(key);
+            }
+            notifier_.notify_all();
         }
 
         bool try_lock(const T& key)
@@ -63,15 +67,6 @@ private:
             lock_t lock{guard_};
             return notifier_.wait_for(lock, duration, is_free(key)) &&
                    data_.insert(key).second;
-        }
-
-        void unlock(const T& key)
-        {
-            {
-                lock_t lock{guard_};
-                data_.erase(key);
-            }
-            notifier_.notify_all();
         }
 
     private:
@@ -94,13 +89,12 @@ private:
     }
 };
 
-template <typename T>
+template <class T>
 auto make_lockable(T key)
 {
     return lockable<T>{key};
 }
 
-}  // namespace detail
 }  // namespace bark
 
-#endif  // BARK_DETAIL_LOCKABLE_HPP
+#endif  // BARK_LOCKABLE_HPP

@@ -10,14 +10,16 @@ env:
 matrix:
   include:
   - os: linux
-    env: COMPILER=g++-7
+    env: COMPILER=g++-8
     addons:
       apt:
         sources:
         - ubuntu-toolchain-r-test
+        - sourceline: ppa:mhier/libboost-latest
         - sourceline: ppa:ubuntugis/ppa
         packages:
-        - g++-7
+        - boost1.69
+        - g++-8
         - libboost-dev
         - libgdal-dev
         - libproj-dev

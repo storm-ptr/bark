@@ -3,81 +3,57 @@
 #ifndef BARK_DB_SQL_BUILDER_OPS_HPP
 #define BARK_DB_SQL_BUILDER_OPS_HPP
 
-#include <bark/dataset/rowset.hpp>
 #include <bark/db/table_def.hpp>
 #include <boost/range/combine.hpp>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db {
 
-struct column_decoder_manipulator {
+struct decoder {
     const column_def& col;
 
-    friend sql_builder& operator<<(sql_builder& bld,
-                                   const column_decoder_manipulator& manip)
+    friend sql_builder& operator<<(sql_builder& bld, const decoder& that)
     {
-        manip.col.decoder(bld, manip.col.name);
+        that.col.decoder(bld, that.col.name);
         return bld;
     }
 };
 
-template <typename T>
-struct column_encoder_manipulator {
+template <class T>
+struct encoder {
     const column_def& col;
     const T& val;
 
-    friend sql_builder& operator<<(sql_builder& bld,
-                                   const column_encoder_manipulator& manip)
+    friend sql_builder& operator<<(sql_builder& bld, const encoder& that)
     {
-        manip.col.encoder(bld, manip.val);
+        that.col.encoder(bld, that.val);
         return bld;
     }
 };
 
-}  // namespace detail
+template <class T>
+encoder(column_def, T)->encoder<T>;
 
-inline auto decode(const column_def& col)
-{
-    return detail::column_decoder_manipulator{col};
-}
+template <class Columns>
+struct row_encoder {
+    const Columns& cols;
+    const row_t& row;
 
-template <typename T>
-auto encode(const column_def& col, const T& val)
-{
-    return detail::column_encoder_manipulator<T>{col, val};
-}
-
-namespace detail {
-
-struct row_value_manipulator {
-    const std::vector<column_def>& cols;
-    const dataset::rowset::tuple& row;
-
-    friend sql_builder& operator<<(sql_builder& bld,
-                                   const row_value_manipulator& manip)
+    friend sql_builder& operator<<(sql_builder& bld, const row_encoder& that)
     {
         return bld << "("
-                   << list(boost::combine(manip.cols, manip.row),
+                   << list{boost::combine(that.cols, that.row),
                            ",",
                            [](const auto& pair) {
-                               return encode(boost::get<0>(pair),
-                                             boost::get<1>(pair));
-                           })
+                               return encoder{boost::get<0>(pair),
+                                              boost::get<1>(pair)};
+                           }}
                    << ")";
     }
 };
 
-}  // namespace detail
+template <class Columns>
+row_encoder(Columns, row_t)->row_encoder<Columns>;
 
-inline auto row_value_constructor(std::vector<column_def> cols)
-{
-    return [cols = std::move(cols)](const dataset::rowset::tuple& row) {
-        return detail::row_value_manipulator{cols, row};
-    };
-}
-
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_SQL_BUILDER_OPS_HPP

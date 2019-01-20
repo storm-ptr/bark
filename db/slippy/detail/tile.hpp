@@ -10,18 +10,15 @@
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <cmath>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
-constexpr size_t Pixels = 256;
+constexpr int Pixels = 256;
 
 /// @see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 struct tile {
-    size_t x = 0;
-    size_t y = 0;
-    size_t z = 0;
+    int x = 0;
+    int y = 0;
+    int z = 0;
 };
 
 using tiles = std::vector<tile>;
@@ -29,26 +26,21 @@ using tiles = std::vector<tile>;
 inline auto sub(const tile& tl)
 {
     std::array<tile, 4> res;
-    for (size_t i = 0; i < 2; ++i)
-        for (size_t j = 0; j < 2; ++j)
+    for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
             res[i * 2 + j] = {2 * tl.x + i, 2 * tl.y + j, tl.z + 1};
     return res;
 }
 
-inline double power_of_two(size_t pow)
-{
-    return 1ll << pow;
-}
-
 inline double left(const tile& tl)
 {
-    return tl.x / power_of_two(tl.z) * 360 - 180;
+    return tl.x / std::pow(2, tl.z) * 360 - 180;
 }
 
 inline double top(const tile& tl)
 {
     constexpr auto Pi = boost::math::constants::pi<double>();
-    auto n = Pi - 2 * Pi * tl.y / power_of_two(tl.z);
+    auto n = Pi - 2 * Pi * tl.y / std::pow(2, tl.z);
     return 180 / Pi * atan((exp(n) - exp(-n)) / 2);
 }
 
@@ -67,7 +59,7 @@ inline geometry::box pixel(const tile& tl)
              center.y() + geometry::height(ext) / Pixels}};
 }
 
-template <typename Predicate>
+template <class Predicate>
 void depth_first_search(tiles& tls, const tile& tl, Predicate filter)
 {
     if (!filter(tl))
@@ -77,7 +69,7 @@ void depth_first_search(tiles& tls, const tile& tl, Predicate filter)
         depth_first_search(tls, sub_tl, filter);
 }
 
-template <typename Predicate>
+template <class Predicate>
 tiles depth_first_search(Predicate filter)
 {
     tiles tls;
@@ -85,7 +77,7 @@ tiles depth_first_search(Predicate filter)
     return tls;
 }
 
-inline tile match(const geometry::box& px, size_t zmax)
+inline tile match(const geometry::box& px, int zmax)
 {
     using namespace boost::geometry;
 
@@ -110,7 +102,7 @@ inline tile match(const geometry::box& px, size_t zmax)
                        : *std::min_element(tls.begin(), tls.end(), cmp);
 }
 
-inline tiles tile_coverage(const geometry::view& view, size_t zmax)
+inline tiles tile_coverage(const geometry::view& view, int zmax)
 {
     auto z = match(pixel(view), zmax).z;
     auto filter = [&](const tile& tl) {
@@ -130,9 +122,6 @@ inline tiles tile_coverage(const geometry::view& view, size_t zmax)
     return tls;
 }
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_TILE_HPP

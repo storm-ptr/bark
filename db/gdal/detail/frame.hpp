@@ -3,13 +3,10 @@
 #ifndef BARK_DB_GDAL_DETAIL_FRAME_HPP
 #define BARK_DB_GDAL_DETAIL_FRAME_HPP
 
-#include <bark/db/gdal/detail/common.hpp>
+#include <bark/db/gdal/detail/utility.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark {
-namespace db {
-namespace gdal {
-namespace detail {
+namespace bark::db::gdal::detail {
 
 /**
  * coefficients for transforming between pixel/line raster space, and projection
@@ -66,9 +63,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace gdal
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::gdal::detail
 
 #endif  // BARK_DB_GDAL_DETAIL_FRAME_HPP

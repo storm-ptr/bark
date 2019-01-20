@@ -9,7 +9,6 @@
 #include <bark/db/slippy/detail/cartodb.hpp>
 #include <bark/db/slippy/detail/double_gis.hpp>
 #include <bark/db/slippy/detail/osm.hpp>
-#include <bark/db/slippy/detail/rosreestr.hpp>
 #include <bark/db/slippy/detail/sputnik.hpp>
 #include <boost/fusion/algorithm.hpp>
 #include <boost/fusion/container.hpp>
@@ -17,10 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
 class layers {
 public:
@@ -53,14 +49,10 @@ private:
                         cartodb,
                         double_gis,
                         osm,
-                        rosreestr,
                         sputnik>
         layers_;
 };
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_LAYERS_HPP

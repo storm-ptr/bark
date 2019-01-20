@@ -6,15 +6,14 @@
 
 #include <QPainter>
 #include <QtConcurrent/QtConcurrentRun>
-#include <bark/common.hpp>
 #include <bark/proj/epsg.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <bark/qt/detail/rendering_task.hpp>
 #include <bark/qt/map_widget.hpp>
+#include <bark/utility.hpp>
 #include <exception>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 
 inline map_widget::map_widget(QWidget* parent)
     : QWidget(parent)
@@ -26,12 +25,12 @@ inline map_widget::map_widget(QWidget* parent)
     setMouseTracking(true);
 }
 
-template <typename Functor>
-void map_widget::set_frame(Functor fn) try {
+template <class Functor>
+void map_widget::set_frame(Functor f) try {
     future_frm_ = {};
     if (!future_map_.valid())
         idle_event();
-    auto tmp = fn();
+    auto tmp = f();
     check(tmp);
     std::swap(frm_, tmp);
     if (frm_.projection != tmp.projection)
@@ -41,10 +40,10 @@ void map_widget::set_frame(Functor fn) try {
 catch (const std::exception&) {
 }
 
-template <typename Functor>
-void map_widget::set_future_frame(Functor&& fn)
+template <class Functor>
+void map_widget::set_future_frame(Functor&& f)
 {
-    future_frm_ = QtConcurrent::run(std::forward<Functor>(fn));
+    future_frm_ = QtConcurrent::run(std::forward<Functor>(f));
     active_event();
 }
 
@@ -211,7 +210,6 @@ inline void map_widget::showEvent(QShowEvent* event)
         transform_event(frm_.projection);
 }
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_MAP_WIDGET_IMPL_HPP

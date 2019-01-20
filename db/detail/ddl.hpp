@@ -10,11 +10,9 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <sstream>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
-template <typename T>
+template <class T>
 class ddl {
     T& as_mixin() { return static_cast<T&>(*this); }
 
@@ -30,32 +28,40 @@ protected:
     }
 
 private:
+    struct col_def {
+        std::string name;
+        std::string type;
+        bool not_null;
+
+        friend sql_builder& operator<<(sql_builder& bld, const col_def& that)
+        {
+            return bld << id(that.name) << " " << that.type
+                       << (that.not_null ? " NOT NULL" : "");
+        }
+    };
+
     void create_table_sql(sql_builder& bld, const table_def& tbl)
     {
-        auto& dlct = as_mixin().as_dialect();
+        auto& dial = as_mixin().as_dialect();
         bld << "CREATE TABLE " << tbl.name << " (\n\t"
-            << list(tbl.columns | boost::adaptors::filtered([](auto& col) {
-                        return col.type != column_type::Geometry;
-                    }),
+            << list{tbl.columns | boost::adaptors::filtered(is_not_geom),
                     ",\n\t",
-                    [&](auto& col) -> column_manipulator {
+                    [&](auto& col) -> col_def {
                         auto cols = {col.name};
                         return {col.name,
-                                dlct.type_name(col.type),
+                                dial.type_name(col.type),
                                 indexed(tbl.indexes, cols)};
-                    });
+                    }};
         auto pri = find_primary(tbl.indexes);
         if (pri != tbl.indexes.end())
-            bld << ",\n\tPRIMARY KEY (" << list(pri->columns, ", ", id<>)
+            bld << ",\n\tPRIMARY KEY (" << list{pri->columns, ", ", id<>}
                 << ")";
         bld << "\n);\n";
     }
 
     void add_geometry_columns_sql(sql_builder& bld, const table_def& tbl)
     {
-        for (auto& col : tbl.columns | boost::adaptors::filtered([](auto& col) {
-                             return col.type == column_type::Geometry;
-                         })) {
+        for (auto& col : tbl.columns | boost::adaptors::filtered(is_geom)) {
             int srid = 0;
             for (auto pj : {col.projection, proj::epsg().find_proj(4326)}) {
                 try {
@@ -83,30 +89,12 @@ private:
             else
                 bld << "CREATE INDEX " << index_name(tbl.name, idx.columns)
                     << " ON " << tbl.name << " ("
-                    << list(idx.columns, ", ", id<>) << ")";
+                    << list{idx.columns, ", ", id<>} << ")";
             bld << ";\n";
         }
     }
-
-private:
-    struct column_manipulator {
-        std::string name;
-        std::string type;
-        bool not_null;
-
-        friend sql_builder& operator<<(sql_builder& bld,
-                                       const column_manipulator& manip)
-        {
-            bld << id(manip.name) << " " << manip.type;
-            if (manip.not_null)
-                bld << " NOT NULL";
-            return bld;
-        }
-    };
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_DDL_HPP

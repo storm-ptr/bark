@@ -13,8 +13,7 @@
 #include <bark/db/qualified_name.hpp>
 #include <string>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 
 struct link {
     QUrl uri;
@@ -50,7 +49,6 @@ struct frame {
     qreal scale = 1.;
 };
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_COMMON_HPP

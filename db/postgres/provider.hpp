@@ -13,9 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace postgres {
+namespace bark::db::postgres {
 
 class provider : private db::detail::cacher<db::postgres::provider>,
                  private db::detail::ddl<db::postgres::provider>,
@@ -43,8 +41,6 @@ public:
     }
 };
 
-}  // namespace postgres
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::postgres
 
 #endif  // BARK_DB_POSTGRES_PROVIDER_HPP

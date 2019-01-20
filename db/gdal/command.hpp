@@ -14,9 +14,7 @@
 #include <mutex>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace gdal {
+namespace bark::db::gdal {
 
 class command : public db::command,
                 private db::detail::transaction<db::gdal::command> {
@@ -51,7 +49,7 @@ public:
         return column_names(lr_.table().columns);
     }
 
-    bool fetch(dataset::ostream& os) override
+    bool fetch(variant_ostream& os) override
     {
         if (geoms_.empty() && cols_.empty())
             columns();
@@ -66,7 +64,7 @@ public:
             if (OGR_F_IsFieldSet(feat.get(), (int)i))
                 cols_[i]->write(feat.get(), (int)i, os);
             else
-                os << boost::blank{};
+                os << variant_t{};
         }
         return true;
     }
@@ -109,8 +107,6 @@ private:
     }
 };
 
-}  // namespace gdal
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::gdal
 
 #endif  // BARK_DB_GDAL_COMMAND_HPP

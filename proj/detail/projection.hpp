@@ -8,9 +8,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace proj {
-namespace detail {
+namespace bark::proj::detail {
 
 struct ctx_deleter {
     void operator()(void* p) const { pj_ctx_free(p); }
@@ -53,8 +51,6 @@ private:
     }
 };
 
-}  // namespace detail
-}  // namespace proj
-}  // namespace bark
+}  // namespace bark::proj::detail
 
 #endif  // BARK_PROJ_DETAIL_PROJECTION_HPP

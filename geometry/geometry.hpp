@@ -19,8 +19,7 @@
 #include <boost/variant.hpp>
 #include <vector>
 
-namespace bark {
-namespace geometry {
+namespace bark::geometry {
 
 using point = boost::geometry::model::d2::point_xy<double>;
 using linestring = boost::geometry::model::linestring<point>;
@@ -49,7 +48,6 @@ struct view {
     double scale;
 };
 
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_GEOMETRY_HPP

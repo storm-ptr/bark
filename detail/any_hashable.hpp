@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_ANY_HASHABLE_HPP
-#define BARK_DETAIL_ANY_HASHABLE_HPP
+#ifndef BARK_ANY_HASHABLE_HPP
+#define BARK_ANY_HASHABLE_HPP
 
 #include <boost/functional/hash.hpp>
 #include <boost/operators.hpp>
@@ -9,10 +9,9 @@
 #include <typeinfo>
 
 namespace bark {
-namespace detail {
 
 /**
- * Polymorphic wrapper of hashable value. boost::any analogue
+ * Polymorphic wrapper of hashable value. std::any analogue
  * @see https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Type_Erasure
  */
 class any_hashable : boost::equality_comparable<any_hashable> {
@@ -20,7 +19,7 @@ public:
     any_hashable() = delete;
     any_hashable(const any_hashable&) = default;
 
-    template <typename T>
+    template <class T>
     explicit any_hashable(const T& key)
         : ptr_{std::make_shared<wrapper<T>>(key)}
     {
@@ -47,7 +46,7 @@ private:
         virtual size_t hash_code() const = 0;
     };
 
-    template <typename T>
+    template <class T>
     class wrapper : public wrapper_base {
         const T key_;
 
@@ -69,7 +68,6 @@ private:
     const std::shared_ptr<const wrapper_base> ptr_;
 };
 
-}  // namespace detail
 }  // namespace bark
 
-#endif  // BARK_DETAIL_ANY_HASHABLE_HPP
+#endif  // BARK_ANY_HASHABLE_HPP

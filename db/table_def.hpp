@@ -3,8 +3,6 @@
 #ifndef BARK_DB_TABLE_DEF_HPP
 #define BARK_DB_TABLE_DEF_HPP
 
-#include <bark/dataset/variant_view.hpp>
-#include <bark/db/qualified_name.hpp>
 #include <bark/db/sql_builder.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <boost/geometry/index/rtree.hpp>
@@ -12,17 +10,16 @@
 #include <string>
 #include <vector>
 
-namespace bark {
-namespace db {
+namespace bark::db {
 
 enum class column_type { Invalid, Blob, Geometry, Integer, Real, Text };
 
 enum class index_type { Invalid, Primary, Secondary };
 
-using column_decoder = std::function<void(sql_builder&, string_view col_nm)>;
+using column_decoder =
+    std::function<void(sql_builder&, std::string_view col_nm)>;
 
-using column_encoder =
-    std::function<void(sql_builder&, dataset::variant_view val)>;
+using column_encoder = std::function<void(sql_builder&, variant_t val)>;
 
 using rtree =
     boost::geometry::index::rtree<geometry::box,
@@ -33,12 +30,12 @@ struct column_def {
     column_type type = column_type::Invalid;
     std::string projection;
 
-    column_decoder decoder = [](sql_builder& bld, string_view col_nm) {
+    column_decoder decoder = [](sql_builder& bld, std::string_view col_nm) {
         bld << id(col_nm);
     };
 
-    column_encoder encoder = [](sql_builder& bld, dataset::variant_view val) {
-        bld << param(val);
+    column_encoder encoder = [](sql_builder& bld, variant_t val) {
+        bld << param{val};
     };
 
     rtree tiles;
@@ -55,7 +52,6 @@ struct table_def {
     std::vector<index_def> indexes;
 };
 
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_TABLE_DEF_HPP

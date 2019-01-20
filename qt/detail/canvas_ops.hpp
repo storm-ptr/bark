@@ -11,9 +11,7 @@
 #include <bark/qt/detail/canvas.hpp>
 #include <stdexcept>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
 inline void check(const canvas& map)
 {
@@ -22,7 +20,7 @@ inline void check(const canvas& map)
         throw std::logic_error("size mismatch");
 }
 
-template <typename T>
+template <class T>
 T make(const frame&);
 
 template <>
@@ -39,7 +37,7 @@ inline canvas make<canvas>(const frame& frm)
     return {frm, make<QImage>(frm)};
 }
 
-template <typename Functor>
+template <class Functor>
 canvas operator|(const canvas& map, Functor fn)
 {
     return fn(map);
@@ -87,8 +85,6 @@ inline auto transform(const frame& frm)
     };
 }
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_CANVAS_OPS_HPP

@@ -3,14 +3,13 @@
 #ifndef BARK_DB_QUALIFIED_NAME_HPP
 #define BARK_DB_QUALIFIED_NAME_HPP
 
-#include <bark/common.hpp>
+#include <bark/utility.hpp>
 #include <boost/functional/hash.hpp>
 #include <ostream>
 #include <string>
 #include <vector>
 
-namespace bark {
-namespace db {
+namespace bark::db {
 
 /**
  * SQL permits names that consist of a single identifier or multiple
@@ -38,7 +37,7 @@ inline qualified_name qualifier(const qualified_name& name)
 
 inline std::ostream& operator<<(std::ostream& os, const qualified_name& name)
 {
-    return os << list(name, ".");
+    return os << list{name, "."};
 }
 
 inline size_t hash_value(const qualified_name& name)
@@ -51,22 +50,21 @@ inline qualified_name id()
     return {};
 }
 
-template <typename... T>
-auto id(string_view parent, T&&... children)
+template <class... Ts>
+auto id(std::string_view parent, Ts&&... children)
 {
-    auto res = id(std::forward<T>(children)...);
+    auto res = id(std::forward<Ts>(children)...);
     if (!parent.empty())
-        res.insert(res.begin(), parent.to_string());
+        res.insert(res.begin(), std::string{parent});
     return res;
 }
 
-inline auto id(qualified_name parent, string_view child)
+inline auto id(qualified_name parent, std::string_view child)
 {
-    parent.push_back(child.to_string());
+    parent.emplace_back(child);
     return parent;
 }
 
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db
 
 #endif  // BARK_DB_QUALIFIED_NAME_HPP

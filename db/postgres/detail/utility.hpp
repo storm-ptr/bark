@@ -1,20 +1,18 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_POSTGRES_DETAIL_COMMON_HPP
-#define BARK_DB_POSTGRES_DETAIL_COMMON_HPP
+#ifndef BARK_DB_POSTGRES_DETAIL_UTILITY_HPP
+#define BARK_DB_POSTGRES_DETAIL_UTILITY_HPP
 
-#include <bark/common.hpp>
+#include <bark/blob.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/map.hpp>
+#include <cstdint>
 #include <libpq-fe.h>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace postgres {
-namespace detail {
+namespace bark::db::postgres::detail {
 
 constexpr Oid PGRES_TYPE_BOOL = 16;
 constexpr Oid PGRES_TYPE_INT2 = 21;
@@ -34,13 +32,13 @@ constexpr Oid PGRES_TYPE_BYTEA = 17;
 constexpr int PGRES_FORMAT_TEXT = 0;
 constexpr int PGRES_FORMAT_BINARY = 1;
 
-template <typename T>
+template <class T>
 constexpr auto code_of()
 {
     using namespace boost::mpl;
     return (Oid)at<map<pair<int64_t, int_<PGRES_TYPE_INT8>>,
                        pair<double, int_<PGRES_TYPE_FLOAT8>>,
-                       pair<string_view, int_<PGRES_TYPE_TEXT>>,
+                       pair<std::string_view, int_<PGRES_TYPE_TEXT>>,
                        pair<blob_view, int_<PGRES_TYPE_BYTEA>>>,
                    T>::type::value;
 }
@@ -73,9 +71,6 @@ inline void check(const connection_holder& con, bool condition)
         throw std::runtime_error(error(con.get()));
 }
 
-}  // namespace detail
-}  // namespace postgres
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::postgres::detail
 
-#endif  // BARK_DB_POSTGRES_DETAIL_COMMON_HPP
+#endif  // BARK_DB_POSTGRES_DETAIL_UTILITY_HPP

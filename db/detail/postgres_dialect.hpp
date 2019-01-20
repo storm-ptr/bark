@@ -3,15 +3,13 @@
 #ifndef BARK_DB_DETAIL_POSTGRES_DIALECT_HPP
 #define BARK_DB_DETAIL_POSTGRES_DIALECT_HPP
 
-#include <bark/db/detail/common.hpp>
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/sql_builder_ops.hpp>
 #include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
-namespace bark {
-namespace db {
-namespace detail {
+namespace bark::db::detail {
 
 class postgres_dialect : public dialect {
 public:
@@ -31,14 +29,14 @@ public:
     {
         auto& scm = reverse_at(tbl_nm, 1);
         bld << "SELECT column_name, (CASE data_type WHEN "
-            << param("USER-DEFINED")
+            << param{"USER-DEFINED"}
             << " THEN udt_name ELSE data_type END), numeric_scale FROM "
                "information_schema.columns WHERE table_schema = "
-            << param(scm) << " AND table_name = " << param(tbl_nm.back())
+            << param{scm} << " AND table_name = " << param{tbl_nm.back()}
             << " ORDER BY ordinal_position";
     }
 
-    column_type type(string_view type_lcase, int scale) override
+    column_type type(std::string_view type_lcase, int scale) override
     {
         if (within(type_lcase)("array"))
             return column_type::Invalid;
@@ -55,7 +53,7 @@ public:
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        string_view type_lcase) override
+                        std::string_view type_lcase) override
     {
         if (type_lcase == "geography")
             bld << "SELECT 4326";
@@ -76,9 +74,9 @@ WITH indexes AS (
     AND i.indrelid = t.oid
     AND t.relnamespace = s.oid
     AND s.nspname = )"
-            << param(scm) << R"(
+            << param{scm} << R"(
     AND t.relname = )"
-            << param(tbl_nm.back()) << R"(
+            << param{tbl_nm.back()} << R"(
 ), columns AS (
   SELECT indexes.*, generate_series(lb, ub) col FROM indexes
 )
@@ -89,11 +87,12 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     column_decoder geometry_decoder() override { return ogc_decoder(); }
 
-    column_encoder geometry_encoder(string_view type_lcase, int srid) override
+    column_encoder geometry_encoder(std::string_view type_lcase,
+                                    int srid) override
     {
         if (type_lcase == "geography")
-            return [](sql_builder& bld, dataset::variant_view v) {
-                bld << "ST_GeogFromWKB(" << param(v) << ")";
+            return [](sql_builder& bld, variant_t v) {
+                bld << "ST_GeogFromWKB(" << param{v} << ")";
             };
         else
             return ogc_encoder(srid);
@@ -101,7 +100,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    string_view type_lcase) override
+                    std::string_view type_lcase) override
     {
         if (type_lcase == "geography")
             ogc_extent_sql(bld, col_nm);
@@ -112,12 +111,12 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
-                       string_view col_nm,
+                       std::string_view col_nm,
                        const geometry::box& extent) override
     {
         auto blob = geometry::as_binary(extent);
         bld << id(col_nm) << " && "
-            << encode(column(tbl.columns, col_nm), blob);
+            << encoder{column(tbl.columns, col_nm), blob};
     }
 
     void current_schema_sql(sql_builder& bld) override
@@ -141,13 +140,13 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void add_geometry_column_sql(sql_builder& bld,
                                  const table_def& tbl,
-                                 string_view col_nm,
+                                 std::string_view col_nm,
                                  int srid) override
     {
         auto& scm = reverse_at(tbl.name, 1);
-        bld << "SELECT AddGeometryColumn(" << param(scm) << ", "
-            << param(tbl.name.back()) << ", " << param(col_nm) << ", " << srid
-            << ", " << param("GEOMETRY") << ", 2)";
+        bld << "SELECT AddGeometryColumn(" << param{scm} << ", "
+            << param{tbl.name.back()} << ", " << param{col_nm} << ", " << srid
+            << ", " << param{"GEOMETRY"} << ", 2)";
     }
 
     void create_spatial_index_sql(sql_builder& bld,
@@ -155,7 +154,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
                                   const index_def& idx) override
     {
         bld << "CREATE INDEX ON " << tbl.name << " USING GIST ("
-            << list(idx.columns, ", ", id<>) << ")";
+            << list{idx.columns, ", ", id<>} << ")";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override
@@ -164,8 +163,6 @@ WHERE attrelid = tbl AND attnum = cols[col])";
     }
 };
 
-}  // namespace detail
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::detail
 
 #endif  // BARK_DB_DETAIL_POSTGRES_DIALECT_HPP

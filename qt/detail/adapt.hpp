@@ -10,47 +10,46 @@
 #include <bark/geometry/geometry.hpp>
 #include <string>
 
-namespace bark {
-namespace qt {
+namespace bark::qt {
 namespace detail {
 
-inline QPointF adapt(const geometry::point& point)
-{
-    return {point.x(), point.y()};
-}
+struct adaptor {
+    auto operator()(const geometry::point& v) const
+    {
+        return QPointF{v.x(), v.y()};
+    }
 
-inline geometry::point adapt(const QPointF& point)
-{
-    return {point.x(), point.y()};
-}
+    auto operator()(const QPointF& v) const
+    {
+        return geometry::point{v.x(), v.y()};
+    }
 
-inline QString adapt(const std::string& str)
-{
-    return QString::fromStdString(str);
-}
+    auto operator()(const std::string& v) const
+    {
+        return QString::fromStdString(v);
+    }
 
-inline std::string adapt(const QString& str)
-{
-    return str.toStdString();
-}
+    auto operator()(const QString& v) const { return v.toStdString(); }
 
-inline auto adapt(const db::qualified_name& name)
-{
-    return back_constructor<QStringList>(
-        name, [](auto& item) { return adapt(item); });
-}
+    auto operator()(const db::qualified_name& v) const
+    {
+        return as<QStringList>(v, *this);
+    }
 
-inline auto adapt(const QStringList& name)
-{
-    return back_constructor<db::qualified_name>(
-        name, [](auto& item) { return adapt(item); });
-}
+    auto operator()(const QStringList& v) const
+    {
+        return as<db::qualified_name>(v, *this);
+    }
+};
 
 }  // namespace detail
 
-using detail::adapt;
+template <class T>
+auto adapt(const T& v)
+{
+    return detail::adaptor{}(v);
+}
 
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt
 
 #endif  // BARK_QT_DETAIL_ADAPT_HPP

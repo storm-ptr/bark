@@ -1,13 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DETAIL_RANDOM_INDEX_HPP
-#define BARK_DETAIL_RANDOM_INDEX_HPP
+#ifndef BARK_RANDOM_INDEX_HPP
+#define BARK_RANDOM_INDEX_HPP
 
 #include <mutex>
 #include <random>
 
 namespace bark {
-namespace detail {
 
 class random_index {
 public:
@@ -21,7 +20,7 @@ public:
 
     value_type operator()()
     {
-        std::lock_guard<std::mutex> lock(guard_);
+        std::lock_guard lock{guard_};
         return dist_(gen_);
     }
 
@@ -31,10 +30,6 @@ private:
     std::uniform_int_distribution<value_type> dist_;
 };
 
-}  // namespace detail
-
-using random_index = detail::random_index;
-
 }  // namespace bark
 
-#endif  // BARK_DETAIL_RANDOM_INDEX_HPP
+#endif  // BARK_RANDOM_INDEX_HPP

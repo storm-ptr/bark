@@ -3,7 +3,6 @@
 #ifndef BARK_TEST_DB_HPP
 #define BARK_TEST_DB_HPP
 
-#include <bark/dataset/rowset_ops.hpp>
 #include <bark/db/gdal/provider.hpp>
 #include <bark/db/mysql/provider.hpp>
 #include <bark/db/odbc/provider.hpp>
@@ -22,7 +21,7 @@ inline auto random_name()
     return bark::db::id(os.str());
 }
 
-const auto& odbc_driver(std::initializer_list<bark::string_view> tokens)
+const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
 {
     using namespace bark;
     static const auto Drivers = db::odbc::drivers();
@@ -31,7 +30,7 @@ const auto& odbc_driver(std::initializer_list<bark::string_view> tokens)
     });
     if (it == boost::end(Drivers)) {
         std::ostringstream os;
-        os << "ODBC driver not found: " << list(tokens, ", ");
+        os << "ODBC driver not found: " << list{tokens, ", "};
         throw std::runtime_error(os.str());
     }
     return *it;
@@ -70,6 +69,14 @@ inline std::vector<bark::db::provider_ptr> make_write_providers()
 }
 #endif
 
+inline bool operator==(const bark::db::rowset& lhs, const bark::db::rowset& rhs)
+{
+    return std::make_tuple(lhs.columns.size(),
+                           static_cast<bark::blob_view>(lhs.data)) ==
+           std::make_tuple(rhs.columns.size(),
+                           static_cast<bark::blob_view>(rhs.data));
+}
+
 TEST_CASE("db_geometry")
 {
     using namespace bark::db;
@@ -88,7 +95,7 @@ TEST_CASE("db_geometry")
     auto rows_from = select(pvd_from, tbl_from.name, cols, 1, Limit);
     unify(rows_from, col);
     std::cout << rows_from << std::endl;
-    REQUIRE(!rows_from.empty());
+    REQUIRE(!rows_from.data.empty());
 
     for (auto& pvd_to : make_write_providers()) {
         auto scr =
@@ -101,15 +108,15 @@ TEST_CASE("db_geometry")
 
         auto cmd = pvd_to->make_command();
         cmd->set_autocommit(false);
-        cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, rows_from));
+        cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, range(rows_from)));
         cmd->commit();
-        cmd.reset(nullptr);
         pvd_to->refresh();
         auto rows_to = select(*pvd_to, tbl_to.name, cols, 0, Limit);
         unify(rows_to, col);
         REQUIRE(rows_from == rows_to);
 
-        drop(*pvd_to, tbl_to.name);
+        cmd->exec(drop_sql(*pvd_to, tbl_to.name));
+        cmd->commit();
         pvd_to->refresh();
         REQUIRE_THROWS(pvd_to->table(tbl_to.name));
     }
@@ -126,7 +133,7 @@ TEST_CASE("gdal_raster")
     auto layer = reg.begin()->first;
     std::cout << layer << '\n'
               << proj::print(pvd.projection(layer)) << '\n'
-              << geometry::wkt(pvd.extent(layer)) << std::endl;
+              << geometry::wkt{pvd.extent(layer)} << std::endl;
 }
 
 #endif  // BARK_TEST_DB_HPP

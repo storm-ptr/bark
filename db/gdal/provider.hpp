@@ -3,31 +3,28 @@
 #ifndef BARK_DB_GDAL_PROVIDER_HPP
 #define BARK_DB_GDAL_PROVIDER_HPP
 
-#include <bark/dataset/rowset_ops.hpp>
 #include <bark/db/detail/cacher.hpp>
-#include <bark/db/detail/common.hpp>
+#include <bark/db/detail/utility.hpp>
 #include <bark/db/gdal/command.hpp>
 #include <bark/db/gdal/detail/dataset.hpp>
 #include <bark/db/gdal/detail/frame.hpp>
-#include <bark/db/provider.hpp>
+#include <bark/db/provider_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/envelope.hpp>
 #include <bark/geometry/geometry_ops.hpp>
-#include <boost/optional.hpp>
-#include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/find_if.hpp>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 
-namespace bark {
-namespace db {
-namespace gdal {
+namespace bark::db::gdal {
 
 class provider : private db::detail::cacher<gdal::provider>,
                  public db::provider {
     friend db::detail::cacher<gdal::provider>;
 
 public:
-    explicit provider(string_view file) : file_{file}
+    explicit provider(std::string_view file) : file_{file}
     {
         if (is_raster())
             frame_ = detail::frame{detail::dataset{file_}};
@@ -44,7 +41,7 @@ public:
     geometry::box extent(const qualified_name& lr_nm) override
     {
         if (is_raster())
-            return frame_.get().extent();
+            return frame_->extent();
         auto tls = column(*this, lr_nm).tiles;
         return tls.empty() ? geometry::box{} : geometry::envelope(bounds(tls));
     }
@@ -52,8 +49,7 @@ public:
     double undistorted_scale(const qualified_name&,
                              const geometry::view& view) override
     {
-        return is_raster() ? geometry::max_scale(frame_.get().pixel())
-                           : view.scale;
+        return is_raster() ? geometry::max_scale(frame_->pixel()) : view.scale;
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
@@ -62,8 +58,8 @@ public:
         return cached_tiles_first(lr_nm, view);
     }
 
-    dataset::rowset spatial_objects(const qualified_name& lr_nm,
-                                    const geometry::view& view) override
+    rowset spatial_objects(const qualified_name& lr_nm,
+                           const geometry::view& view) override
     {
         return cached_spatial_objects(lr_nm, view);
     }
@@ -95,7 +91,7 @@ public:
 
 private:
     const std::string file_;
-    boost::optional<detail::frame> frame_;
+    std::optional<detail::frame> frame_;
 
     layer_to_type_map load_dir()
     {
@@ -120,10 +116,7 @@ private:
         auto qry = detail::dataset{file_}.layer_by_sql(bld.sql()).table();
         auto tbl = detail::dataset{file_}.layer_by_name(tbl_nm).table();
         auto diff = set_difference(qry.columns, tbl.columns);
-        auto it =
-            std::find_if(tbl.columns.begin(), tbl.columns.end(), [](auto& col) {
-                return col.type != column_type::Geometry;
-            });
+        auto it = boost::range::find_if(tbl.columns, is_not_geom);
         tbl.columns.insert(it, diff.begin(), diff.end());
         if (diff.size() == 1)
             tbl.indexes.insert(tbl.indexes.begin(),
@@ -147,15 +140,15 @@ private:
         return res;
     }
 
-    dataset::rowset load_spatial_objects(const qualified_name& lr_nm,
-                                         const geometry::view& view)
+    rowset load_spatial_objects(const qualified_name& lr_nm,
+                                const geometry::view& view)
     {
         if (is_raster()) {
-            dataset::ostream os;
+            variant_ostream os;
             auto bbox = this->extent(lr_nm);
             if (boost::geometry::intersects(view.extent, bbox))
                 os << geometry::as_binary(bbox) << detail::dataset{file_}.png();
-            return {{"wkb", "image"}, std::move(os).buf()};
+            return {{"wkb", "image"}, std::move(os.data)};
         }
         else {
             gdal::command cmd(file_);
@@ -165,8 +158,6 @@ private:
     }
 };
 
-}  // namespace gdal
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::gdal
 
 #endif  // BARK_DB_GDAL_PROVIDER_HPP

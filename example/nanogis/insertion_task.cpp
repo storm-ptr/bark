@@ -2,9 +2,9 @@
 
 #include "insertion_task.h"
 #include <QElapsedTimer>
-#include <bark/dataset/rowset_ops.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <boost/range/adaptor/map.hpp>
+#include <boost/range/adaptor/sliced.hpp>
 
 namespace {
 
@@ -15,9 +15,19 @@ const qint64 TimeoutMs = 3000;
 auto column_map(bark::qt::layer lr)
 {
     string_map res;
-    for (auto& col : column_names(lr))
+    for (auto& col : attr_names(lr))
         res.insert({col, col});
     return res;
+}
+
+template <class RandomAccessRng, class Functor>
+void for_each_slice(RandomAccessRng&& rng, size_t slice_size, Functor f)
+{
+    for (size_t pos = 0, sz = std::size(rng); pos < sz;) {
+        auto prev = pos;
+        pos += std::min(sz - pos, slice_size);
+        f(boost::adaptors::slice(rng, prev, pos));
+    }
 }
 
 class inserter {
@@ -31,7 +41,7 @@ public:
 
     size_t affected() const { return affected_; }
 
-    template <typename ColumnNames, typename Rows>
+    template <class ColumnNames, class Rows>
     void operator()(const ColumnNames& cols, const Rows& rows)
     {
         exec(*cmd_, insert_sql(*lr_.provider, qualifier(lr_.name), cols, rows));
@@ -106,23 +116,21 @@ void insertion_task::insert(bark::qt::layer from,
     auto geom_pos = std::distance(cols.begin(), cols.find(from.name.back()));
     auto limit = std::max<size_t>(1, MaxVariableNumber / cols.size());
     auto tf = bark::proj::transformer{projection(from), projection(to)};
-    inserter insert{*this, to};
+    auto insert = inserter{*this, to};
     while (true) {
-        auto rowset = select(*from.provider,
-                             qualifier(from.name),
-                             cols | boost::adaptors::map_keys,
-                             insert.affected(),
-                             MaxRowNumber);
-        auto rows = as_vector(rowset);
-        bark::for_each_slice(rows, limit, [&](auto&& rng) {
+        auto rows = select(*from.provider,
+                           qualifier(from.name),
+                           cols | boost::adaptors::map_keys,
+                           insert.affected(),
+                           MaxRowNumber);
+        auto rng = range(rows);
+        for_each_slice(rng, limit, [&](auto&& slice) {
             if (!tf.is_trivial())
-                for (auto&& row : rng)
-                    tf.inplace_forward(const_cast<uint8_t*>(
-                        boost::get<bark::blob_view>(row[geom_pos]).data()));
-            insert(cols | boost::adaptors::map_values, rng);
+                bark::db::for_each_blob(slice, geom_pos, tf.inplace_forward());
+            insert(cols | boost::adaptors::map_values, slice);
             insert.commit(false);
         });
-        if (rows.size() < MaxRowNumber)
+        if (rng.size() < MaxRowNumber)
             break;
     }
     insert.commit(true);

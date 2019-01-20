@@ -10,9 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
 constexpr int PriorityNormal{0};
 
@@ -22,9 +20,9 @@ struct cancel_exception : std::runtime_error {
 
 class runnable : public QRunnable {
 public:
-    template <typename Functor>
-    runnable(Functor&& fn, int priority)
-        : task_{std::forward<Functor>(fn)}, priority_{priority}
+    template <class Functor>
+    runnable(Functor&& f, int priority)
+        : task_{std::forward<Functor>(f)}, priority_{priority}
     {
     }
 
@@ -35,10 +33,10 @@ private:
     const int priority_;
 };
 
-template <typename Functor>
-void start_thread(Functor&& fn, int priority = PriorityNormal)
+template <class Functor>
+void start_thread(Functor&& f, int priority = PriorityNormal)
 {
-    auto ptr = new runnable(std::forward<Functor>(fn), priority);
+    auto ptr = new runnable(std::forward<Functor>(f), priority);
     ptr->setAutoDelete(true);
     QThreadPool::globalInstance()->start(ptr, priority);
 }
@@ -56,8 +54,6 @@ catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
 }
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_START_THREAD_HPP

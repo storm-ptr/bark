@@ -6,10 +6,7 @@
 #include <bark/db/slippy/detail/layer.hpp>
 #include <sstream>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
 class sputnik : public layer {
 public:
@@ -26,9 +23,6 @@ public:
     }
 };
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_SPUTNIK_HPP

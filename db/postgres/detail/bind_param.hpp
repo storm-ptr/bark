@@ -3,15 +3,11 @@
 #ifndef BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP
 #define BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP
 
-#include <bark/dataset/variant_view.hpp>
-#include <bark/db/postgres/detail/common.hpp>
-#include <boost/detail/endian.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <bark/db/postgres/detail/utility.hpp>
+#include <bark/db/rowset.hpp>
+#include <boost/predef/other/endian.h>
 
-namespace bark {
-namespace db {
-namespace postgres {
-namespace detail {
+namespace bark::db::postgres::detail {
 
 struct param {
     virtual ~param() = default;
@@ -30,16 +26,16 @@ struct param_null : param {
     int format() override { return PGRES_FORMAT_TEXT; }
 };
 
-template <typename T>
+template <class T>
 class param_val : public param {
     T val_;
 
 public:
     explicit param_val(T val)
     {
-#if defined BOOST_LITTLE_ENDIAN
+#if defined BOOST_ENDIAN_LITTLE_BYTE
         val_ = reversed(val);
-#elif defined BOOST_BIG_ENDIAN
+#elif defined BOOST_ENDIAN_BIG_BYTE
         val_ = val;
 #else
 #error byte order error
@@ -52,47 +48,38 @@ public:
     int format() override { return PGRES_FORMAT_BINARY; }
 };
 
-template <typename T, int Format>
+template <class T, int Format>
 class param_arr : public param {
-    T arr_;
+    T data_;
 
 public:
-    explicit param_arr(T arr) : arr_(arr) {}
+    explicit param_arr(T data) : data_(data) {}
     Oid type() override { return code_of<T>(); }
-    const char* value() override { return (const char*)arr_.data(); }
-    int length() override { return int(arr_.size()); }
+    const char* value() override { return (const char*)data_.data(); }
+    int length() override { return int(data_.size()); }
     int format() override { return Format; }
 };
 
-struct bind_param_visitor : boost::static_visitor<param*> {
-    param* operator()(boost::blank) const { return new param_null{}; }
-
-    template <typename T>
-    param* operator()(std::reference_wrapper<const T> v) const
-    {
-        return new param_val<T>{v.get()};
-    }
-
-    param* operator()(string_view v) const
-    {
-        return new param_arr<string_view, PGRES_FORMAT_TEXT>{v};
-    }
-
-    param* operator()(blob_view v) const
-    {
-        return new param_arr<blob_view, PGRES_FORMAT_BINARY>{v};
-    }
-};
-
-inline param_holder bind_param(dataset::variant_view param)
+inline param_holder bind_param(const variant_t& v)
 {
-    bind_param_visitor visitor;
-    return param_holder{boost::apply_visitor(visitor, param)};
+    return std::visit(
+        overloaded{[](std::monostate) -> param_holder {
+                       return std::make_unique<param_null>();
+                   },
+                   [](auto v) -> param_holder {
+                       return std::make_unique<param_val<decltype(v)>>(v);
+                   },
+                   [](std::string_view v) -> param_holder {
+                       return std::make_unique<
+                           param_arr<std::string_view, PGRES_FORMAT_TEXT>>(v);
+                   },
+                   [](blob_view v) -> param_holder {
+                       return std::make_unique<
+                           param_arr<blob_view, PGRES_FORMAT_BINARY>>(v);
+                   }},
+        v);
 }
 
-}  // namespace detail
-}  // namespace postgres
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::postgres::detail
 
 #endif  // BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP

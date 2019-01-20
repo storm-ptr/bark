@@ -14,13 +14,10 @@
 #include <bark/qt/detail/adapt.hpp>
 #include <bark/qt/detail/tree.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <optional>
 #include <stdexcept>
 
-namespace bark {
-namespace qt {
-namespace detail {
+namespace bark::qt::detail {
 
 inline auto trimmed_path(const QUrl& uri)
 {
@@ -29,14 +26,14 @@ inline auto trimmed_path(const QUrl& uri)
     return res;
 }
 
-template <typename Provider, typename... Args>
+template <class Provider, class... Args>
 link make_link(const QUrl& uri, Args&&... args)
 {
     auto pvd = std::make_shared<Provider>(std::forward<Args>(args)...);
     return {uri, pvd, db::queryable(*pvd)};
 }
 
-template <typename Provider>
+template <class Provider>
 link make_file_link(const QUrl& uri)
 {
     auto file = uri;
@@ -44,7 +41,7 @@ link make_file_link(const QUrl& uri)
     return make_link<Provider>(uri, adapt(file.toLocalFile()));
 }
 
-template <typename Provider, int Port>
+template <class Provider, int Port>
 link make_server_link(const QUrl& uri)
 {
     return make_link<Provider>(uri,
@@ -94,20 +91,15 @@ inline link make_link(const QUrl& uri)
 
 inline QString to_string(tree* ptr)
 {
-    struct visitor : boost::static_visitor<QString> {
-        result_type operator()(const boost::blank&) const { return {}; }
-
-        result_type operator()(const link& v) const
-        {
-            return v.uri.toDisplayString(QUrl::DecodeReserved);
-        }
-
-        result_type operator()(const layer_def& v) const
-        {
-            return adapt(boost::lexical_cast<std::string>(v.name));
-        }
-    };
-    return boost::apply_visitor(visitor{}, ptr->data);
+    return std::visit(
+        overloaded{[](const std::monostate&) { return QString{}; },
+                   [](const link& v) {
+                       return v.uri.toDisplayString(QUrl::DecodeReserved);
+                   },
+                   [](const layer_def& v) {
+                       return adapt(boost::lexical_cast<std::string>(v.name));
+                   }},
+        ptr->data);
 }
 
 inline auto binary_search(tree* parent, tree* child)
@@ -149,26 +141,26 @@ inline void copy_children_data(tree* from, tree* to)
 
 inline bool is_link(tree* ptr)
 {
-    return ptr->data.which() == which<node, link>();
+    return ptr->data.index() == variant_index<node, link>();
 }
 
 inline bool is_layer(tree* ptr)
 {
-    return ptr->data.which() == which<node, layer_def>();
+    return ptr->data.index() == variant_index<node, layer_def>();
 }
 
-inline boost::optional<Qt::CheckState> state(tree* ptr)
+inline std::optional<Qt::CheckState> state(tree* ptr)
 {
     if (!is_layer(ptr))
         return {};
-    return boost::get<layer_def>(ptr->data).state;
+    return std::get<layer_def>(ptr->data).state;
 }
 
 inline bool toggle(tree* ptr)
 {
     if (!is_layer(ptr))
         return {};
-    auto& lr = boost::get<layer_def>(ptr->data);
+    auto& lr = std::get<layer_def>(ptr->data);
     switch (lr.state) {
         case Qt::Unchecked:
             lr.state = Qt::Checked;
@@ -181,33 +173,31 @@ inline bool toggle(tree* ptr)
     }
 }
 
-inline boost::optional<link> get_link(tree* ptr)
+inline std::optional<link> get_link(tree* ptr)
 {
     if (!is_link(ptr))
         return {};
-    return boost::get<link>(ptr->data);
+    return std::get<link>(ptr->data);
 }
 
-inline boost::optional<layer> get_layer(tree* ptr)
+inline std::optional<layer> get_layer(tree* ptr)
 {
     if (!ptr->parent || !is_link(ptr->parent) || !is_layer(ptr))
         return {};
-    return layer{boost::get<link>(ptr->parent->data),
-                 boost::get<layer_def>(ptr->data)};
+    return layer{std::get<link>(ptr->parent->data),
+                 std::get<layer_def>(ptr->data)};
 }
 
 inline void set_layer(tree* ptr, const layer& lr)
 {
     if (!ptr->parent || !is_link(ptr->parent) || !is_layer(ptr))
         return;
-    auto& lnk = boost::get<link>(ptr->parent->data);
-    auto& def = boost::get<layer_def>(ptr->data);
+    auto& lnk = std::get<link>(ptr->parent->data);
+    auto& def = std::get<layer_def>(ptr->data);
     if (lnk.uri == lr.uri && def.name == lr.name)
         def = lr;
 }
 
-}  // namespace detail
-}  // namespace qt
-}  // namespace bark
+}  // namespace bark::qt::detail
 
 #endif  // BARK_QT_DETAIL_TREE_OPS_HPP

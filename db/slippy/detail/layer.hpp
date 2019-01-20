@@ -9,10 +9,7 @@
 #include <bark/proj/transformer.hpp>
 #include <string>
 
-namespace bark {
-namespace db {
-namespace slippy {
-namespace detail {
+namespace bark::db::slippy::detail {
 
 constexpr int LayerEpsg = 3857;
 constexpr int TileEpsg = 4326;
@@ -34,9 +31,6 @@ inline proj::transformer tile_to_layer_transformer()
     return {proj::epsg().find_proj(TileEpsg), projection()};
 }
 
-}  // namespace detail
-}  // namespace slippy
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::slippy::detail
 
 #endif  // BARK_DB_SLIPPY_DETAIL_LAYER_HPP

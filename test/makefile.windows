@@ -1,4 +1,4 @@
-CXXFLAGS=/EHsc /bigobj /std:c++latest /D_HAS_AUTO_PTR_ETC=1 $(CXXFLAGS)
+CXXFLAGS=/EHsc /bigobj /std:c++17 /O2 $(CXXFLAGS)
 EXECUTABLE=run_me.exe
 INCLUDE=..\..\;$(INCLUDE)
 LIBS=gdal_i.lib libcurl.lib libmysql.lib libpq.lib odbc32.lib proj_i.lib spatialite_i.lib sqlite3_i.lib

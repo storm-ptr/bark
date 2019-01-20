@@ -3,16 +3,12 @@
 #ifndef BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP
 #define BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP
 
-#include <bark/dataset/variant_view.hpp>
-#include <bark/db/odbc/detail/common.hpp>
+#include <bark/db/odbc/detail/utility.hpp>
+#include <bark/db/rowset.hpp>
 #include <bark/unicode.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <memory>
 
-namespace bark {
-namespace db {
-namespace odbc {
-namespace detail {
+namespace bark::db::odbc::detail {
 
 struct binding {
     virtual ~binding() = default;
@@ -57,7 +53,7 @@ public:
     SQLLEN* ind() override { return &ind_; }
 };
 
-template <typename T>
+template <class T>
 class binding_val : public binding {
     T val_;
     SQLLEN ind_ = sizeof(T);
@@ -76,7 +72,7 @@ class binding_text : public binding {
     SQLLEN ind_;
 
 public:
-    explicit binding_text(string_view v)
+    explicit binding_text(std::string_view v)
         : val_(unicode::to_string<SQLWCHAR>(v))
         , ind_(val_.size() * sizeof(SQLWCHAR))
     {
@@ -103,34 +99,27 @@ public:
     SQLLEN* ind() override { return &ind_; }
 };
 
-class binding_visitor : public boost::static_visitor<binding*> {
-public:
-    binding* operator()(boost::blank) const { return new binding_null{}; }
-
-    template <typename T>
-    binding* operator()(std::reference_wrapper<const T> v) const
-    {
-        return new binding_val<T>{v};
-    }
-
-    binding* operator()(string_view v) const { return new binding_text{v}; }
-
-    binding* operator()(blob_view v) const { return new binding_blob{v}; }
-};
-
-inline binding_holder bind_param(const dataset::variant_view* param)
+inline binding_holder bind_param(const variant_t* v)
 {
-    if (param) {
-        binding_visitor visitor;
-        return binding_holder{boost::apply_visitor(visitor, *param)};
-    }
+    if (v)
+        return std::visit(
+            overloaded{[](std::monostate) -> binding_holder {
+                           return std::make_unique<binding_null>();
+                       },
+                       [](auto v) -> binding_holder {
+                           return std::make_unique<binding_val<decltype(v)>>(v);
+                       },
+                       [](std::string_view v) -> binding_holder {
+                           return std::make_unique<binding_text>(v);
+                       },
+                       [](blob_view v) -> binding_holder {
+                           return std::make_unique<binding_blob>(v);
+                       }},
+            *v);
     else
-        return binding_holder{new binding_stub{}};
+        return std::make_unique<binding_stub>();
 }
 
-}  // namespace detail
-}  // namespace odbc
-}  // namespace db
-}  // namespace bark
+}  // namespace bark::db::odbc::detail
 
 #endif  // BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP

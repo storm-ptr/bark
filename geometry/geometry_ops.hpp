@@ -9,8 +9,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace bark {
-namespace geometry {
+namespace bark::geometry {
 
 inline double left(const box& box)
 {
@@ -52,31 +51,31 @@ inline double height(const box& box)
     return top(box) - bottom(box);
 }
 
-template <typename Size>
+template <class Size>
 double width(const Size& size)
 {
     return size.width();
 }
 
-template <typename Size>
+template <class Size>
 double height(const Size& size)
 {
     return size.height();
 }
 
-template <typename Size>
+template <class Size>
 double max_scale(const Size& size)
 {
     return std::max<>(width(size), height(size));
 }
 
-template <typename LhsSize, typename RhsSize>
+template <class LhsSize, class RhsSize>
 double max_scale(const LhsSize& lhs, const RhsSize& rhs)
 {
     return std::max<>(width(lhs) / width(rhs), height(lhs) / height(rhs));
 }
 
-template <typename Point>
+template <class Point>
 void check(const Point& point)
 {
     if (!std::isfinite(point.x()) || !std::isfinite(point.y()))
@@ -103,14 +102,13 @@ inline box pixel(const view& v)
     return {min_corner, max_corner};
 }
 
-template <typename OStream>
+template <class OStream>
 OStream& operator<<(OStream& os, const box& ext)
 {
     return os << left(ext) << "," << bottom(ext) << "," << right(ext) << ","
               << top(ext);
 }
 
-}  // namespace geometry
-}  // namespace bark
+}  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_GEOMETRY_OPS_HPP
