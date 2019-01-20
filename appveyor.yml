@@ -20,7 +20,7 @@ install:
   - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
   - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
   - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-  - call C:\Qt\5.11\msvc2017_64\bin\qtenv2.bat
+  - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_66_0;%INCLUDE%'
   - 'set LIB=%OSGEO4W_ROOT%\lib;%LIB%'
