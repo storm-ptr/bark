@@ -3,7 +3,9 @@ SOURCES = *.cpp
 HEADERS = *.h
 RESOURCES = resource.qrc
 windows:CONFIG += c++17
-unix:CONFIG += c++1z
+unix:CONFIG += strict_c++ c++17
+unix:QMAKE_CXXFLAGS += -std=c++17
+unix:QMAKE_CXXFLAGS += -std=c++1z
 
 windows:INCLUDEPATH += ../../..
 
