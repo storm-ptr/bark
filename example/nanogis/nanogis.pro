@@ -2,10 +2,7 @@ QT = concurrent core gui widgets
 SOURCES = *.cpp
 HEADERS = *.h
 RESOURCES = resource.qrc
-windows:CONFIG += c++17
-unix:CONFIG += strict_c++ c++17
-unix:QMAKE_CXXFLAGS += -std=c++17
-unix:QMAKE_CXXFLAGS += -std=c++1z
+CONFIG += c++17
 
 windows:INCLUDEPATH += ../../..
 

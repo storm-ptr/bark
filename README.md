@@ -30,7 +30,7 @@ windows
 ubuntu
 - [how to set up the environment](https://github.com/storm-ptr/bark/blob/master/readme.ubuntu.txt)
 - [how to test](https://github.com/storm-ptr/bark/blob/master/test/readme.ubuntu.txt)
-- how to run example/nanogis: download debian package for [ubuntu 14.04](https://github.com/storm-ptr/bark/releases/latest) or [ubuntu 18.04](https://yadi.sk/d/V1coAS6C3VKnGd) and run
+- how to run example/nanogis: download debian package for [ubuntu 16.04](https://github.com/storm-ptr/bark/releases/latest) or [ubuntu 18.04](https://yadi.sk/d/V1coAS6C3VKnGd) and run
   ```
   sudo dpkg -i ./nanogis.ubuntu.1804.deb
   sudo apt-get -f install
