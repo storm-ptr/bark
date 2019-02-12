@@ -6,7 +6,7 @@ git:
   depth: 1
 env:
   global:
-  - DEB_ROOT: "$TRAVIS_BUILD_DIR/nanogis.ubuntu.1404"
+  - DEB_ROOT: "$TRAVIS_BUILD_DIR/nanogis.ubuntu.1604"
 matrix:
   include:
   - os: linux
@@ -16,9 +16,9 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         - sourceline: ppa:mhier/libboost-latest
+        - sourceline: ppa:beineri/opt-qt-5.12.0-xenial
         - sourceline: ppa:ubuntugis/ppa
         packages:
-        - boost1.67
         - g++-8
         - libboost-dev
         - libgdal-dev
