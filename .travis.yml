@@ -22,6 +22,7 @@ matrix:
         - g++-8
         - libboost-dev
         - libgdal-dev
+        - libgl1-mesa-dev
         - libproj-dev
         - qt512-meta-minimal
         - qt512base
