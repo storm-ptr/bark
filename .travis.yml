@@ -26,6 +26,8 @@ matrix:
         - qt512-meta-minimal
         - qt512base
         - qt512imageformats
+install:
+- source /opt/qt512/bin/qt512-env.sh
 script:
 - wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
