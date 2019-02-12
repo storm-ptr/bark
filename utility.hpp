@@ -46,9 +46,11 @@ inline auto within(std::string_view rhs)
     };
 }
 
-inline auto equal_to(std::string_view rhs)
+/// @see https://youtu.be/qL6zUn7iiLg?t=477
+template <class T>
+auto equal_to(T rhs)
 {
-    return [rhs](std::string_view lhs) { return lhs == rhs; };
+    return [rhs](auto&& lhs) { return lhs == rhs; };
 }
 
 template <class T, class Predicate>
@@ -106,11 +108,10 @@ struct list {
     {
         auto first = std::begin(that.rng);
         auto last = std::end(that.rng);
-        for (auto it = first; it != last; ++it) {
-            if (it != first)
-                os << that.sep;
-            os << that.op(*it);
-        }
+        if (first != last)
+            os << that.op(*first++);
+        while (first != last)
+            os << that.sep << that.op(*first++);
         return os;
     }
 };

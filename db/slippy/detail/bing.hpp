@@ -4,7 +4,6 @@
 #define BARK_DB_SLIPPY_DETAIL_BING_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <bark/detail/random_index.hpp>
 #include <sstream>
 
 namespace bark::db::slippy::detail {
@@ -31,39 +30,30 @@ struct quad_key {
     }
 };
 
-class bing_maps : public layer {
-    random_index subdomain_{8};
-
-public:
+struct bing_maps : layer {
     qualified_name name() override { return id("bing", "maps"); }
 
     int zmax() override { return 19; }
 
     std::string url(const tile& tl) override
     {
-        // &mkt=en-US
         std::ostringstream os;
-        os << "http://ecn.t" << char('0' + subdomain_())
-           << ".tiles.virtualearth.net/tiles/r" << quad_key{tl}
+        os << "http://tiles.virtualearth.net/tiles/r" << quad_key{tl}
            << ".png?g=1&shading=hill&n=z";
         return os.str();
     }
 };
 
-class bing_aerials : public layer {
-    random_index subdomain_{8};
-
-public:
+struct bing_aerials : layer {
     qualified_name name() override { return id("bing", "aerials"); }
 
     int zmax() override { return 19; }
 
     std::string url(const tile& tl) override
     {
-        // &mkt=en-US
         std::ostringstream os;
-        os << "http://ecn.t" << char('0' + subdomain_())
-           << ".tiles.virtualearth.net/tiles/a" << quad_key{tl} << ".jpeg?g=1";
+        os << "http://tiles.virtualearth.net/tiles/a" << quad_key{tl}
+           << ".jpeg?g=1";
         return os.str();
     }
 };
