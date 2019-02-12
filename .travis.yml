@@ -23,13 +23,13 @@ matrix:
         - libboost-dev
         - libgdal-dev
         - libproj-dev
-        - qt5-default
+        - qt512-meta-full
 script:
 - wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
 - make -f ./makefile.ubuntu test CXX=$COMPILER
 - cd $TRAVIS_BUILD_DIR/example/nanogis
-- qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
+- qmake -qt=qt5 QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
 - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
 - cd $TRAVIS_BUILD_DIR
 - mkdir $DEB_ROOT
