@@ -45,8 +45,9 @@ inline bool sortable(const column_def& col)
         case column_type::Real:
         case column_type::Text:
             return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 template <class Columns>

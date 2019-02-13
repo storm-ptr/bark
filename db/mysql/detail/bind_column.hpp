@@ -108,8 +108,10 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
         case MYSQL_TYPE_MEDIUM_BLOB:
         case MYSQL_TYPE_TINY_BLOB:
             return std::make_unique<column_arr<blob_view>>(bnd);
+        default:
+            throw std::runtime_error("unsupported MySQL type: " +
+                                     std::to_string(type));
     }
-    throw std::runtime_error("unsupported MySQL type: " + std::to_string(type));
 }
 
 }  // namespace bark::db::mysql::detail
