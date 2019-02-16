@@ -94,19 +94,24 @@ inline std::array<box, 4> sub(const box& ext)
             box{{med.get<0>(), min.get<1>()}, {max.get<0>(), med.get<1>()}}};
 }
 
-inline box pixel(const view& v)
-{
-    auto min_corner = boost::geometry::return_centroid<point>(v.extent);
-    auto max_corner = min_corner;
-    boost::geometry::add_value(max_corner, v.scale);
-    return {min_corner, max_corner};
-}
-
 template <class OStream>
 OStream& operator<<(OStream& os, const box& ext)
 {
     return os << left(ext) << "," << bottom(ext) << "," << right(ext) << ","
               << top(ext);
+}
+
+template <class RhsGeom>
+box move_to(const box& lhs, const RhsGeom& rhs)
+{
+    using namespace boost::geometry;
+    auto diff = return_centroid<point>(lhs);
+    subtract_point(diff, return_centroid<point>(rhs));
+    auto min_corner = lhs.min_corner();
+    auto max_corner = lhs.max_corner();
+    add_point(min_corner, diff);
+    add_point(max_corner, diff);
+    return {min_corner, max_corner};
 }
 
 }  // namespace bark::geometry

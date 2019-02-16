@@ -14,10 +14,10 @@
 
 namespace bark::qt::detail {
 
-inline bool tiny(const geometry::box& tile, const geometry::view& view)
+inline bool tiny(const geometry::box& tile, const geometry::box& pixel)
 {
     static constexpr int MinTilePixels{128 * 128};
-    return boost::geometry::area(tile) / boost::geometry::area(pixel(view)) <
+    return boost::geometry::area(tile) / boost::geometry::area(pixel) <
            MinTilePixels;
 }
 
@@ -42,12 +42,13 @@ public:
         for (auto& lr : lrs)
             start_thread([self = shared_from_this(), lr = std::move(lr)] {
                 self->check();
-                auto tf =
-                    proj::transformer{self->frm_.projection, projection(lr)};
-                auto v = tf.forward(view(self->frm_));
-                auto tls = tile_coverage(lr, v);
+                auto pj = projection(lr);
+                auto tf = proj::transformer{pj, self->frm_.projection};
+                auto ext = tf.backward(extent(self->frm_));
+                auto px = tf.backward(pixel(self->frm_));
+                auto tls = tile_coverage(lr, ext, px);
                 self->check();
-                if (!tls.empty() && tiny(tls.front(), v)) {
+                if (!tls.empty() && tiny(tls.front(), px)) {
                     auto mock_lr = lr;
                     mock_lr.brush.setStyle(Qt::NoBrush);
                     auto maps = mock_rendering(mock_lr, tls, self->frm_);

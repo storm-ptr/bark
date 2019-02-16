@@ -43,14 +43,18 @@ inline auto attr_names(const layer& lr)
                             boost::adaptors::filtered(db::is_not_geom));
 }
 
-inline auto tile_coverage(const layer& lr, const geometry::view& view)
+inline auto tile_coverage(const layer& lr,
+                          const geometry::box& ext,
+                          const geometry::box& px)
 {
-    return lr.provider->tile_coverage(lr.name, view);
+    return lr.provider->tile_coverage(lr.name, ext, px);
 }
 
-inline auto spatial_objects(const layer& lr, const geometry::view& view)
+inline auto spatial_objects(const layer& lr,
+                            const geometry::box& ext,
+                            const geometry::box& px)
 {
-    return lr.provider->spatial_objects(lr.name, view);
+    return lr.provider->spatial_objects(lr.name, ext, px);
 }
 
 inline void check(const frame& frm)
@@ -95,11 +99,6 @@ inline geometry::box pixel(const frame& frm)
 inline geometry::box extent(const frame& frm)
 {
     return backward(frm, QRectF{{}, frm.size});
-}
-
-inline geometry::view view(const frame& frm)
-{
-    return {extent(frm), frm.scale};
 }
 
 inline bool operator==(const frame& lhs, const frame& rhs)
@@ -190,8 +189,9 @@ inline auto undistort(layer lr)
         auto pj = projection(lr);
         auto tf = proj::transformer{frm.projection, pj};
         auto center = tf.forward(adapt(frm.center));
-        auto sc =
-            lr.provider->undistorted_scale(lr.name, tf.forward(view(frm)));
+        auto px = tf.forward(pixel(frm));
+        px = lr.provider->undistorted_pixel(lr.name, px);
+        auto sc = geometry::max_scale(px);
         return frm | set_projection(pj) | set_center(center) | set_scale(sc);
     };
 }

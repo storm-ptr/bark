@@ -39,20 +39,6 @@ public:
         return detail::transformed(pj_to_, pj_from_, box);
     }
 
-    geometry::view forward(const geometry::view& view) const
-    {
-        auto ext = forward(view.extent);
-        auto px = forward(geometry::pixel(view));
-        return {ext, geometry::max_scale(px)};
-    }
-
-    geometry::view backward(const geometry::view& view) const
-    {
-        auto ext = backward(view.extent);
-        auto px = backward(geometry::pixel(view));
-        return {ext, geometry::max_scale(px)};
-    }
-
     void inplace_forward(double* begin, double* end) const
     {
         detail::transform(pj_from_, pj_to_, begin, end);

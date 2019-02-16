@@ -43,11 +43,12 @@ protected:
     }
 
     geometry::multi_box cached_tiles_first(const qualified_name& lr_nm,
-                                           const geometry::view& view)
+                                           const geometry::box& ext,
+                                           const geometry::box& px)
     {
         using namespace boost::geometry;
-        auto res = as_mixin().make_tile_coverage(lr_nm, view);
-        auto center = return_centroid<geometry::point>(view.extent);
+        auto res = as_mixin().make_tile_coverage(lr_nm, ext, px);
+        auto center = return_centroid<geometry::point>(ext);
         std::sort(res.begin(), res.end(), [center](auto& lhs, auto& rhs) {
             return distance(center, return_centroid<geometry::point>(lhs)) <
                    distance(center, return_centroid<geometry::point>(rhs));
@@ -59,11 +60,12 @@ protected:
     }
 
     rowset cached_spatial_objects(const qualified_name& lr_nm,
-                                  const geometry::view& view)
+                                  const geometry::box& ext,
+                                  const geometry::box& px)
     {
         return std::any_cast<rowset>(
-            lru_cache::get_or_load(scope_, layer_tile{lr_nm, view.extent}, [&] {
-                return as_mixin().load_spatial_objects(lr_nm, view);
+            lru_cache::get_or_load(scope_, layer_tile{lr_nm, ext}, [&] {
+                return as_mixin().load_spatial_objects(lr_nm, ext, px);
             }));
     }
 

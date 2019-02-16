@@ -160,12 +160,13 @@ void attributes_task::run_event()
     ::push_output(*this, lr_.name);
 
     auto tf = proj::transformer{frm_.projection, projection(lr_)};
-    auto v = tf.forward(view(frm_));
-    auto intersects = make_intersects(v.extent);
+    auto ext = tf.forward(extent(frm_));
+    auto px = tf.forward(pixel(frm_));
+    auto intersects = make_intersects(ext);
 
     std::optional<db::rowset> res;
-    for (auto&& tl : tile_coverage(lr_, v)) {
-        auto objects = spatial_objects(lr_, {tl, v.scale});
+    for (auto&& tl : tile_coverage(lr_, ext, px)) {
+        auto objects = spatial_objects(lr_, tl, px);
         auto rng = range(objects);
         if (res) {
             if (res->columns != objects.columns)

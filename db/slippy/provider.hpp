@@ -31,26 +31,27 @@ public:
         return tf.forward(detail::extent({}));
     }
 
-    double undistorted_scale(const qualified_name& lr_nm,
-                             const geometry::view& view) override
+    geometry::box undistorted_pixel(const qualified_name& lr_nm,
+                                    const geometry::box& px) override
     {
         auto tf = detail::tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto px = geometry::pixel(view);
         auto tl = detail::match(tf.backward(px), lr->zmax());
-        return geometry::max_scale(tf.forward(detail::pixel(tl)));
+        return geometry::move_to(tf.forward(detail::pixel(tl)), px);
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
-                                      const geometry::view& view) override
+                                      const geometry::box& ext,
+                                      const geometry::box& px) override
     {
-        return cached_tiles_first(lr_nm, view);
+        return cached_tiles_first(lr_nm, ext, px);
     }
 
     rowset spatial_objects(const qualified_name& lr_nm,
-                           const geometry::view& view) override
+                           const geometry::box& ext,
+                           const geometry::box& px) override
     {
-        return cached_spatial_objects(lr_nm, view);
+        return cached_spatial_objects(lr_nm, ext, px);
     }
 
     command_holder make_command() override
@@ -81,21 +82,25 @@ private:
     layer_to_type_map load_dir() { return layers_.dir(); }
 
     geometry::multi_box make_tile_coverage(const qualified_name& lr_nm,
-                                           const geometry::view& view)
+                                           const geometry::box& ext,
+                                           const geometry::box& px)
     {
         auto tf = detail::tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto tls = detail::tile_coverage(tf.backward(view), lr->zmax());
+        auto z = detail::match(tf.backward(px), lr->zmax()).z;
+        auto tls = detail::tile_coverage(tf.backward(ext), z);
         return as<geometry::multi_box>(
             tls, [&tf](auto& tl) { return tf.forward(detail::extent(tl)); });
     }
 
     rowset load_spatial_objects(const qualified_name& lr_nm,
-                                const geometry::view& view)
+                                const geometry::box& ext,
+                                const geometry::box& px)
     {
         auto tf = detail::tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto tls = detail::tile_coverage(tf.backward(view), lr->zmax());
+        auto z = detail::match(tf.backward(px), lr->zmax()).z;
+        auto tls = detail::tile_coverage(tf.backward(ext), z);
 
         bark::curl<detail::tile> jobs;
         for (auto& tl : tls)
@@ -104,9 +109,8 @@ private:
         variant_ostream os;
         while (!jobs.empty()) {
             auto [tl, img] = jobs.pop();
-            auto ext = tf.forward(detail::extent(tl));
-            os << geometry::as_binary(ext) << *img << tl.z << tl.x << tl.y
-               << lr->url(tl);
+            os << geometry::as_binary(tf.forward(detail::extent(tl))) << *img
+               << tl.z << tl.x << tl.y << lr->url(tl);
         }
         return {{"wkb", "image", "zoom", "x", "y", "url"}, std::move(os.data)};
     }

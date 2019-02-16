@@ -53,8 +53,8 @@ inline QVector<canvas> geometry_rendering(const layer& lr,
     if (wnd.size.isEmpty())
         return {};
 
-    auto scale = tf.backward(view(frm)).scale;
-    auto rows = spatial_objects(lr, {tl, scale});
+    auto px = tf.backward(pixel(frm));
+    auto rows = spatial_objects(lr, tl, px);
     auto rng = range(rows);
     if (!tf.is_trivial())
         db::for_each_blob(rng, 0, tf.inplace_forward());
@@ -73,8 +73,8 @@ inline QVector<canvas> raster_rendering(const layer& lr,
     QVector<canvas> res;
     auto pj = projection(lr);
     auto tf = proj::transformer{pj, frm.projection};
-    auto v = tf.backward(view(frm));
-    auto rows = spatial_objects(lr, {tl, v.scale});
+    auto px = tf.backward(pixel(frm));
+    auto rows = spatial_objects(lr, tl, px);
     for (auto& row : range(rows)) {
         auto wkb = std::get<blob_view>(row[0]);
         auto bbox = envelope(poly_from_wkb(wkb));

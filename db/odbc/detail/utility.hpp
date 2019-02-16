@@ -103,7 +103,7 @@ void check(const HandleHolder& handle, SQLRETURN r)
     if (!SQL_SUCCEEDED(r))
         throw std::runtime_error(msg.empty() ? "ODBC error" : msg);
     if (!msg.empty())
-        std::cout << msg << std::endl;
+        std::cerr << msg << std::endl;
 }
 
 template <class HandleHolder>

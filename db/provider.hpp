@@ -32,15 +32,17 @@ struct provider {
 
     virtual geometry::box extent(const qualified_name& layer) = 0;
 
-    virtual double undistorted_scale(const qualified_name& layer,
-                                     const geometry::view&) = 0;
+    virtual geometry::box undistorted_pixel(const qualified_name& layer,
+                                            const geometry::box& pixel) = 0;
 
     virtual geometry::multi_box tile_coverage(const qualified_name& layer,
-                                              const geometry::view&) = 0;
+                                              const geometry::box& extent,
+                                              const geometry::box& pixel) = 0;
 
     /// @return {<wkb[, image][, attributes]>}
     virtual rowset spatial_objects(const qualified_name& layer,
-                                   const geometry::view&) = 0;
+                                   const geometry::box& extent,
+                                   const geometry::box& pixel) = 0;
 
     virtual command_holder make_command() = 0;
 

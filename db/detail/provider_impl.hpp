@@ -37,22 +37,24 @@ public:
         return db::extent(column(*this, lr_nm));
     }
 
-    double undistorted_scale(const qualified_name&,
-                             const geometry::view& view) override
+    geometry::box undistorted_pixel(const qualified_name&,
+                                    const geometry::box& px) override
     {
-        return view.scale;
+        return px;
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
-                                      const geometry::view& view) override
+                                      const geometry::box& ext,
+                                      const geometry::box& px) override
     {
-        return as_mixin().cached_tiles_first(lr_nm, view);
+        return as_mixin().cached_tiles_first(lr_nm, ext, px);
     }
 
     rowset spatial_objects(const qualified_name& lr_nm,
-                           const geometry::view& view) override
+                           const geometry::box& ext,
+                           const geometry::box& px) override
     {
-        return as_mixin().cached_spatial_objects(lr_nm, view);
+        return as_mixin().cached_spatial_objects(lr_nm, ext, px);
     }
 
     command_holder make_command() override { return pool_->make_command(); }
@@ -95,17 +97,19 @@ protected:
     }
 
     geometry::multi_box make_tile_coverage(const qualified_name& lr_nm,
-                                           const geometry::view& view)
+                                           const geometry::box& ext,
+                                           const geometry::box&)
     {
         geometry::multi_box res;
         column(*this, lr_nm)
-            .tiles.query(boost::geometry::index::intersects(view.extent),
+            .tiles.query(boost::geometry::index::intersects(ext),
                          std::back_inserter(res));
         return res;
     }
 
     rowset load_spatial_objects(const qualified_name& lr_nm,
-                                const geometry::view& view)
+                                const geometry::box& ext,
+                                const geometry::box&)
     {
         auto tbl = table(qualifier(lr_nm));
         auto col_nm = lr_nm.back();
@@ -115,7 +119,7 @@ protected:
         bld << "SELECT "
             << list{tbl.columns, ", ", [](auto& col) { return decoder{col}; }}
             << " FROM " << tbl.name << " WHERE ";
-        as_dialect().window_clause(bld, tbl, col_nm, view.extent);
+        as_dialect().window_clause(bld, tbl, col_nm, ext);
         return fetch_all(*this, bld);
     }
 

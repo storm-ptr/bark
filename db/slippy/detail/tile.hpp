@@ -102,16 +102,15 @@ inline tile match(const geometry::box& px, int zmax)
                        : *std::min_element(tls.begin(), tls.end(), cmp);
 }
 
-inline tiles tile_coverage(const geometry::view& view, int zmax)
+inline tiles tile_coverage(const geometry::box& ext, int z)
 {
-    auto z = match(pixel(view), zmax).z;
     auto filter = [&](const tile& tl) {
-        if (tl.z > z || !boost::geometry::intersects(view.extent, extent(tl)))
+        if (tl.z > z || !boost::geometry::intersects(ext, extent(tl)))
             return false;
         if (tl.z < z)
             return true;
         geometry::box visible{};
-        boost::geometry::intersection(view.extent, extent(tl), visible);
+        boost::geometry::intersection(ext, extent(tl), visible);
         auto sub_pixel = pixel(sub(tl).front());
         return geometry::width(visible) > geometry::width(sub_pixel) &&
                geometry::height(visible) > geometry::height(sub_pixel);

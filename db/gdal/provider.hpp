@@ -46,22 +46,24 @@ public:
         return tls.empty() ? geometry::box{} : geometry::envelope(bounds(tls));
     }
 
-    double undistorted_scale(const qualified_name&,
-                             const geometry::view& view) override
+    geometry::box undistorted_pixel(const qualified_name&,
+                                    const geometry::box& px) override
     {
-        return is_raster() ? geometry::max_scale(frame_->pixel()) : view.scale;
+        return is_raster() ? geometry::move_to(frame_->pixel(), px) : px;
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
-                                      const geometry::view& view) override
+                                      const geometry::box& ext,
+                                      const geometry::box& px) override
     {
-        return cached_tiles_first(lr_nm, view);
+        return cached_tiles_first(lr_nm, ext, px);
     }
 
     rowset spatial_objects(const qualified_name& lr_nm,
-                           const geometry::view& view) override
+                           const geometry::box& ext,
+                           const geometry::box& px) override
     {
-        return cached_spatial_objects(lr_nm, view);
+        return cached_spatial_objects(lr_nm, ext, px);
     }
 
     command_holder make_command() override
@@ -125,34 +127,36 @@ private:
     }
 
     geometry::multi_box make_tile_coverage(const qualified_name& lr_nm,
-                                           const geometry::view& view)
+                                           const geometry::box& ext,
+                                           const geometry::box&)
     {
         geometry::multi_box res;
         if (is_raster()) {
             auto bbox = this->extent(lr_nm);
-            if (boost::geometry::intersects(view.extent, bbox))
+            if (boost::geometry::intersects(ext, bbox))
                 res.push_back(std::move(bbox));
         }
         else
             column(*this, lr_nm)
-                .tiles.query(boost::geometry::index::intersects(view.extent),
+                .tiles.query(boost::geometry::index::intersects(ext),
                              std::back_inserter(res));
         return res;
     }
 
     rowset load_spatial_objects(const qualified_name& lr_nm,
-                                const geometry::view& view)
+                                const geometry::box& ext,
+                                const geometry::box&)
     {
         if (is_raster()) {
             variant_ostream os;
             auto bbox = this->extent(lr_nm);
-            if (boost::geometry::intersects(view.extent, bbox))
+            if (boost::geometry::intersects(ext, bbox))
                 os << geometry::as_binary(bbox) << detail::dataset{file_}.png();
             return {{"wkb", "image"}, std::move(os.data)};
         }
         else {
             gdal::command cmd(file_);
-            cmd.open(lr_nm, view.extent);
+            cmd.open(lr_nm, ext);
             return fetch_all(cmd);
         }
     }

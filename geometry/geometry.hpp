@@ -43,11 +43,6 @@ struct geometry_collection : std::vector<geometry> {
 using box = boost::geometry::model::box<point>;
 using multi_box = std::vector<box>;
 
-struct view {
-    box extent;
-    double scale;
-};
-
 }  // namespace bark::geometry
 
 #endif  // BARK_GEOMETRY_GEOMETRY_HPP
