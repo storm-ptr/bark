@@ -25,7 +25,6 @@ matrix:
         - libgl1-mesa-dev
         - libproj-dev
         - qt512-meta-minimal
-        - qt512base
         - qt512imageformats
 install:
 - source /opt/qt512/bin/qt512-env.sh
