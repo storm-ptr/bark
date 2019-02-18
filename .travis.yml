@@ -42,7 +42,7 @@ script:
 - mkdir $DEB_ROOT/usr/local/bin
 - cp $TRAVIS_BUILD_DIR/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
 - mkdir $DEB_ROOT/DEBIAN
-- cp $TRAVIS_BUILD_DIR/control $DEB_ROOT/DEBIAN
+- cp $TRAVIS_BUILD_DIR/example/nanogis/control $DEB_ROOT/DEBIAN
 - dpkg-deb --build $DEB_ROOT
 deploy:
   provider: releases
