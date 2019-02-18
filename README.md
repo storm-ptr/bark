@@ -69,7 +69,7 @@ windows
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
     ```
 
-  - install [git](https://git-scm.com/downloads) and download bark library
+  - install [git](https://git-scm.com/downloads) and clone bark library
 
     ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
@@ -115,6 +115,7 @@ ubuntu 16.04
       sudo add-apt-repository ppa:ubuntugis/ppa
       sudo apt-get update
       sudo apt-get install g++-8
+      sudo apt-get install git
       sudo apt-get install libboost-dev
       sudo apt-get install libgdal-dev
       sudo apt-get install libgl1-mesa-dev
@@ -169,12 +170,24 @@ ubuntu 16.04
     CommLog=1
     UsageCount=1
     ```
+
+  - download Catch2 library
+
+    ```
+    wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
+    ```
+
+  - clone bark library
+
+    ```
+    git clone --depth=1 https://github.com/storm-ptr/bark.git
+    ```
   </p></details>
 * <details><summary>how to test</summary><p>
 
   - start the [virtual machine](https://yadi.sk/d/sdEDsIjC3TkeM6) with databases
 
-  - run
+  - run in bark/test
 
     ```
     make -f ./makefile.ubuntu test CXX=g++-8 CXXFLAGS+=-DBARK_TEST_DATABASE
