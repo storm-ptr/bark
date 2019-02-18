@@ -92,7 +92,7 @@ windows
     ```
   </p></details>
 
-ubuntu
+ubuntu 16.04
 * <details><summary>how to run example/nanogis</summary><p>
 
   download [debian package](https://github.com/storm-ptr/bark/releases/latest) for ubuntu 16.04 and run
@@ -107,6 +107,21 @@ ubuntu
   ```
   </p></details>
 * <details><summary>how to set up the development environment</summary><p>
+  
+  - install packages
+      ```
+      sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+      sudo add-apt-repository ppa:ubuntugis/ppa
+      sudo apt-get update
+      sudo apt-get install g++-8
+      sudo apt-get install libboost-dev
+      sudo apt-get install libgdal-dev
+      sudo apt-get install libgl1-mesa-dev
+      sudo apt-get install libproj-dev
+      sudo apt-get install qt512-meta-minimal
+      sudo apt-get install qt512imageformats
+      ```
   
   - install odbc drivers
 
@@ -162,7 +177,7 @@ ubuntu
   - run
 
     ```
-    make -f ./makefile.ubuntu test CXXFLAGS+=-DBARK_TEST_DATABASE
+    make -f ./makefile.ubuntu test CXX=g++-8 CXXFLAGS+=-DBARK_TEST_DATABASE
     make -f ./makefile.ubuntu clean
     ```
   </p></details>
