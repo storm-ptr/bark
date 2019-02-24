@@ -89,7 +89,7 @@ TEST_CASE("db_geometry")
     std::cout << tbl_from << std::endl;
     REQUIRE(!tbl_from.columns.empty());
     REQUIRE(!tbl_from.indexes.empty());
-    auto cols = column_names(tbl_from.columns);
+    auto cols = names(tbl_from.columns);
     auto col = std::distance(tbl_from.columns.begin(),
                              find(tbl_from.columns, lr_from.back()));
     auto rows_from = select(pvd_from, tbl_from.name, cols, 1, Limit);

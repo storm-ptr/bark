@@ -87,7 +87,7 @@ public:
     sql_builder& operator<<(const qualified_name& name)
     {
         sql_ << list{name, ".", [&](std::string_view id) {
-                         return id_delim{id, syntax_.delimiter};
+                         return delimited{id, syntax_.delimiter};
                      }};
         return *this;
     }
@@ -122,11 +122,11 @@ private:
     variant_ostream params_;
     size_t param_counter_ = 0;
 
-    struct id_delim {
+    struct delimited {
         std::string_view id;
         const identifier_delimiter& delimiter;
 
-        friend std::ostream& operator<<(std::ostream& os, const id_delim& that)
+        friend std::ostream& operator<<(std::ostream& os, const delimited& that)
         {
             that.delimiter(os, that.id);
             return os;

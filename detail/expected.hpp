@@ -42,7 +42,7 @@ private:
 template <class Functor>
 auto make_expected(Functor f) noexcept
 {
-    using expected_t = expected<std::decay_t<std::result_of_t<Functor()>>>;
+    using expected_t = expected<std::decay_t<decltype(f())>>;
     try {
         return expected_t(f());
     }

@@ -92,7 +92,8 @@ private:
 
             auto col = boost::lexical_cast<std::string>(row[Column]);
             idx.columns.push_back(col);
-            if (!contains(tbl.columns, col) || test(row[Descending]))
+            if (db::find(tbl.columns, col) == tbl.columns.end() ||
+                test(row[Descending]))
                 idx.type = index_type::Invalid;  // expression or descending
         }
         if (index_type::Invalid != idx.type)

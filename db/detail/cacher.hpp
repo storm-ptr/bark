@@ -10,7 +10,6 @@
 #include <bark/geometry/geometry.hpp>
 #include <bark/proj/bimap.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/operators.hpp>
 #include <tuple>
 
 namespace bark::db::detail {
@@ -80,12 +79,9 @@ protected:
 private:
     enum keys { ProjectionBimap, Registry, Schema };
 
-    class layer_tile : boost::equality_comparable<layer_tile> {
-    public:
-        layer_tile(const qualified_name& layer, const geometry::box& extent)
-            : name_(layer), extent_(extent)
-        {
-        }
+    struct layer_tile {
+        qualified_name name;
+        geometry::box extent;
 
         friend bool operator==(const layer_tile& lhs, const layer_tile& rhs)
         {
@@ -97,17 +93,13 @@ private:
             return boost::hash_value(that.tie());
         };
 
-    private:
-        const qualified_name name_;
-        const geometry::box extent_;
-
         auto tie() const
         {
-            return std::tie(name_,
-                            extent_.min_corner().x(),
-                            extent_.min_corner().y(),
-                            extent_.max_corner().x(),
-                            extent_.max_corner().y());
+            return std::tie(name,
+                            extent.min_corner().x(),
+                            extent.min_corner().y(),
+                            extent.max_corner().x(),
+                            extent.max_corner().y());
         }
     };
 

@@ -28,12 +28,12 @@ protected:
     }
 
 private:
-    struct col_def {
+    struct column {
         std::string name;
         std::string type;
         bool not_null;
 
-        friend sql_builder& operator<<(sql_builder& bld, const col_def& that)
+        friend sql_builder& operator<<(sql_builder& bld, const column& that)
         {
             return bld << id(that.name) << " " << that.type
                        << (that.not_null ? " NOT NULL" : "");
@@ -44,15 +44,18 @@ private:
     {
         auto& dial = as_mixin().as_dialect();
         bld << "CREATE TABLE " << tbl.name << " (\n\t"
-            << list{tbl.columns | boost::adaptors::filtered(is_not_geom),
+            << list{tbl.columns | boost::adaptors::filtered(
+                                      not_same{column_type::Geometry}),
                     ",\n\t",
-                    [&](auto& col) -> col_def {
+                    [&](auto& col) {
+                        auto name = col.name;
+                        auto type = dial.type_name(col.type);
                         auto cols = {col.name};
-                        return {col.name,
-                                dial.type_name(col.type),
-                                indexed(tbl.indexes, cols)};
+                        auto not_null = indexed(tbl.indexes, cols);
+                        return column{name, type, not_null};
                     }};
-        auto pri = find_primary(tbl.indexes);
+        auto pri =
+            boost::range::find_if(tbl.indexes, same{index_type::Primary});
         if (pri != tbl.indexes.end())
             bld << ",\n\tPRIMARY KEY (" << list{pri->columns, ", ", id<>}
                 << ")";
@@ -61,7 +64,8 @@ private:
 
     void add_geometry_columns_sql(sql_builder& bld, const table_def& tbl)
     {
-        for (auto& col : tbl.columns | boost::adaptors::filtered(is_geom)) {
+        for (auto&& col : tbl.columns | boost::adaptors::filtered(
+                                            same{column_type::Geometry})) {
             int srid = 0;
             for (auto pj : {col.projection, proj::epsg().find_proj(4326)}) {
                 try {
@@ -79,11 +83,9 @@ private:
 
     void create_indexes_sql(sql_builder& bld, const table_def& tbl)
     {
-        for (auto& idx :
-             tbl.indexes | boost::adaptors::filtered([&tbl](auto& idx) {
-                 return idx.type == index_type::Secondary;
-             })) {
-            auto& col = column(tbl.columns, idx.columns.front());
+        for (auto& idx : tbl.indexes | boost::adaptors::filtered(
+                                           same{index_type::Secondary})) {
+            auto& col = *db::find(tbl.columns, idx.columns.front());
             if (col.type == column_type::Geometry)
                 as_mixin().as_dialect().create_spatial_index_sql(bld, tbl, idx);
             else

@@ -78,6 +78,7 @@ blob& operator<<(blob& dest, const T& src)
     return dest;
 }
 
+/// Bytes inserted into the stream are expressed in hexadecimal base (radix 16)
 struct hex {
     blob_view data;
 

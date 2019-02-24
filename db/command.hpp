@@ -23,6 +23,10 @@ struct command {
     virtual void commit() = 0;
 };
 
+using command_allocator = std::function<command*()>;
+using command_deleter = std::function<void(command*)>;
+using command_holder = std::unique_ptr<command, command_deleter>;
+
 inline auto builder(command& cmd)
 {
     return sql_builder{cmd.syntax()};
@@ -55,10 +59,6 @@ T fetch_or_default(command& cmd)
     auto is = variant_istream{rows.data};
     return is.data.empty() ? T{} : boost::lexical_cast<T>(read(is));
 }
-
-using command_allocator = std::function<command*()>;
-using command_deleter = std::function<void(command*)>;
-using command_holder = std::unique_ptr<command, command_deleter>;
 
 }  // namespace bark::db
 

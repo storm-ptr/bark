@@ -10,6 +10,7 @@
 #include <iterator>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <variant>
 
 namespace bark {
@@ -118,6 +119,15 @@ struct list {
 
 template <class... Ts>
 list(Ts...)->list<Ts...>;
+
+template <class It>
+using iter_value_t = typename std::iterator_traits<It>::value_type;
+
+template <class Rng>
+using iterator_t = decltype(std::begin(std::declval<Rng>()));
+
+template <class Rng>
+using range_value_t = iter_value_t<iterator_t<Rng>>;
 
 template <class V, class T, size_t I = 0>
 constexpr size_t variant_index()

@@ -139,14 +139,6 @@ struct line {
     }
 };
 
-template <class ColumnNames>
-auto find(ColumnNames&& col_nms, std::string_view col_nm)
-{
-    return boost::range::find_if(col_nms, [&](auto& item) {
-        return unicode::case_insensitive_equal_to{}(item, col_nm);
-    });
-}
-
 }  // namespace detail
 
 inline std::ostream& operator<<(std::ostream& dest, const rowset& src)
@@ -167,9 +159,11 @@ inline std::ostream& operator<<(std::ostream& dest, const rowset& src)
 
 inline rowset select(std::vector<std::string> cols, const rowset& from)
 {
-    auto positions = as<std::vector<size_t>>(cols, [&](auto& col) {
-        return std::distance(std::begin(from.columns),
-                             detail::find(from.columns, col));
+    auto positions = as<std::vector<size_t>>(cols, [&](auto& lhs) {
+        auto it = boost::range::find_if(from.columns, [&](auto& rhs) {
+            return unicode::case_insensitive_equal_to{}(lhs, rhs);
+        });
+        return std::distance(from.columns.begin(), it);
     });
     variant_ostream os;
     for (auto& row : range(from))

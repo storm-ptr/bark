@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <bark/db/command.hpp>
 #include <exception>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -21,15 +22,15 @@ public:
     {
         auto self = shared_from_this();
         auto deleter = [self](command* cmd) { self->push(cmd); };
-        auto holder = command_holder(nullptr, deleter);
+        auto res = command_holder(nullptr, deleter);
         std::lock_guard lock{guard_};
         if (commands_.empty())
-            holder.reset(alloc_());
+            res.reset(alloc_());
         else {
-            holder.reset(commands_.front().release());
+            res.reset(commands_.front().release());
             commands_.pop();  // no-throw guarantee
         }
-        return holder;
+        return res;
     }
 
 private:
@@ -38,14 +39,14 @@ private:
     std::queue<command_holder> commands_;
 
     void push(command* cmd) try {
-        static const auto ConnectionsLimit =
+        static const auto Limit =
             std::max<size_t>(2, std::thread::hardware_concurrency());
         if (!cmd)
             return;
         auto holder = command_holder(cmd, std::default_delete<command>());
         cmd->set_autocommit(true);
         std::lock_guard lock{guard_};
-        if (commands_.size() < ConnectionsLimit)
+        if (commands_.size() < Limit)
             commands_.emplace(std::move(holder));
     }
     catch (const std::exception&) {

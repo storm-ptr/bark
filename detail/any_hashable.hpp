@@ -4,7 +4,6 @@
 #define BARK_ANY_HASHABLE_HPP
 
 #include <boost/functional/hash.hpp>
-#include <boost/operators.hpp>
 #include <memory>
 #include <typeinfo>
 
@@ -12,16 +11,15 @@ namespace bark {
 
 /**
  * Polymorphic wrapper of hashable value. std::any analogue
- * @see https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Type_Erasure
+ * @see https://en.wikibooks.org/wiki/More_C++_Idioms/Type_Erasure
  */
-class any_hashable : boost::equality_comparable<any_hashable> {
+class any_hashable {
 public:
     any_hashable() = delete;
     any_hashable(const any_hashable&) = default;
 
     template <class T>
-    explicit any_hashable(const T& key)
-        : ptr_{std::make_shared<wrapper<T>>(key)}
+    explicit any_hashable(const T& key) : ptr_{std::make_shared<model<T>>(key)}
     {
     }
 
@@ -40,22 +38,23 @@ public:
     }
 
 private:
-    struct wrapper_base {
-        virtual ~wrapper_base() = default;
-        virtual bool equal_to(const wrapper_base&) const = 0;
+    struct concept
+    {
+        virtual ~concept() = default;
+        virtual bool equal_to(const concept&) const = 0;
         virtual size_t hash_code() const = 0;
     };
 
     template <class T>
-    class wrapper : public wrapper_base {
-        const T key_;
+    class model : public concept {
+        T key_;
 
     public:
-        explicit wrapper(const T& key) : key_{key} {}
+        explicit model(const T& key) : key_{key} {}
 
-        bool equal_to(const wrapper_base& rhs) const override
+        bool equal_to(const concept& that) const override
         {
-            return key_ == dynamic_cast<const wrapper&>(rhs).key_;
+            return this->key_ == dynamic_cast<const model&>(that).key_;
         }
 
         size_t hash_code() const override
@@ -65,7 +64,7 @@ private:
         }
     };
 
-    const std::shared_ptr<const wrapper_base> ptr_;
+    std::shared_ptr<concept> ptr_;
 };
 
 }  // namespace bark

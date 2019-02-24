@@ -106,7 +106,7 @@ public:
     {
         auto blob = geometry::as_binary(extent);
         bld << "db2gse.EnvelopesIntersect(" << id(col_nm) << ", "
-            << encoder{column(tbl.columns, col_nm), blob} << ") = 1";
+            << encoder{*db::find(tbl.columns, col_nm), blob} << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override

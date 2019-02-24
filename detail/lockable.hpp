@@ -33,13 +33,13 @@ public:
     }
 
 private:
-    const T key_;
+    T key_;
 
     class lockable_hash_set {
     public:
         void lock(const T& key)
         {
-            lock_t lock{guard_};
+            std::unique_lock lock{guard_};
             notifier_.wait(lock, is_free(key));
             if (!data_.insert(key).second)
                 throw std::logic_error("lockable_hash_set");
@@ -48,7 +48,7 @@ private:
         void unlock(const T& key)
         {
             {
-                lock_t lock{guard_};
+                std::unique_lock lock{guard_};
                 data_.erase(key);
             }
             notifier_.notify_all();
@@ -56,7 +56,7 @@ private:
 
         bool try_lock(const T& key)
         {
-            lock_t lock{guard_};
+            std::unique_lock lock{guard_};
             return data_.insert(key).second;
         }
 
@@ -64,14 +64,12 @@ private:
         bool try_lock_for(const T& key,
                           const std::chrono::duration<Rep, Period>& duration)
         {
-            lock_t lock{guard_};
+            std::unique_lock lock{guard_};
             return notifier_.wait_for(lock, duration, is_free(key)) &&
                    data_.insert(key).second;
         }
 
     private:
-        using lock_t = std::unique_lock<std::mutex>;
-
         std::mutex guard_;
         std::condition_variable notifier_;
         std::unordered_set<T, boost::hash<T>> data_;
@@ -88,12 +86,6 @@ private:
         return singleton;
     }
 };
-
-template <class T>
-auto make_lockable(T key)
-{
-    return lockable<T>{key};
-}
 
 }  // namespace bark
 

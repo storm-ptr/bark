@@ -89,8 +89,8 @@ private:
         auto lr = layers_[lr_nm];
         auto z = detail::match(tf.backward(px), lr->zmax()).z;
         auto tls = detail::tile_coverage(tf.backward(ext), z);
-        return as<geometry::multi_box>(
-            tls, [&tf](auto& tl) { return tf.forward(detail::extent(tl)); });
+        auto op = [&tf](auto& tl) { return tf.forward(detail::extent(tl)); };
+        return as<geometry::multi_box>(tls, op);
     }
 
     rowset load_spatial_objects(const qualified_name& lr_nm,

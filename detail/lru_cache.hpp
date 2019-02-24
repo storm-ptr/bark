@@ -44,9 +44,9 @@ public:
     template <class T>
     static std::any get_or_load(scope_type scope, T key, loader_type loader)
     {
-        auto key_pair = make_key_pair(scope, std::move(key));
-        auto mutex = make_lockable(key_pair);
-        std::unique_lock<decltype(mutex)> lock{mutex, std::defer_lock};
+        key_type key_pair{std::make_pair(scope, std::move(key))};
+        lockable mutex{key_pair};
+        std::unique_lock lock{mutex, std::defer_lock};
         if (!lock.try_lock_for(CacheTimeout))
             throw busy_exception();
         auto optional = one().at(key_pair);
@@ -60,7 +60,7 @@ public:
     template <class T>
     static bool contains(scope_type scope, T key)
     {
-        return one().has(make_key_pair(scope, std::move(key)));
+        return one().has(key_type{std::make_pair(scope, std::move(key))});
     }
 
 private:
@@ -68,12 +68,6 @@ private:
     std::atomic<scope_type> max_scope_{0};
     std::mutex guard_;
     linked_hash_map<key_type, mapped_type> data_;
-
-    template <class T>
-    static auto make_key_pair(scope_type scope, T key)
-    {
-        return key_type{std::make_pair(scope, std::move(key))};
-    }
 
     bool has(const key_type& key)
     {
@@ -96,9 +90,8 @@ private:
         auto pos = data_.find(key);
         if (pos == data_.end())
             return {};
-        auto optional = pos->second;
         data_.move(pos, data_.end());
-        return optional;
+        return pos->second;
     }
 };
 

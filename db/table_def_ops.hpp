@@ -3,7 +3,6 @@
 #ifndef BARK_DB_TABLE_DEF_OPS_HPP
 #define BARK_DB_TABLE_DEF_OPS_HPP
 
-#include <algorithm>
 #include <bark/db/table_def.hpp>
 #include <bark/geometry/as_text.hpp>
 #include <bark/geometry/envelope.hpp>
@@ -12,7 +11,6 @@
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/search.hpp>
-#include <stdexcept>
 
 namespace bark::db {
 
@@ -21,21 +19,6 @@ inline geometry::box extent(const column_def& col)
     if (col.tiles.empty())
         return {};
     return geometry::envelope(bounds(col.tiles));
-}
-
-inline decltype(auto) name(const column_def& col)
-{
-    return col.name;
-}
-
-inline bool is_geom(const column_def& col)
-{
-    return col.type == column_type::Geometry;
-}
-
-inline bool is_not_geom(const column_def& col)
-{
-    return !is_geom(col);
 }
 
 inline bool sortable(const column_def& col)
@@ -50,52 +33,6 @@ inline bool sortable(const column_def& col)
     }
 }
 
-template <class Columns>
-auto find(Columns&& cols, std::string_view col_nm)
-{
-    return boost::range::find_if(cols, [&](auto& col) {
-        return unicode::case_insensitive_equal_to{}(col_nm, col.name);
-    });
-}
-
-template <class Columns>
-bool contains(Columns&& cols, std::string_view col_nm)
-{
-    return db::find(cols, col_nm) != std::end(cols);
-}
-
-template <class Columns>
-decltype(auto) column(Columns&& cols, std::string_view col_nm)
-{
-    auto it = db::find(cols, col_nm);
-    if (it == std::end(cols))
-        throw std::out_of_range(std::string{col_nm});
-    return *it;
-}
-
-template <class Columns, class ColumnNames>
-auto columns(Columns&& cols, ColumnNames&& col_nms)
-{
-    return as<std::vector<column_def>>(
-        col_nms, [&](auto& col_nm) { return column(cols, col_nm); });
-}
-
-template <class Columns>
-auto column_names(Columns&& cols)
-{
-    return as<std::vector<std::string>>(cols, name);
-}
-
-template <class LhsColumns, class RhsColumns>
-auto set_difference(LhsColumns&& lhs, RhsColumns&& rhs)
-{
-    std::vector<column_def> res;
-    for (auto& col : lhs)
-        if (!contains(rhs, col.name))
-            res.push_back(col);
-    return res;
-}
-
 template <class Indexes, class ColumnNames>
 bool indexed(Indexes&& indexes, ColumnNames&& col_nms)
 {
@@ -106,13 +43,6 @@ bool indexed(Indexes&& indexes, ColumnNames&& col_nms)
                           unicode::case_insensitive_equal_to{}) ==
                       idx.columns.begin();
            }) != indexes.end();
-}
-
-template <class Indexes>
-auto find_primary(Indexes&& indexes)
-{
-    return boost::range::find_if(
-        indexes, [](auto& idx) { return idx.type == index_type::Primary; });
 }
 
 inline std::ostream& operator<<(std::ostream& os, const column_def& col)
@@ -172,6 +102,56 @@ inline bool operator==(const table_def& lhs, const table_def& rhs)
                                lhs.indexes.end(),
                                rhs.indexes.begin(),
                                rhs.indexes.end());
+}
+
+template <class Type>
+struct same {
+    Type type;
+
+    template <class T>
+    bool operator()(const T& val) const
+    {
+        return type == val.type;
+    }
+};
+
+template <class T>
+same(T)->same<T>;
+
+template <class Type>
+struct not_same {
+    Type type;
+
+    template <class T>
+    auto operator()(const T& val) const
+    {
+        return type != val.type;
+    }
+};
+
+template <class T>
+not_same(T)->not_same<T>;
+
+template <class Rng>
+auto find(Rng&& rng, std::string_view name)
+{
+    return boost::range::find_if(rng, [&](auto& item) {
+        return unicode::case_insensitive_equal_to{}(name, item.name);
+    });
+}
+
+template <class Rng, class Names>
+auto select(Rng&& rng, Names&& names)
+{
+    return as<std::vector<range_value_t<Rng>>>(
+        names, [&](auto& name) { return *db::find(rng, name); });
+}
+
+template <class Rng>
+auto names(Rng&& rng)
+{
+    return as<std::vector<std::string>>(rng,
+                                        [&](auto& item) { return item.name; });
 }
 
 }  // namespace bark::db

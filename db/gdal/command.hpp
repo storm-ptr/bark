@@ -46,7 +46,7 @@ public:
             auto ogr_type = OGR_Fld_GetType(field_def);
             cols_.push_back(detail::bind_column(ogr_type));
         }
-        return column_names(lr_.table().columns);
+        return names(lr_.table().columns);
     }
 
     bool fetch(variant_ostream& os) override

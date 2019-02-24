@@ -60,20 +60,20 @@ inline geometry::box pixel(const tile& tl)
 }
 
 template <class Predicate>
-void depth_first_search(tiles& tls, const tile& tl, Predicate filter)
+void depth_first_search(tiles& tls, const tile& tl, const Predicate& p)
 {
-    if (!filter(tl))
+    if (!p(tl))
         return;
     tls.push_back(tl);
     for (auto& sub_tl : sub(tl))
-        depth_first_search(tls, sub_tl, filter);
+        depth_first_search(tls, sub_tl, p);
 }
 
 template <class Predicate>
-tiles depth_first_search(Predicate filter)
+tiles depth_first_search(const Predicate& p)
 {
     tiles tls;
-    depth_first_search(tls, {}, filter);
+    depth_first_search(tls, {}, p);
     return tls;
 }
 

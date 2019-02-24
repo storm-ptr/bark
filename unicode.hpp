@@ -3,21 +3,14 @@
 #ifndef BARK_UNICODE_HPP
 #define BARK_UNICODE_HPP
 
-#include <algorithm>
+#include <bark/utility.hpp>
 #include <boost/regex/pending/unicode_iterator.hpp>
 #include <cwctype>
-#include <iterator>
 #include <string>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 
 namespace bark::unicode {
 namespace detail {
-
-template <class Str>
-using unit_t = typename std::iterator_traits<decltype(
-    std::begin((std::declval<Str>())))>::value_type;
 
 template <class Unit>
 struct utf8 {
@@ -54,7 +47,7 @@ using utf = std::conditional_t<
 template <class ToUnit, class FromStr>
 std::basic_string<ToUnit> to_string(FromStr&& str)
 {
-    using from_unit = detail::unit_t<FromStr>;
+    using from_unit = range_value_t<FromStr>;
     using decoder = typename detail::utf<from_unit>::decoder;
     using encoder = typename detail::utf<ToUnit>::encoder;
     auto view = static_cast<std::basic_string_view<from_unit>>(str);
@@ -65,7 +58,7 @@ std::basic_string<ToUnit> to_string(FromStr&& str)
 template <class Str>
 size_t size(Str&& str)
 {
-    using unit = detail::unit_t<Str>;
+    using unit = range_value_t<Str>;
     using decoder = typename detail::utf<unit>::decoder;
     auto view = static_cast<std::basic_string_view<unit>>(str);
     return std::distance(decoder{view.begin()}, decoder{view.end()});
@@ -80,7 +73,7 @@ auto to_lower(Str&& str)
 {
     auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
     std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towlower);
-    return unicode::to_string<detail::unit_t<Str>>(wstr);
+    return unicode::to_string<range_value_t<Str>>(wstr);
 }
 
 /**
@@ -92,7 +85,7 @@ auto to_upper(Str&& str)
 {
     auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
     std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towupper);
-    return unicode::to_string<detail::unit_t<Str>>(wstr);
+    return unicode::to_string<range_value_t<Str>>(wstr);
 }
 
 struct case_insensitive_equal_to {

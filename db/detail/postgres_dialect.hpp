@@ -116,7 +116,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
     {
         auto blob = geometry::as_binary(extent);
         bld << id(col_nm) << " && "
-            << encoder{column(tbl.columns, col_nm), blob};
+            << encoder{*db::find(tbl.columns, col_nm), blob};
     }
 
     void current_schema_sql(sql_builder& bld) override

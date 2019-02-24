@@ -39,8 +39,8 @@ inline auto script(const layer& from, const link& to)
 
 inline auto attr_names(const layer& lr)
 {
-    return db::column_names(table(lr).columns |
-                            boost::adaptors::filtered(db::is_not_geom));
+    return db::names(table(lr).columns | boost::adaptors::filtered(db::not_same{
+                                             db::column_type::Geometry}));
 }
 
 inline auto tile_coverage(const layer& lr,

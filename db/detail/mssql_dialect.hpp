@@ -100,7 +100,7 @@ public:
     {
         auto blob = geometry::as_binary(extent);
         bld << id(col_nm) << ".Filter("
-            << encoder{column(tbl.columns, col_nm), blob} << ") = 1";
+            << encoder{*db::find(tbl.columns, col_nm), blob} << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override
@@ -144,13 +144,14 @@ public:
                                   const index_def& idx) override
     {
         using geometry::operator<<;
-        if (find_primary(tbl.indexes) == tbl.indexes.end())
+        if (boost::range::find_if(tbl.indexes, same{index_type::Primary}) ==
+            tbl.indexes.end())
             return;
         auto col_nm = idx.columns.front();
         bld << "CREATE SPATIAL INDEX " << index_name(tbl.name, idx.columns)
             << " ON " << tbl.name << " (" << id(col_nm)
-            << ")\n\tWITH(BOUNDING_BOX=(" << extent(column(tbl.columns, col_nm))
-            << "))";
+            << ")\n\tWITH(BOUNDING_BOX=("
+            << extent(*db::find(tbl.columns, col_nm)) << "))";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override

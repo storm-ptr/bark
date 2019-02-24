@@ -12,7 +12,6 @@
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/envelope.hpp>
 #include <bark/geometry/geometry_ops.hpp>
-#include <boost/range/algorithm/find_if.hpp>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -117,12 +116,17 @@ private:
         bld << "SELECT * FROM " << tbl_nm << " LIMIT 0";
         auto qry = detail::dataset{file_}.layer_by_sql(bld.sql()).table();
         auto tbl = detail::dataset{file_}.layer_by_name(tbl_nm).table();
-        auto diff = set_difference(qry.columns, tbl.columns);
-        auto it = boost::range::find_if(tbl.columns, is_not_geom);
-        tbl.columns.insert(it, diff.begin(), diff.end());
-        if (diff.size() == 1)
+        auto diff =
+            qry.columns | boost::adaptors::filtered([&](auto& col) {
+                return db::find(tbl.columns, col.name) == std::end(tbl.columns);
+            });
+        auto it =
+            boost::range::find_if(tbl.columns, not_same{column_type::Geometry});
+        auto count = tbl.columns.size();
+        tbl.columns.insert(it, std::begin(diff), std::end(diff));
+        if (tbl.columns.size() - count == 1)
             tbl.indexes.insert(tbl.indexes.begin(),
-                               {index_type::Primary, column_names(diff)});
+                               {index_type::Primary, names(diff)});
         return tbl;
     }
 

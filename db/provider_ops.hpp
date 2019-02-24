@@ -9,7 +9,6 @@
 #include <bark/db/sql_builder_ops.hpp>
 #include <bark/db/table_def_ops.hpp>
 #include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <exception>
 
 namespace bark::db {
@@ -21,7 +20,7 @@ inline layer_type type(provider& pvd, const qualified_name& layer)
 
 inline column_def column(provider& pvd, const qualified_name& col_nm)
 {
-    return column(pvd.table(qualifier(col_nm)).columns, col_nm.back());
+    return *find(pvd.table(qualifier(col_nm)).columns, col_nm.back());
 }
 
 inline bool queryable(provider& pvd) try {
@@ -62,7 +61,7 @@ sql_builder select_sql(provider& pvd,
 {
     auto res = builder(pvd);
     auto tbl = pvd.table(tbl_nm);
-    auto cols = columns(tbl.columns, col_nms);
+    auto cols = db::select(tbl.columns, col_nms);
     res << "SELECT " << list{cols, ", ", [](auto& col) { return decoder{col}; }}
         << " FROM " << tbl_nm;
     return res;
@@ -75,17 +74,16 @@ sql_builder select_sql(provider& pvd,
                        size_t offset,
                        size_t limit)
 {
-    using namespace boost::adaptors;
     auto res = select_sql(pvd, tbl_nm, col_nms);
     auto tbl = pvd.table(tbl_nm);
-    auto pri = find_primary(tbl.indexes);
-    res << " ORDER BY ";
-    if (pri != tbl.indexes.end())
-        res << list{pri->columns, ", ", id<>};
-    else
-        res << list{
-            tbl.columns | filtered(sortable) | transformed(name), ", ", id<>};
-    res << " ";
+    auto pri = boost::range::find_if(tbl.indexes, same{index_type::Primary});
+    res << " ORDER BY "
+        << list{pri != tbl.indexes.end()
+                    ? pri->columns
+                    : names(tbl.columns | boost::adaptors::filtered(sortable)),
+                ", ",
+                id<>}
+        << " ";
     pvd.page_clause(res, offset, limit);
     return res;
 }
@@ -101,6 +99,7 @@ rowset select(provider& pvd,
     if (!std::equal(std::begin(col_nms),
                     std::end(col_nms),
                     res.columns.begin(),
+                    res.columns.end(),
                     unicode::case_insensitive_equal_to{}))
         res = select({std::begin(col_nms), std::end(col_nms)}, res);
     return res;
@@ -114,7 +113,7 @@ sql_builder insert_sql(provider& pvd,
 {
     auto res = builder(pvd);
     auto tbl = pvd.table(tbl_nm);
-    auto cols = columns(tbl.columns, col_nms);
+    auto cols = db::select(tbl.columns, col_nms);
     auto encode = [&](auto& row) { return row_encoder{cols, row}; };
     res << "INSERT INTO " << tbl_nm << " (" << list{col_nms, ", ", id<>}
         << ") VALUES\n"
