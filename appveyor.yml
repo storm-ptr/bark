@@ -8,6 +8,10 @@ clone_depth: 1
 
 skip_tags: true
 
+services:
+  - mssql2017
+  - mysql
+
 environment:
   OSGEO4W_ROOT: C:\OSGeo4W64
   NANOGIS_ROOT: C:\nanogis
@@ -32,7 +36,7 @@ build_script:
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%/test
-  - nmake /f makefile.windows test
+  - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12!&& nmake -f ./makefile.windows test
 
 after_build:
   - mkdir %NANOGIS_ROOT%

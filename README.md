@@ -87,7 +87,7 @@ windows
   - run in C:\OSGeo4W64\include\bark\test
 
     ```
-    SET CXXFLAGS=/DBARK_TEST_DATABASE&& nmake -f ./makefile.windows test
+    SET CXXFLAGS=/DBARK_TEST_DATABASE_SERVER=192.168.170.128 /DBARK_TEST_DATABASE_PWD=E207cGYM&& nmake -f ./makefile.windows test
     nmake -f ./makefile.windows clean
     ```
   </p></details>
@@ -190,7 +190,7 @@ ubuntu 16.04
   - run in bark/test
 
     ```
-    make -f ./makefile.ubuntu test CXX=g++-8 CXXFLAGS+=-DBARK_TEST_DATABASE
+    make -f ./makefile.ubuntu test CXX=g++-8
     make -f ./makefile.ubuntu clean
     ```
   </p></details>

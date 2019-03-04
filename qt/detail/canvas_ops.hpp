@@ -38,9 +38,9 @@ inline canvas make<canvas>(const frame& frm)
 }
 
 template <class Functor>
-canvas operator|(const canvas& map, Functor fn)
+canvas operator|(const canvas& map, Functor f)
 {
-    return fn(map);
+    return f(map);
 }
 
 inline auto copy(const frame& frm)
