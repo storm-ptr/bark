@@ -36,15 +36,17 @@ install:
   - SET PGPASSWORD=Password12!
   - SET PATH=C:\Program Files\PostgreSQL\10\bin\;%PATH%
 
+before_test:
+  - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+
+test_script:
+  - cd %APPVEYOR_BUILD_FOLDER%/test
+  - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12! /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_PWD=Password12!&& nmake -f ./makefile.windows test
+
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
   - qmake
   - nmake
-
-test_script:
-  - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
-  - cd %APPVEYOR_BUILD_FOLDER%/test
-  - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12! /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_PWD=Password12!&& nmake -f ./makefile.windows test
 
 after_build:
   - mkdir %NANOGIS_ROOT%
