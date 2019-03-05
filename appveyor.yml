@@ -32,7 +32,9 @@ install:
   - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
   - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-2.5.0x64.zip > nul
   - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
-  - call "C:\Program Files\PostgreSQL\10\bin\psql.exe" "host=localhost dbname=postgres user=postgres password=Password12!" -c "CREATE EXTENSION postgis;"
+  - SET PGUSER=postgres
+  - SET PGPASSWORD=Password12!
+  - SET PATH=C:\Program Files\PostgreSQL\10\bin\;%PATH%
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
@@ -40,6 +42,7 @@ build_script:
   - nmake
 
 test_script:
+  - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
   - cd %APPVEYOR_BUILD_FOLDER%/test
   - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12! /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_PWD=Password12!&& nmake -f ./makefile.windows test
 
