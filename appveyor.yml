@@ -30,7 +30,7 @@ install:
   - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
   - 'set LIB=%OSGEO4W_ROOT%\lib;%LIB%'
   - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
-  - 7z x postgis-bundle-pg10-2.5.0x64.zip > nul
+  - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-2.5.0x64.zip > nul
   - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
 
 build_script:
