@@ -11,6 +11,7 @@ skip_tags: true
 services:
   - mssql2017
   - mysql
+  - postgresql101
 
 environment:
   OSGEO4W_ROOT: C:\OSGeo4W64
@@ -28,6 +29,9 @@ install:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
   - 'set LIB=%OSGEO4W_ROOT%\lib;%LIB%'
+  - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
+  - 7z x postgis-bundle-pg10-2.5.0x64.zip > nul
+  - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
@@ -36,7 +40,7 @@ build_script:
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%/test
-  - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12!&& nmake -f ./makefile.windows test
+  - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MSSQL_PWD=Password12! /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_PWD=Password12! /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_PWD=Password12!&& nmake -f ./makefile.windows test
 
 after_build:
   - mkdir %NANOGIS_ROOT%
