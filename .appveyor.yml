@@ -35,6 +35,8 @@ for:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
     - sh: make -f ./makefile.ubuntu test CXX=g++ CXXFLAGS+=-DBARK_TEST_MSSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
 
+  build_script:
+
 -
   matrix:
     only:
