@@ -36,6 +36,7 @@ for:
     - sh: make -f ./makefile.ubuntu test CXX=g++ CXXFLAGS+=-DBARK_TEST_MSSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
 
   build_script:
+    - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
 
 -
   matrix:
