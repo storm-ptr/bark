@@ -30,6 +30,7 @@ for:
     - sh: sudo apt-get -y install libproj-dev
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
+    - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
