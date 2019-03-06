@@ -77,7 +77,7 @@ for:
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
-    - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
+    - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_SERVER_ODBC=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER_ODBC=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
 
   build_script:
     - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
