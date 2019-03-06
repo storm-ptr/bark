@@ -46,35 +46,28 @@ const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
 #define BARK_TEST_POSTGRES_SERVER_ODBC BARK_TEST_DATABASE_SERVER
 #endif
 
-#if defined(BARK_TEST_DATABASE_PWD)
-#define BARK_TEST_DB2_PWD BARK_TEST_DATABASE_PWD
-#define BARK_TEST_MSSQL_PWD BARK_TEST_DATABASE_PWD
-#define BARK_TEST_MYSQL_PWD BARK_TEST_DATABASE_PWD
-#define BARK_TEST_POSTGRES_PWD BARK_TEST_DATABASE_PWD
-#endif
-
 inline std::vector<bark::db::provider_ptr> make_write_providers()
 {
     using namespace bark::db;
     return
     {
-#if defined(BARK_TEST_DB2_SERVER) && defined(BARK_TEST_DB2_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"IBM"}) + ";UID=DB2INST1;PWD=" BOOST_PP_STRINGIZE( BARK_TEST_DB2_PWD) ";DATABASE=SAMPLE;HOSTNAME=" BOOST_PP_STRINGIZE(BARK_TEST_DB2_SERVER)),
+#if defined(BARK_TEST_DB2_SERVER) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"IBM"}) + ";UID=DB2INST1;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=SAMPLE;HOSTNAME=" BOOST_PP_STRINGIZE(BARK_TEST_DB2_SERVER)),
 #endif
-#if defined(BARK_TEST_MSSQL_SERVER) && defined(BARK_TEST_MSSQL_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"SQL", "Server"}) + ";UID=sa;PWD=" BOOST_PP_STRINGIZE( BARK_TEST_MSSQL_PWD) ";DATABASE=master;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MSSQL_SERVER)),
+#if defined(BARK_TEST_MSSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"SQL", "Server"}) + ";UID=sa;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=master;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MSSQL_SERVER)),
 #endif
-#if defined(BARK_TEST_MYSQL_SERVER) && defined(BARK_TEST_MYSQL_PWD)
-        std::make_shared<mysql::provider>(BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER), 3306, "mysql", "root", BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_PWD)),
+#if defined(BARK_TEST_MYSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<mysql::provider>(BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER), 3306, "mysql", "root", BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD)),
 #endif
-#if defined(BARK_TEST_MYSQL_SERVER_ODBC) && defined(BARK_TEST_MYSQL_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_PWD) ";DATABASE=mysql;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER) ";MULTI_STATEMENTS=1"),
+#if defined(BARK_TEST_MYSQL_SERVER_ODBC) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=mysql;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER) ";MULTI_STATEMENTS=1"),
 #endif
-#if defined(BARK_TEST_POSTGRES_SERVER) && defined(BARK_TEST_POSTGRES_PWD)
-        std::make_shared<postgres::provider>(BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER), 5432, "postgres", "postgres", BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_PWD)),
+#if defined(BARK_TEST_POSTGRES_SERVER) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<postgres::provider>(BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER), 5432, "postgres", "postgres", BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD)),
 #endif
-#if defined(BARK_TEST_POSTGRES_SERVER_ODBC) && defined(BARK_TEST_POSTGRES_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) + ";UID=postgres;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_PWD) ";DATABASE=postgres;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER)),
+#if defined(BARK_TEST_POSTGRES_SERVER_ODBC) && defined(BARK_TEST_DATABASE_PWD)
+        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) + ";UID=postgres;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=postgres;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER)),
 #endif
         std::make_shared<sqlite::provider>(R"(./drop_me.sqlite)")
     };
