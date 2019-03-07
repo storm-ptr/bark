@@ -23,7 +23,6 @@ for:
   environment:
     COMPILER: g++-8
     DEB_NAME: "nanogis.ubuntu.1804"
-    DEB_ROOT: "$APPVEYOR_BUILD_FOLDER/$DEB_NAME"
 
   install:
     - sh: sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
@@ -44,14 +43,14 @@ for:
     - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
     - sh: make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
     - sh: cd $APPVEYOR_BUILD_FOLDER
-    - sh: mkdir $DEB_ROOT
-    - sh: mkdir $DEB_ROOT/usr
-    - sh: mkdir $DEB_ROOT/usr/local
-    - sh: mkdir $DEB_ROOT/usr/local/bin
-    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
-    - sh: mkdir $DEB_ROOT/DEBIAN
-    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control $DEB_ROOT/DEBIAN
-    - sh: dpkg-deb --build $DEB_ROOT
+    - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME
+    - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr
+    - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr/local
+    - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr/local/bin
+    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/nanogis $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr/local/bin
+    - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN
+    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN
+    - sh: dpkg-deb --build $APPVEYOR_BUILD_FOLDER/$DEB_NAME
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
