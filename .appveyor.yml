@@ -22,6 +22,8 @@ for:
 
   environment:
     COMPILER: g++-8
+    DEB_NAME: "nanogis.ubuntu.1804"
+    DEB_ROOT: "$APPVEYOR_BUILD_FOLDER/$DEB_NAME"
 
   install:
     - sh: sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
@@ -41,10 +43,29 @@ for:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
     - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
     - sh: make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
+    - sh: cd $APPVEYOR_BUILD_FOLDER
+    - sh: mkdir $DEB_ROOT
+    - sh: mkdir $DEB_ROOT/usr
+    - sh: mkdir $DEB_ROOT/usr/local
+    - sh: mkdir $DEB_ROOT/usr/local/bin
+    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/nanogis $DEB_ROOT/usr/local/bin
+    - sh: mkdir $DEB_ROOT/DEBIAN
+    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control $DEB_ROOT/DEBIAN
+    - sh: dpkg-deb --build $DEB_ROOT
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
     - sh: make -f ./makefile.ubuntu test CXX=$COMPILER CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_MSSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
+
+  artifacts:
+    - path: $(DEB_NAME).deb
+      name: $(DEB_NAME).deb
+
+  deploy:
+    provider: GitHub
+    auth_token:
+      secure: eK6200vsXUmBfsFy8CVFVCsgBL+WDOP2j2HHHdbcEo5ToHFBljTDUWDNgFq0U5xw
+    artifact: $(DEB_NAME).deb
 
 -
   matrix:
@@ -95,7 +116,6 @@ for:
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
-    - nmake -f ./makefile.windows test
     - SET CXXFLAGS=/DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_ODBC_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
 
   artifacts:
