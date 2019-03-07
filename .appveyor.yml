@@ -60,11 +60,8 @@ for:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
     OSGEO4W_ROOT: C:\OSGeo4W64
-    PATH: "C:\\Program Files\\PostgreSQL\\10\bin\\;%PATH%"
     PGUSER: postgres
     PGPASSWORD: Password12!
-    INCLUDE: "%OSGEO4W_ROOT%\\include;%OSGEO4W_ROOT%\\include\\libpq;%OSGEO4W_ROOT%\\include\\mysql;C:\\Libraries\\boost_1_69_0;%INCLUDE%"
-    LIB: "%OSGEO4W_ROOT%\\lib;%LIB%"
 
   install:
     - mkdir %OSGEO4W_ROOT%
@@ -78,6 +75,8 @@ for:
     - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
+    - 'SET INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
+    - 'SET LIB=%OSGEO4W_ROOT%\lib;%LIB%'
 
   build_script:
     - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
@@ -92,7 +91,7 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
   before_test:
-    - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+    - call "C:\Program Files\PostgreSQL\10\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
