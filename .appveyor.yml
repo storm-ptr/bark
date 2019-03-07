@@ -22,6 +22,9 @@ for:
 
   environment:
     COMPILER: g++-8
+    CFLAGS: "-fPIC"
+    CXXFLAGS: "-std=c++17 -fPIC -DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_ODBC_MSSQL_SERVER=localhost -DBARK_TEST_DATABASE_PWD=Password12!"
+    QMAKE_CXXFLAGS: "-std=c++17"
 
   install:
     - sh: sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
@@ -39,12 +42,12 @@ for:
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
-    - sh: make -f ./makefile.ubuntu test CXX=$COMPILER CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_MSSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
+    - sh: make -f ./makefile.ubuntu test
 
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
-    - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
-    - sh: make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
+    - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER
+    - sh: make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER
 
 -
   matrix:
@@ -60,31 +63,25 @@ for:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
     OSGEO4W_ROOT: C:\OSGeo4W64
+    PATH: "C:\Program Files\PostgreSQL\10\bin\;%PATH%"
+    PGUSER: postgres
+    PGPASSWORD: Password12!
+    CXXFLAGS: "/DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_ODBC_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!"
+    INCLUDE: "%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%"
+    LIB: "%OSGEO4W_ROOT%\lib;%LIB%"
 
   install:
     - mkdir %OSGEO4W_ROOT%
     - ps: Invoke-WebRequest -Uri http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile $env:OSGEO4W_ROOT\osgeo4w-setup-x86_64.exe
     - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
     - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
-    - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
     - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-    - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-    - 'set INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
-    - 'set LIB=%OSGEO4W_ROOT%\lib;%LIB%'
     - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
     - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-2.5.0x64.zip > nul
     - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
-    - SET PGUSER=postgres
-    - SET PGPASSWORD=Password12!
-    - SET PATH=C:\Program Files\PostgreSQL\10\bin\;%PATH%
-
-  before_test:
-    - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
-
-  test_script:
-    - cd %APPVEYOR_BUILD_FOLDER%/test
-    - SET CXXFLAGS=/DBARK_TEST_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_MYSQL_SERVER_ODBC=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER_ODBC=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
+    - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
 
   build_script:
     - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
@@ -97,6 +94,13 @@ for:
     - windeployqt --no-quick-import --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw %NANOGIS_ROOT%\nanogis.exe > NUL
     - copy %OSGEO4W_ROOT%\bin\*.dll %NANOGIS_ROOT% > NUL
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
+
+  before_test:
+    - psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+
+  test_script:
+    - cd %APPVEYOR_BUILD_FOLDER%/test
+    - nmake -f ./makefile.windows test
 
   artifacts:
     - path: example\%NANOGIS_ARCHIVE%
