@@ -63,12 +63,12 @@ for:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
     OSGEO4W_ROOT: C:\OSGeo4W64
-    PATH: "C:\Program Files\PostgreSQL\10\bin\;%PATH%"
+    PATH: "C:\\Program Files\\PostgreSQL\\10\bin\\;%PATH%"
     PGUSER: postgres
     PGPASSWORD: Password12!
     CXXFLAGS: "/DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_ODBC_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!"
-    INCLUDE: "%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%"
-    LIB: "%OSGEO4W_ROOT%\lib;%LIB%"
+    INCLUDE: "%OSGEO4W_ROOT%\\include;%OSGEO4W_ROOT%\\include\\libpq;%OSGEO4W_ROOT%\\include\\mysql;C:\\Libraries\\boost_1_69_0;%INCLUDE%"
+    LIB: "%OSGEO4W_ROOT%\\lib;%LIB%"
 
   install:
     - mkdir %OSGEO4W_ROOT%
