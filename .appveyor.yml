@@ -49,7 +49,7 @@ for:
     - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr/local/bin
     - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/nanogis $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr/local/bin
     - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN
-    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN
+    - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control.ubuntu.1804 $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN/control
     - sh: dpkg-deb --build $APPVEYOR_BUILD_FOLDER/$DEB_NAME
 
   test_script:
