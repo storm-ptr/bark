@@ -3,6 +3,6 @@ Version: 1.0.0
 Section: base
 Priority: optional
 Architecture: amd64
-Depends: g++-8, libcurl3, libgdal20, libmysqlclient20, libodbc2, libproj13, libpq5, libqt5concurrent5, libspatialite7, libsqlite3-0, qt512base
+Depends: libgdal20, libmysqlclient20, libodbc1, libproj13, libpq5, libspatialite7, libsqlite3-0, qt512base
 Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>
 Description: nanogis
