@@ -92,23 +92,36 @@ windows
     ```
   </p></details>
 
-ubuntu 16.04
+ubuntu
 * <details><summary>how to run example/nanogis</summary><p>
 
-  download [debian package](https://github.com/storm-ptr/bark/releases/latest) for ubuntu 16.04 and run
+  download [debian package](https://github.com/storm-ptr/bark/releases/latest) and run
+
+  ubuntu 16.04
   ```
   sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
   sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   sudo add-apt-repository ppa:ubuntugis/ppa
   sudo apt-get update
   sudo dpkg -i ./nanogis.ubuntu.1604.deb
-  sudo apt-get -f install
+  sudo apt-get install -f
   nanogis
+  ```
+
+  ubuntu 18.04
+  ```
+  sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+  sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+  sudo apt-get update
+  sudo dpkg -i ./nanogis.ubuntu.1804.deb
+  sudo apt-get install -f
   ```
   </p></details>
 * <details><summary>how to set up the development environment</summary><p>
   
   - install packages
+
+      ubuntu 16.04
       ```
       sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
       sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -123,6 +136,20 @@ ubuntu 16.04
       sudo apt-get install qt512-meta-minimal
       sudo apt-get install qt512imageformats
       ```
+
+      ubuntu 18.04
+      ```
+      sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+      sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+      sudo apt-get update
+      sudo apt-get -y install git
+      sudo apt-get -y install libboost-dev
+      sudo apt-get -y install libgdal-dev
+      sudo apt-get -y install libgl1-mesa-dev
+      sudo apt-get -y install libproj-dev
+      sudo apt-get -y install qt512-meta-minimal
+      sudo apt-get -y install qt512imageformats
+      ```
   
   - install odbc drivers
 
@@ -134,7 +161,7 @@ ubuntu 16.04
 
     postgres: ```apt-get install odbc-postgresql```
 
-  - check
+    <details><summary>check</summary><p>
 
     ```
     cat /etc/odbcinst.ini
@@ -170,6 +197,7 @@ ubuntu 16.04
     CommLog=1
     UsageCount=1
     ```
+    </p></details>
 
   - download Catch2 library
 
@@ -190,7 +218,7 @@ ubuntu 16.04
   - run in bark/test
 
     ```
-    make -f ./makefile.ubuntu test CXX=g++-8
+    make -f ./makefile.ubuntu test CXX=g++-8 CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_DATABASE_SERVER=192.168.170.128 CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=E207cGYM
     make -f ./makefile.ubuntu clean
     ```
   </p></details>
