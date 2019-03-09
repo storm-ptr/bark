@@ -27,17 +27,26 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
+template <class It>
+using iter_value_t = typename std::iterator_traits<It>::value_type;
+
+template <class Rng>
+using iterator_t = decltype(std::begin(std::declval<Rng>()));
+
+template <class Rng>
+using range_value_t = iter_value_t<iterator_t<Rng>>;
+
 template <class T, class Result = void>
 using if_arithmetic_t =
     std::enable_if_t<std::is_arithmetic_v<T> || std::is_enum_v<T>, Result>;
 
 template <class T>
-if_arithmetic_t<T, T> reversed(T v)
+if_arithmetic_t<T, T> reversed(T val)
 {
-    auto first = reinterpret_cast<std::byte*>(&v);
+    auto first = reinterpret_cast<std::byte*>(&val);
     auto last = first + sizeof(T);
     std::reverse(first, last);
-    return v;
+    return val;
 }
 
 inline auto within(std::string_view rhs)
@@ -77,9 +86,9 @@ void resize_and_assign(Container& container, size_t pos, Item&& item)
 /// @see https://en.cppreference.com/w/cpp/utility/functional/identity
 struct identity {
     template <class T>
-    constexpr decltype(auto) operator()(T&& v) const noexcept
+    constexpr decltype(auto) operator()(T&& val) const noexcept
     {
-        return std::forward<T>(v);
+        return std::forward<T>(val);
     }
 };
 
@@ -119,15 +128,6 @@ struct list {
 
 template <class... Ts>
 list(Ts...)->list<Ts...>;
-
-template <class It>
-using iter_value_t = typename std::iterator_traits<It>::value_type;
-
-template <class Rng>
-using iterator_t = decltype(std::begin(std::declval<Rng>()));
-
-template <class Rng>
-using range_value_t = iter_value_t<iterator_t<Rng>>;
 
 template <class V, class T, size_t I = 0>
 constexpr size_t variant_index()

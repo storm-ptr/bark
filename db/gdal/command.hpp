@@ -69,12 +69,17 @@ public:
         return true;
     }
 
-    void set_autocommit(bool autocommit) override
+    command& set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
+        return *this;
     }
 
-    void commit() override { transaction::commit(); }
+    command& commit() override
+    {
+        transaction::commit();
+        return *this;
+    }
 
     command& open(const qualified_name& layer, const geometry::box& bbox)
     {

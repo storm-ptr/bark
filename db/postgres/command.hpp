@@ -40,8 +40,8 @@ public:
     sql_syntax syntax() override
     {
         sql_syntax res{};
-        res.marker = [](std::ostream& os, size_t param_order) {
-            os << '$' << (param_order + 1);
+        res.parameter_marker = [](size_t param_order) {
+            return "$" + std::to_string(param_order + 1);
         };
         return res;
     }
@@ -114,12 +114,17 @@ public:
         return true;
     }
 
-    void set_autocommit(bool autocommit) override
+    command& set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
+        return *this;
     }
 
-    void commit() override { transaction::commit(); }
+    command& commit() override
+    {
+        transaction::commit();
+        return *this;
+    }
 
 private:
     detail::connection_holder con_;

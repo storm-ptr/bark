@@ -21,20 +21,6 @@ namespace bark::db {
 struct qualified_name : std::vector<std::string> {
 };
 
-inline const std::string& reverse_at(const qualified_name& name, size_t pos)
-{
-    static const std::string Empty{};
-    return pos < name.size() ? name[name.size() - pos - 1] : Empty;
-}
-
-inline qualified_name qualifier(const qualified_name& name)
-{
-    qualified_name res{name};
-    if (!res.empty())
-        res.pop_back();
-    return res;
-}
-
 inline std::ostream& operator<<(std::ostream& os, const qualified_name& name)
 {
     return os << list{name, "."};
@@ -45,17 +31,26 @@ inline size_t hash_value(const qualified_name& name)
     return boost::hash_range(name.begin(), name.end());
 }
 
-inline qualified_name id()
+inline const std::string& reverse_at(const qualified_name& name, size_t pos)
 {
-    return {};
+    static const std::string Empty{};
+    return pos < name.size() ? name[name.size() - pos - 1] : Empty;
+}
+
+inline qualified_name qualifier(qualified_name name)
+{
+    if (!name.empty())
+        name.pop_back();
+    return name;
 }
 
 template <class... Ts>
 auto id(std::string_view parent, Ts&&... children)
 {
-    auto res = id(std::forward<Ts>(children)...);
+    qualified_name res;
     if (!parent.empty())
-        res.insert(res.begin(), std::string{parent});
+        res.emplace_back(parent);
+    (res.emplace_back(std::forward<Ts>(children)), ...);
     return res;
 }
 

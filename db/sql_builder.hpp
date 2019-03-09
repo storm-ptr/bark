@@ -14,32 +14,25 @@
 
 namespace bark::db {
 
-/**
- * An identifier that does not comply with the rules for the format of
- * regular identifiers must always be delimited.
- */
-using identifier_delimiter =
-    std::function<void(std::ostream& os, std::string_view id)>;
-
-/**
- * A parameter marker is a place holder in an SQL statement whose value is
- * obtained during statement execution. Empty marker means embedding the
- * parameters in the SQL text (with quotations if needed).
- */
-using parameter_marker =
-    std::function<void(std::ostream& os, size_t param_order)>;
-
 struct sql_syntax {
-    identifier_delimiter delimiter = [](std::ostream& os, std::string_view id) {
-        os << '"' << id << '"';
-    };
+    /**
+     * The character string that is used as the starting and ending delimiter of
+     * a quoted (delimited) identifier in SQL statements.
+     */
+    std::string identifier_quote = "\"";
 
-    parameter_marker marker = [](std::ostream& os, size_t) { os << "?"; };
+    /**
+     * A parameter marker is a place holder in an SQL statement whose value is
+     * obtained during statement execution. Empty marker means embedding the
+     * parameters in the SQL text (with quotations if needed).
+     */
+    std::function<std::string(size_t param_order)> parameter_marker =
+        [](size_t) { return "?"; };
 };
 
 inline sql_syntax embeded_params(sql_syntax syntax)
 {
-    syntax.marker = parameter_marker{};
+    syntax.parameter_marker = nullptr;
     return syntax;
 }
 
@@ -87,7 +80,7 @@ public:
     sql_builder& operator<<(const qualified_name& name)
     {
         sql_ << list{name, ".", [&](std::string_view id) {
-                         return delimited{id, syntax_.delimiter};
+                         return delimited{id, syntax_.identifier_quote};
                      }};
         return *this;
     }
@@ -95,8 +88,8 @@ public:
     template <class T>
     sql_builder& operator<<(const param<T>& manip)
     {
-        if (syntax_.marker) {
-            syntax_.marker(sql_, param_counter_++);
+        if (syntax_.parameter_marker) {
+            sql_ << syntax_.parameter_marker(param_counter_++);
             params_ << manip.data;
         }
         else
@@ -117,19 +110,18 @@ public:
     }
 
 private:
-    const sql_syntax syntax_;
+    sql_syntax syntax_;
     std::ostringstream sql_;
     variant_ostream params_;
     size_t param_counter_ = 0;
 
     struct delimited {
         std::string_view id;
-        const identifier_delimiter& delimiter;
+        std::string_view quote;
 
         friend std::ostream& operator<<(std::ostream& os, const delimited& that)
         {
-            that.delimiter(os, that.id);
-            return os;
+            return os << that.quote << that.id << that.quote;
         }
     };
 

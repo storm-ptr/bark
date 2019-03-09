@@ -29,7 +29,7 @@ const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
     auto it = boost::range::find_if(Drivers, [tokens](const auto& drv) {
         return all_of(tokens, within(drv));
     });
-    if (it == boost::end(Drivers)) {
+    if (it == std::end(Drivers)) {
         std::ostringstream os;
         os << "ODBC driver not found: " << list{tokens, ", "};
         throw std::runtime_error(os.str());
@@ -111,16 +111,15 @@ TEST_CASE("db_geometry")
         REQUIRE(tbl_from == tbl_to);
 
         auto cmd = pvd_to->make_command();
-        cmd->set_autocommit(false);
-        cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, range(rows_from)));
-        cmd->commit();
+        cmd->set_autocommit(false)
+            .exec(insert_sql(*pvd_to, tbl_to.name, cols, range(rows_from)))
+            .commit();
         pvd_to->refresh();
         auto rows_to = select(*pvd_to, tbl_to.name, cols, 0, Limit);
         unify(rows_to, col);
         REQUIRE(rows_from == rows_to);
 
-        cmd->exec(drop_sql(*pvd_to, tbl_to.name));
-        cmd->commit();
+        cmd->exec(drop_sql(*pvd_to, tbl_to.name)).commit();
         pvd_to->refresh();
         REQUIRE_THROWS(pvd_to->table(tbl_to.name));
     }

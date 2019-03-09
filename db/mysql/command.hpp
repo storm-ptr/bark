@@ -47,9 +47,7 @@ public:
     sql_syntax syntax() override
     {
         db::sql_syntax res{};
-        res.delimiter = [](std::ostream& os, std::string_view id) {
-            os << '`' << id << '`';
-        };
+        res.identifier_quote = "`";
         return res;
     }
 
@@ -119,12 +117,17 @@ public:
         return true;
     }
 
-    void set_autocommit(bool autocommit) override
+    command& set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
+        return *this;
     }
 
-    void commit() override { transaction::commit(); }
+    command& commit() override
+    {
+        transaction::commit();
+        return *this;
+    }
 
 private:
     detail::connection_holder con_;

@@ -40,10 +40,7 @@ public:
     sql_syntax syntax() override
     {
         db::sql_syntax res{};
-        res.delimiter = [quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR)](
-                            std::ostream& os, std::string_view id) {
-            os << quote << id << quote;
-        };
+        res.identifier_quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR);
         return res;
     }
 
@@ -86,23 +83,25 @@ public:
         return true;
     }
 
-    void set_autocommit(bool autocommit) override
+    command& set_autocommit(bool autocommit) override
     {
         reset_stmt(nullptr);
         if (get_autocommit() == autocommit)
-            return;
+            return *this;
         if (autocommit)
             check(dbc_, SQLEndTran(SQL_HANDLE_DBC, dbc_.get(), SQL_ROLLBACK));
         set_attr(dbc_,
                  SQL_ATTR_AUTOCOMMIT,
                  autocommit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF);
+        return *this;
     }
 
-    void commit() override
+    command& commit() override
     {
         reset_stmt(nullptr);
         if (!get_autocommit())
             check(dbc_, SQLEndTran(SQL_HANDLE_DBC, dbc_.get(), SQL_COMMIT));
+        return *this;
     }
 
     std::string dbms_name() const { return get_info(dbc_, SQL_DBMS_NAME); }

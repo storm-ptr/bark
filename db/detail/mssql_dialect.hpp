@@ -79,8 +79,8 @@ public:
                                     int srid) override
     {
         return [type = std::string{type_lcase}, srid](sql_builder& bld,
-                                                      variant_t v) {
-            bld << type << "::STGeomFromWKB(" << param{v} << ", " << srid
+                                                      variant_t val) {
+            bld << type << "::STGeomFromWKB(" << param{val} << ", " << srid
                 << ")";
         };
     }

@@ -28,7 +28,7 @@ protected:
 private:
     using function_type = std::function<void(insertion_task*)>;
 
-    function_type fun_;
+    function_type f_;
 
     bark::qt::layer create(bark::qt::layer from, bark::qt::link to);
     void insert(bark::qt::layer from, bark::qt::layer to, string_map cols);

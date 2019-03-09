@@ -16,9 +16,10 @@ enum class column_type { Invalid, Blob, Geometry, Integer, Real, Text };
 
 enum class index_type { Invalid, Primary, Secondary };
 
-using column_decoder =
-    std::function<void(sql_builder&, std::string_view col_nm)>;
+/// Converts to a well-known representation, e.g. ST_AsBinary
+using column_decoder = std::function<void(sql_builder&, std::string_view name)>;
 
+/// Constructs a value using its well-known representation, e.g. ST_GeomFromWKB
 using column_encoder = std::function<void(sql_builder&, variant_t val)>;
 
 using rtree =
@@ -28,16 +29,16 @@ using rtree =
 struct column_def {
     std::string name;
     column_type type = column_type::Invalid;
-    std::string projection;
 
-    column_decoder decoder = [](sql_builder& bld, std::string_view col_nm) {
-        bld << id(col_nm);
+    column_decoder decoder = [](sql_builder& bld, std::string_view name) {
+        bld << id(name);
     };
 
     column_encoder encoder = [](sql_builder& bld, variant_t val) {
         bld << param{val};
     };
 
+    std::string projection;
     rtree tiles;
 };
 

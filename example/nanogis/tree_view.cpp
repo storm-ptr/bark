@@ -162,7 +162,6 @@ void tree_view::attach_files_slot()
         {"SQLite/SpatiaLite (*)", "sqlite:///"}};
     QFileDialog dlg(this, "attach file(s)");
     dlg.setNameFilters(FilterToSchemaMap.keys());
-    dlg.setFileMode(QFileDialog::ExistingFiles);
     if (dlg.exec() == QDialog::Accepted) {
         auto schema = FilterToSchemaMap.value(dlg.selectedNameFilter());
         for (auto& file : dlg.selectedFiles())

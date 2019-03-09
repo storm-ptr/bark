@@ -142,8 +142,8 @@ inline auto ogc_decoder()
 
 inline auto ogc_encoder(int srid)
 {
-    return [srid](sql_builder& bld, variant_t v) {
-        bld << "ST_GeomFromWKB(" << param{v} << ", " << srid << ")";
+    return [srid](sql_builder& bld, variant_t val) {
+        bld << "ST_GeomFromWKB(" << param{val} << ", " << srid << ")";
     };
 }
 

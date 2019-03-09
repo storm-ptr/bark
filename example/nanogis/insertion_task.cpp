@@ -45,7 +45,7 @@ public:
     void operator()(const ColumnNames& cols, const Rows& rows)
     {
         exec(*cmd_, insert_sql(*lr_.provider, qualifier(lr_.name), cols, rows));
-        affected_ += boost::size(rows);
+        affected_ += std::size(rows);
     }
 
     void commit(bool force)
@@ -70,7 +70,7 @@ private:
 insertion_task::insertion_task(QVector<bark::qt::layer> from,
                                bark::qt::link to,
                                action act)
-    : fun_(([=](insertion_task* self) {
+    : f_(([=](insertion_task* self) {
         if (action::PrintSqlOnly == act)
             self->push_output("-- print only --");
         self->push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
@@ -90,7 +90,7 @@ insertion_task::insertion_task(QVector<bark::qt::layer> from,
 insertion_task::insertion_task(bark::qt::layer from,
                                bark::qt::layer to,
                                string_map cols)
-    : fun_(([=](insertion_task* self) {
+    : f_(([=](insertion_task* self) {
         self->push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
         self->insert(from, to, cols);
     }))
@@ -128,16 +128,16 @@ void insertion_task::insert(bark::qt::layer from,
             if (!tf.is_trivial())
                 bark::db::for_each_blob(slice, geom_pos, tf.inplace_forward());
             insert(cols | boost::adaptors::map_values, slice);
-            insert.commit(false);
+            insert.commit(false /*force*/);
         });
         if (rng.size() < MaxRowNumber)
             break;
     }
-    insert.commit(true);
+    insert.commit(true /*force*/);
     to.provider->refresh();
 }
 
 void insertion_task::run_event()
 {
-    fun_(this);
+    f_(this);
 }

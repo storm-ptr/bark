@@ -19,8 +19,8 @@ struct command {
     virtual command& exec(const sql_builder&) = 0;
     virtual std::vector<std::string> columns() = 0;
     virtual bool fetch(variant_ostream&) = 0;
-    virtual void set_autocommit(bool) = 0;
-    virtual void commit() = 0;
+    virtual command& set_autocommit(bool) = 0;
+    virtual command& commit() = 0;
 };
 
 using command_allocator = std::function<command*()>;
