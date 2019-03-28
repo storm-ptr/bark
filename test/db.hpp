@@ -8,7 +8,6 @@
 #include <bark/db/odbc/provider.hpp>
 #include <bark/db/postgres/provider.hpp>
 #include <bark/db/sqlite/provider.hpp>
-#include <bark/detail/random_index.hpp>
 #include <bark/test/wkb_unifier.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/preprocessor/stringize.hpp>

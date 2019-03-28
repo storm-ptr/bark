@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_DB2_DIALECT_HPP
-#define BARK_DB_DETAIL_DB2_DIALECT_HPP
+#ifndef BARK_DB_DB2_DIALECT_HPP
+#define BARK_DB_DB2_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/utility.hpp>
@@ -9,7 +9,7 @@
 #include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 class db2_dialect : public dialect {
 public:
@@ -157,6 +157,6 @@ public:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_DB2_DIALECT_HPP
+#endif  // BARK_DB_DB2_DIALECT_HPP

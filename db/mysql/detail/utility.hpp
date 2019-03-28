@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_MYSQL_DETAIL_UTILITY_HPP
-#define BARK_DB_MYSQL_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_MYSQL_UTILITY_HPP
+#define BARK_DB_MYSQL_UTILITY_HPP
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -18,7 +18,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark::db::mysql::detail {
+namespace bark::db::mysql {
 
 template <class T>
 constexpr auto code_of()
@@ -79,6 +79,6 @@ void check(const HandleHolder& handle, int r)
     check(handle, r == 0);
 }
 
-}  // namespace bark::db::mysql::detail
+}  // namespace bark::db::mysql
 
-#endif  // BARK_DB_MYSQL_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_MYSQL_UTILITY_HPP

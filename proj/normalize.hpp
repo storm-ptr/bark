@@ -12,7 +12,7 @@ namespace bark::proj {
 
 inline std::string normalize(const std::string& pj) try {
     return pj.empty() ? std::string{}
-                      : boost::trim_copy(detail::projection{pj}.get_def());
+                      : boost::trim_copy(projection{pj}.get_def());
 }
 catch (const std::exception&) {
     return boost::trim_copy(pj);

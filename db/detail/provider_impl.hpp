@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_PROVIDER_IMPL_HPP
-#define BARK_DB_DETAIL_PROVIDER_IMPL_HPP
+#ifndef BARK_DB_PROVIDER_IMPL_HPP
+#define BARK_DB_PROVIDER_IMPL_HPP
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/pool.hpp>
@@ -12,7 +12,7 @@
 #include <exception>
 #include <memory>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class provider_impl : public db::provider {
@@ -168,6 +168,6 @@ private:
     dialect_holder dialect_;
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_PROVIDER_IMPL_HPP
+#endif  // BARK_DB_PROVIDER_IMPL_HPP

@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_TABLE_GUIDE_HPP
-#define BARK_DB_DETAIL_TABLE_GUIDE_HPP
+#ifndef BARK_DB_TABLE_GUIDE_HPP
+#define BARK_DB_TABLE_GUIDE_HPP
 
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <stdexcept>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class table_guide {
@@ -101,6 +101,6 @@ private:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_TABLE_GUIDE_HPP
+#endif  // BARK_DB_TABLE_GUIDE_HPP

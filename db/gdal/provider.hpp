@@ -18,30 +18,29 @@
 
 namespace bark::db::gdal {
 
-class provider : private db::detail::cacher<gdal::provider>,
-                 public db::provider {
-    friend db::detail::cacher<gdal::provider>;
+class provider : private cacher<gdal::provider>, public db::provider {
+    friend cacher<gdal::provider>;
 
 public:
     explicit provider(std::string_view file) : file_{file}
     {
         if (is_raster())
-            frame_ = detail::frame{detail::dataset{file_}};
+            frame_ = frame{dataset{file_}};
     }
 
     layer_to_type_map dir() override { return cached_dir(); }
 
     std::string projection(const qualified_name& lr_nm) override
     {
-        return is_raster() ? detail::dataset{file_}.projection()
-                           : column(*this, lr_nm).projection;
+        return is_raster() ? dataset{file_}.projection()
+                           : db::column(*this, lr_nm).projection;
     }
 
     geometry::box extent(const qualified_name& lr_nm) override
     {
         if (is_raster())
             return frame_->extent();
-        auto tls = column(*this, lr_nm).tiles;
+        auto tls = db::column(*this, lr_nm).tiles;
         return tls.empty() ? geometry::box{} : geometry::envelope(bounds(tls));
     }
 
@@ -85,19 +84,19 @@ public:
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override
     {
-        db::detail::limit_page_clause(bld, offset, limit);
+        limit_page_clause(bld, offset, limit);
     }
 
     void refresh() override { reset_cache(); }
 
 private:
     const std::string file_;
-    std::optional<detail::frame> frame_;
+    std::optional<frame> frame_;
 
     layer_to_type_map load_dir()
     {
         layer_to_type_map res;
-        for (auto& item : detail::dataset{file_}.layers())
+        for (auto& item : dataset{file_}.layers())
             res.emplace(item, layer_type::Geometry);
         if (res.empty())
             res.emplace(id(file_), layer_type::Raster);
@@ -114,8 +113,8 @@ private:
     {
         auto bld = builder(*this);
         bld << "SELECT * FROM " << tbl_nm << " LIMIT 0";
-        auto qry = detail::dataset{file_}.layer_by_sql(bld.sql()).table();
-        auto tbl = detail::dataset{file_}.layer_by_name(tbl_nm).table();
+        auto qry = dataset{file_}.layer_by_sql(bld.sql()).table();
+        auto tbl = dataset{file_}.layer_by_name(tbl_nm).table();
         auto diff =
             qry.columns | boost::adaptors::filtered([&](auto& col) {
                 return db::find(tbl.columns, col.name) == std::end(tbl.columns);
@@ -141,7 +140,7 @@ private:
                 res.push_back(std::move(bbox));
         }
         else
-            column(*this, lr_nm)
+            db::column(*this, lr_nm)
                 .tiles.query(boost::geometry::index::intersects(ext),
                              std::back_inserter(res));
         return res;
@@ -155,7 +154,7 @@ private:
             variant_ostream os;
             auto bbox = this->extent(lr_nm);
             if (boost::geometry::intersects(ext, bbox))
-                os << geometry::as_binary(bbox) << detail::dataset{file_}.png();
+                os << geometry::as_binary(bbox) << dataset{file_}.png();
             return {{"wkb", "image"}, std::move(os.data)};
         }
         else {

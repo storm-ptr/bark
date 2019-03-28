@@ -65,79 +65,74 @@ public:
 
 struct vertex {
     template <class Visitor>
-    static auto accept(istream& is, Visitor& vis)
+    static auto accept(istream& is, Visitor& viz)
     {
         auto x = is.read_double();
         auto y = is.read_double();
-        return vis(x, y);
+        return viz(x, y);
     }
 };
 
 template <class T>
 struct chain {
     template <class Visitor>
-    static auto accept(istream& is, Visitor& vis)
+    static auto accept(istream& is, Visitor& viz)
     {
         auto count = is.read_uint32();
-        auto sum = vis(count, chain{});
+        auto res = viz(count, chain{});
         for (decltype(count) i = 0; i < count; ++i)
-            vis(sum, T::accept(is, vis), chain{});
-        return sum;
+            viz(res, T::accept(is, viz), chain{});
+        return res;
     }
 };
 
-template <uint32_t Code, class T>
+template <class T, uint32_t Code>
 struct tagged {
     template <class Visitor>
-    static auto accept(istream& is, Visitor& vis)
+    static auto accept(istream& is, Visitor& viz)
     {
         is.read_byte_order();
         if (is.read_uint32() != Code)
             throw std::runtime_error("WKB code mismatch");
-        vis(tagged{});
-        return vis(T::accept(is, vis), tagged{});
+        viz(tagged{});
+        return viz(T::accept(is, viz), tagged{});
     }
 };
 
 using path = chain<vertex>;
-using point = tagged<Point, vertex>;
-using linestring = tagged<Linestring, path>;
-using polygon = tagged<Polygon, chain<path>>;
-using multi_point = tagged<MultiPoint, chain<point>>;
-using multi_linestring = tagged<MultiLinestring, chain<linestring>>;
-using multi_polygon = tagged<MultiPolygon, chain<polygon>>;
+using point = tagged<vertex, Point>;
+using linestring = tagged<path, Linestring>;
+using polygon = tagged<chain<path>, Polygon>;
+using multi_point = tagged<chain<point>, MultiPoint>;
+using multi_linestring = tagged<chain<linestring>, MultiLinestring>;
+using multi_polygon = tagged<chain<polygon>, MultiPolygon>;
 struct geometry;
-using geometry_collection = tagged<GeometryCollection, chain<geometry>>;
+using geometry_collection = tagged<chain<geometry>, GeometryCollection>;
 
 struct geometry {
-    template <class T, class Visitor>
-    static auto do_accept(istream& is, Visitor& vis)
-    {
-        return vis(T::accept(is, vis), geometry{});
-    }
-
     template <class Visitor>
-    static auto accept(istream& is, Visitor& vis)
+    static auto accept(istream& is, Visitor& viz)
     {
         auto look_ahead = is;
         look_ahead.read_byte_order();
         switch (look_ahead.read_uint32()) {
             case Point:
-                return do_accept<point>(is, vis);
+                return viz(point::accept(is, viz), geometry{});
             case Linestring:
-                return do_accept<linestring>(is, vis);
+                return viz(linestring::accept(is, viz), geometry{});
             case Polygon:
-                return do_accept<polygon>(is, vis);
+                return viz(polygon::accept(is, viz), geometry{});
             case MultiPoint:
-                return do_accept<multi_point>(is, vis);
+                return viz(multi_point::accept(is, viz), geometry{});
             case MultiLinestring:
-                return do_accept<multi_linestring>(is, vis);
+                return viz(multi_linestring::accept(is, viz), geometry{});
             case MultiPolygon:
-                return do_accept<multi_polygon>(is, vis);
+                return viz(multi_polygon::accept(is, viz), geometry{});
             case GeometryCollection:
-                return do_accept<geometry_collection>(is, vis);
+                return viz(geometry_collection::accept(is, viz), geometry{});
+            default:
+                throw std::runtime_error("unsupported WKB code");
         }
-        throw std::runtime_error("unsupported WKB code");
     }
 };
 

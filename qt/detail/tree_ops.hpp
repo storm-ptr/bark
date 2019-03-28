@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_TREE_OPS_HPP
-#define BARK_QT_DETAIL_TREE_OPS_HPP
+#ifndef BARK_QT_TREE_OPS_HPP
+#define BARK_QT_TREE_OPS_HPP
 
 #include <QString>
 #include <algorithm>
@@ -17,7 +17,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 inline auto trimmed_path(const QUrl& uri)
 {
@@ -198,6 +198,6 @@ inline void set_layer(tree* ptr, const layer& lr)
         def = lr;
 }
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_TREE_OPS_HPP
+#endif  // BARK_QT_TREE_OPS_HPP

@@ -33,8 +33,8 @@ public:
     {
     }
 
-    template <uint32_t Code, class T>
-    void operator()(bark::wkb::tagged<Code, T>)
+    template <class T, uint32_t Code>
+    void operator()(bark::wkb::tagged<T, Code>)
     {
         *this << bark::wkb::HostEndian << Code;
     }

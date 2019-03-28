@@ -3,7 +3,7 @@
 #ifndef BARK_TEST_UNICODE_HPP
 #define BARK_TEST_UNICODE_HPP
 
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <iostream>
 #include <locale>
 #include <string>

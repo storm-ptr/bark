@@ -6,7 +6,7 @@
 #include <bark/db/command.hpp>
 #include <bark/db/odbc/detail/bind_column.hpp>
 #include <bark/db/odbc/detail/bind_param.hpp>
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 
 namespace bark::db::odbc {
 
@@ -16,7 +16,7 @@ public:
     {
         using namespace std::chrono;
 
-        env_.reset(alloc_handle(detail::env_holder{}, SQL_HANDLE_ENV));
+        env_.reset(alloc_handle(env_holder{}, SQL_HANDLE_ENV));
         set_attr(env_, SQL_ATTR_ODBC_VERSION, SQL_OV_ODBC3);
 
         dbc_.reset(alloc_handle(env_, SQL_HANDLE_DBC));
@@ -107,11 +107,11 @@ public:
     std::string dbms_name() const { return get_info(dbc_, SQL_DBMS_NAME); }
 
 private:
-    detail::env_holder env_;
-    detail::dbc_holder dbc_;
-    detail::stmt_holder stmt_;
+    env_holder env_;
+    dbc_holder dbc_;
+    stmt_holder stmt_;
     std::string sql_;
-    std::vector<detail::column_holder> cols_;
+    std::vector<column_holder> cols_;
 
     void reset_stmt(SQLHANDLE stmt)
     {
@@ -137,15 +137,14 @@ private:
     }
 
     template <class VariantViews>
-    [[nodiscard]] std::vector<detail::binding_holder> bind_params(
+    [[nodiscard]] std::vector<binding_holder> bind_params(
         const VariantViews& params) {
-        std::vector<detail::binding_holder> res;
+        std::vector<binding_holder> res;
         SQLSMALLINT num_params = 0;
         SQLNumParams(stmt_.get(), &num_params);
         auto count = std::max<size_t>(num_params, params.size());
         for (size_t i = 0; i < count; ++i) {
-            auto bnd =
-                detail::bind_param(i < params.size() ? &params[i] : nullptr);
+            auto bnd = bind_param(i < params.size() ? &params[i] : nullptr);
             check(stmt_,
                   SQLBindParameter(stmt_.get(),
                                    SQLUSMALLINT(i + 1),

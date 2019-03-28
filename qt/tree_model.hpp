@@ -60,11 +60,11 @@ protected:
     void timerEvent(QTimerEvent*) override;
 
 private:
-    std::shared_ptr<detail::tree> root_;
-    QList<QFuture<std::shared_ptr<detail::tree>>> future_branches_;
+    std::shared_ptr<tree> root_;
+    QList<QFuture<std::shared_ptr<tree>>> future_branches_;
     QBasicTimer timer_;
 
-    detail::tree* to_ptr(const QModelIndex&) const;
+    tree* to_ptr(const QModelIndex&) const;
 };
 
 }  // namespace bark::qt

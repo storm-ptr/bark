@@ -21,42 +21,39 @@ public:
 
     geometry::point forward(const geometry::point& point) const
     {
-        return detail::transformed(pj_from_, pj_to_, point);
+        return transformed(pj_from_, pj_to_, point);
     }
 
     geometry::point backward(const geometry::point& point) const
     {
-        return detail::transformed(pj_to_, pj_from_, point);
+        return transformed(pj_to_, pj_from_, point);
     }
 
     geometry::box forward(const geometry::box& box) const
     {
-        return detail::transformed(pj_from_, pj_to_, box);
+        return transformed(pj_from_, pj_to_, box);
     }
 
     geometry::box backward(const geometry::box& box) const
     {
-        return detail::transformed(pj_to_, pj_from_, box);
+        return transformed(pj_to_, pj_from_, box);
     }
 
     void inplace_forward(double* begin, double* end) const
     {
-        detail::transform(pj_from_, pj_to_, begin, end);
+        transform(pj_from_, pj_to_, begin, end);
     }
 
     void inplace_backward(double* begin, double* end) const
     {
-        detail::transform(pj_to_, pj_from_, begin, end);
+        transform(pj_to_, pj_from_, begin, end);
     }
 
-    void inplace_forward(blob_view wkb) const
-    {
-        detail::stream{pj_from_, pj_to_}(wkb);
-    }
+    void inplace_forward(blob_view wkb) const { stream{pj_from_, pj_to_}(wkb); }
 
     void inplace_backward(blob_view wkb) const
     {
-        detail::stream{pj_to_, pj_from_}(wkb);
+        stream{pj_to_, pj_from_}(wkb);
     }
 
     auto inplace_forward() const
@@ -70,8 +67,8 @@ public:
     }
 
 private:
-    detail::projection pj_from_;
-    detail::projection pj_to_;
+    projection pj_from_;
+    projection pj_to_;
 };
 
 }  // namespace bark::proj

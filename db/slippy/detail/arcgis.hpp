@@ -1,12 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_ARCGIS_HPP
-#define BARK_DB_SLIPPY_DETAIL_ARCGIS_HPP
+#ifndef BARK_DB_SLIPPY_ARCGIS_HPP
+#define BARK_DB_SLIPPY_ARCGIS_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
 #include <sstream>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 class arcgis_imagery : public layer {
 public:
@@ -40,6 +40,6 @@ public:
     }
 };
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_ARCGIS_HPP
+#endif  // BARK_DB_SLIPPY_ARCGIS_HPP

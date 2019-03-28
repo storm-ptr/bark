@@ -3,14 +3,13 @@
 #ifndef BARK_UNICODE_HPP
 #define BARK_UNICODE_HPP
 
-#include <bark/utility.hpp>
+#include <bark/detail/utility.hpp>
 #include <boost/regex/pending/unicode_iterator.hpp>
 #include <cwctype>
 #include <string>
 #include <string_view>
 
 namespace bark::unicode {
-namespace detail {
 
 template <class Unit>
 struct utf8 {
@@ -42,25 +41,21 @@ using utf = std::conditional_t<
                                           utf32<Unit>,
                                           void>>>;
 
-}  // namespace detail
-
 template <class ToUnit, class FromStr>
-std::basic_string<ToUnit> to_string(FromStr&& str)
+std::basic_string<ToUnit> to_string(const FromStr& str)
 {
-    using from_unit = range_value_t<FromStr>;
-    using decoder = typename detail::utf<from_unit>::decoder;
-    using encoder = typename detail::utf<ToUnit>::encoder;
-    auto view = static_cast<std::basic_string_view<from_unit>>(str);
+    auto view = std::basic_string_view{std::data(str), std::size(str)};
+    using decoder = typename utf<range_value_t<decltype(view)>>::decoder;
+    using encoder = typename utf<ToUnit>::encoder;
     auto points = std::u32string{decoder{view.begin()}, decoder{view.end()}};
     return {encoder{points.begin()}, encoder{points.end()}};
 }
 
 template <class Str>
-size_t size(Str&& str)
+size_t size(const Str& str)
 {
-    using unit = range_value_t<Str>;
-    using decoder = typename detail::utf<unit>::decoder;
-    auto view = static_cast<std::basic_string_view<unit>>(str);
+    auto view = std::basic_string_view{std::data(str), std::size(str)};
+    using decoder = typename utf<range_value_t<decltype(view)>>::decoder;
     return std::distance(decoder{view.begin()}, decoder{view.end()});
 }
 
@@ -69,9 +64,9 @@ size_t size(Str&& str)
  * the current locale
  */
 template <class Str>
-auto to_lower(Str&& str)
+auto to_lower(const Str& str)
 {
-    auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
+    auto wstr = unicode::to_string<wchar_t>(str);
     std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towlower);
     return unicode::to_string<range_value_t<Str>>(wstr);
 }
@@ -81,19 +76,18 @@ auto to_lower(Str&& str)
  * the current locale
  */
 template <class Str>
-auto to_upper(Str&& str)
+auto to_upper(const Str& str)
 {
-    auto wstr = unicode::to_string<wchar_t>(std::forward<Str>(str));
+    auto wstr = unicode::to_string<wchar_t>(str);
     std::transform(wstr.begin(), wstr.end(), wstr.begin(), std::towupper);
     return unicode::to_string<range_value_t<Str>>(wstr);
 }
 
 struct case_insensitive_equal_to {
     template <class Lhs, class Rhs>
-    bool operator()(Lhs&& lhs, Rhs&& rhs) const
+    bool operator()(const Lhs& lhs, const Rhs& rhs) const
     {
-        return to_lower(std::forward<Lhs>(lhs)) ==
-               to_lower(std::forward<Rhs>(rhs));
+        return to_lower(lhs) == to_lower(rhs);
     }
 };
 

@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_DDL_HPP
-#define BARK_DB_DETAIL_DDL_HPP
+#ifndef BARK_DB_DDL_HPP
+#define BARK_DB_DDL_HPP
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/sql_builder.hpp>
@@ -10,7 +10,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <sstream>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class ddl {
@@ -97,6 +97,6 @@ private:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_DDL_HPP
+#endif  // BARK_DB_DDL_HPP

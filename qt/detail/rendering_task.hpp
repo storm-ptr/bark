@@ -1,7 +1,7 @@
 ﻿// Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_RENDERING_TASK_HPP
-#define BARK_QT_DETAIL_RENDERING_TASK_HPP
+#ifndef BARK_QT_RENDERING_TASK_HPP
+#define BARK_QT_RENDERING_TASK_HPP
 
 #include <QPainter>
 #include <QVector>
@@ -12,7 +12,7 @@
 #include <memory>
 #include <mutex>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 inline bool tiny(const geometry::box& tile, const geometry::box& pixel)
 {
@@ -106,6 +106,6 @@ private:
     }
 };
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_RENDERING_TASK_HPP
+#endif  // BARK_QT_RENDERING_TASK_HPP

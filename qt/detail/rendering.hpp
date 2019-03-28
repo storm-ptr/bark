@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_RENDERING_HPP
-#define BARK_QT_DETAIL_RENDERING_HPP
+#ifndef BARK_QT_RENDERING_HPP
+#define BARK_QT_RENDERING_HPP
 
 #include <QMargins>
 #include <QPainter>
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 template <class Geometry>
 QVector<canvas> mock_rendering(const layer& lr,
@@ -121,6 +121,6 @@ catch (const std::exception& e) {
     return mock_rendering(mock_lr, tl, frm);
 }
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_RENDERING_HPP
+#endif  // BARK_QT_RENDERING_HPP

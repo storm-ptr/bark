@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_PROJ_DETAIL_TRANSFORM_HPP
-#define BARK_PROJ_DETAIL_TRANSFORM_HPP
+#ifndef BARK_PROJ_TRANSFORM_HPP
+#define BARK_PROJ_TRANSFORM_HPP
 
 #include <algorithm>
 #include <bark/detail/grid.hpp>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace bark::proj::detail {
+namespace bark::proj {
 
 inline void transform(projPJ pj_from, projPJ pj_to, double* begin, double* end)
 {
@@ -68,6 +68,6 @@ inline geometry::box transformed(projPJ pj_from,
             {*minmax_x.second, *minmax_y.second}};
 }
 
-}  // namespace bark::proj::detail
+}  // namespace bark::proj
 
-#endif  // BARK_PROJ_DETAIL_TRANSFORM_HPP
+#endif  // BARK_PROJ_TRANSFORM_HPP

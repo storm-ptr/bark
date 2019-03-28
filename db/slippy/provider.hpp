@@ -13,31 +13,30 @@
 
 namespace bark::db::slippy {
 
-class provider : private db::detail::cacher<slippy::provider>,
-                 public db::provider {
+class provider : private cacher<slippy::provider>, public db::provider {
 public:
-    friend db::detail::cacher<slippy::provider>;
+    friend cacher<slippy::provider>;
 
     layer_to_type_map dir() override { return cached_dir(); }
 
     std::string projection(const qualified_name&) override
     {
-        return detail::projection();
+        return slippy::projection();
     }
 
     geometry::box extent(const qualified_name&) override
     {
-        auto tf = detail::tile_to_layer_transformer();
-        return tf.forward(detail::extent({}));
+        auto tf = tile_to_layer_transformer();
+        return tf.forward(slippy::extent({}));
     }
 
     geometry::box undistorted_pixel(const qualified_name& lr_nm,
                                     const geometry::box& px) override
     {
-        auto tf = detail::tile_to_layer_transformer();
+        auto tf = tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto tl = detail::match(tf.backward(px), lr->zmax());
-        return geometry::move_to(tf.forward(detail::pixel(tl)), px);
+        auto tl = match(tf.backward(px), lr->zmax());
+        return geometry::move_to(tf.forward(slippy::pixel(tl)), px);
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
@@ -77,7 +76,7 @@ public:
     void refresh() override { reset_cache(); }
 
 private:
-    detail::layers layers_;
+    layers layers_;
 
     layer_to_type_map load_dir() { return layers_.dir(); }
 
@@ -85,11 +84,11 @@ private:
                                            const geometry::box& ext,
                                            const geometry::box& px)
     {
-        auto tf = detail::tile_to_layer_transformer();
+        auto tf = tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto z = detail::match(tf.backward(px), lr->zmax()).z;
-        auto tls = detail::tile_coverage(tf.backward(ext), z);
-        auto op = [&tf](auto& tl) { return tf.forward(detail::extent(tl)); };
+        auto z = match(tf.backward(px), lr->zmax()).z;
+        auto tls = slippy::tile_coverage(tf.backward(ext), z);
+        auto op = [&tf](auto& tl) { return tf.forward(slippy::extent(tl)); };
         return as<geometry::multi_box>(tls, op);
     }
 
@@ -97,19 +96,19 @@ private:
                                 const geometry::box& ext,
                                 const geometry::box& px)
     {
-        auto tf = detail::tile_to_layer_transformer();
+        auto tf = tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
-        auto z = detail::match(tf.backward(px), lr->zmax()).z;
-        auto tls = detail::tile_coverage(tf.backward(ext), z);
+        auto z = match(tf.backward(px), lr->zmax()).z;
+        auto tls = slippy::tile_coverage(tf.backward(ext), z);
 
-        bark::curl<detail::tile> jobs;
+        bark::curl<tile> jobs;
         for (auto& tl : tls)
             jobs.push(tl, lr->url(tl));
 
         variant_ostream os;
         while (!jobs.empty()) {
             auto [tl, img] = jobs.pop();
-            os << geometry::as_binary(tf.forward(detail::extent(tl))) << *img
+            os << geometry::as_binary(tf.forward(slippy::extent(tl))) << *img
                << tl.z << tl.x << tl.y << lr->url(tl);
         }
         return {{"wkb", "image", "zoom", "x", "y", "url"}, std::move(os.data)};

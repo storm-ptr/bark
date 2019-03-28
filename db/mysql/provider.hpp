@@ -15,16 +15,16 @@
 
 namespace bark::db::mysql {
 
-class provider : private db::detail::cacher<db::mysql::provider>,
-                 private db::detail::ddl<db::mysql::provider>,
-                 private db::detail::projection_guide<db::mysql::provider>,
-                 public db::detail::provider_impl<db::mysql::provider>,
-                 private db::detail::table_guide<db::mysql::provider> {
-    friend db::detail::cacher<db::mysql::provider>;
-    friend db::detail::ddl<db::mysql::provider>;
-    friend db::detail::projection_guide<db::mysql::provider>;
-    friend db::detail::provider_impl<db::mysql::provider>;
-    friend db::detail::table_guide<db::mysql::provider>;
+class provider : private cacher<mysql::provider>,
+                 private ddl<mysql::provider>,
+                 private projection_guide<mysql::provider>,
+                 public provider_impl<mysql::provider>,
+                 private table_guide<mysql::provider> {
+    friend cacher<mysql::provider>;
+    friend ddl<mysql::provider>;
+    friend projection_guide<mysql::provider>;
+    friend provider_impl<mysql::provider>;
+    friend table_guide<mysql::provider>;
 
 public:
     provider(std::string host,
@@ -32,9 +32,9 @@ public:
              std::string db,
              std::string usr,
              std::string pwd)
-        : db::detail::provider_impl<db::mysql::provider>{
+        : provider_impl<mysql::provider>{
               [=] { return new db::mysql::command(host, port, db, usr, pwd); },
-              std::make_unique<db::detail::mysql_dialect>()}
+              std::make_unique<mysql_dialect>()}
     {
     }
 };

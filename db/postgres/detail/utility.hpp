@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_POSTGRES_DETAIL_UTILITY_HPP
-#define BARK_DB_POSTGRES_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_POSTGRES_UTILITY_HPP
+#define BARK_DB_POSTGRES_UTILITY_HPP
 
 #include <bark/blob.hpp>
 #include <boost/mpl/int.hpp>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark::db::postgres::detail {
+namespace bark::db::postgres {
 
 constexpr Oid PGRES_TYPE_BOOL = 16;
 constexpr Oid PGRES_TYPE_INT2 = 21;
@@ -71,6 +71,6 @@ inline void check(const connection_holder& con, bool condition)
         throw std::runtime_error(error(con.get()));
 }
 
-}  // namespace bark::db::postgres::detail
+}  // namespace bark::db::postgres
 
-#endif  // BARK_DB_POSTGRES_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_POSTGRES_UTILITY_HPP

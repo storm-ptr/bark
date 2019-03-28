@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_POOL_HPP
-#define BARK_DB_DETAIL_POOL_HPP
+#ifndef BARK_DB_POOL_HPP
+#define BARK_DB_POOL_HPP
 
 #include <algorithm>
 #include <bark/db/command.hpp>
@@ -11,7 +11,7 @@
 #include <queue>
 #include <thread>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 /// thread-safe reuse interface to prevent the connection time overhead
 class pool : public std::enable_shared_from_this<pool> {
@@ -53,6 +53,6 @@ private:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_POOL_HPP
+#endif  // BARK_DB_POOL_HPP

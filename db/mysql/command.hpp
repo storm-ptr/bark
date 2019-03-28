@@ -11,9 +11,8 @@
 
 namespace bark::db::mysql {
 
-class command : public db::command,
-                private db::detail::transaction<db::mysql::command> {
-    friend db::detail::transaction<db::mysql::command>;
+class command : public db::command, private transaction<mysql::command> {
+    friend transaction<mysql::command>;
 
 public:
     command(const std::string& host,
@@ -61,14 +60,14 @@ public:
             check(con_, mysql_query(con_.get(), sql.c_str()));
             for (int r = 0; r >= 0; r = mysql_next_result(con_.get())) {
                 check(con_, r);
-                detail::result_holder{mysql_store_result(con_.get())};
+                result_holder{mysql_store_result(con_.get())};
             }
         }
         else {
             check(stmt_, r);
             std::vector<MYSQL_BIND> binds(params.size());
             for (size_t i = 0; i < params.size(); ++i)
-                detail::bind_param(params[i], binds[i]);
+                bind_param(params[i], binds[i]);
             if (!binds.empty())
                 check(stmt_, mysql_stmt_bind_param(stmt_.get(), binds.data()));
             check(stmt_, mysql_stmt_execute(stmt_.get()));
@@ -79,8 +78,8 @@ public:
     std::vector<std::string> columns() override
     {
         reset_cols();
-        detail::result_holder res{
-            stmt_ ? mysql_stmt_result_metadata(stmt_.get()) : nullptr};
+        result_holder res{stmt_ ? mysql_stmt_result_metadata(stmt_.get())
+                                : nullptr};
         auto cols = res ? mysql_num_fields(res.get()) : 0;
 
         std::vector<std::string> names(cols);
@@ -89,7 +88,7 @@ public:
         for (decltype(cols) i = 0; i < cols; ++i) {
             auto fld = mysql_fetch_field_direct(res.get(), i);
             names[i] = fld->name;
-            cols_[i] = detail::bind_column(fld->type, binds_[i]);
+            cols_[i] = bind_column(fld->type, binds_[i]);
         }
         if (cols)
             check(stmt_, mysql_stmt_bind_result(stmt_.get(), binds_.data()));
@@ -130,11 +129,11 @@ public:
     }
 
 private:
-    detail::connection_holder con_;
-    detail::statement_holder stmt_;
+    connection_holder con_;
+    statement_holder stmt_;
     std::string sql_;
     std::vector<MYSQL_BIND> binds_;
-    std::vector<detail::column_holder> cols_;
+    std::vector<column_holder> cols_;
 
     void reset_cols()
     {

@@ -3,7 +3,7 @@
 #ifndef BARK_DB_QUALIFIED_NAME_HPP
 #define BARK_DB_QUALIFIED_NAME_HPP
 
-#include <bark/utility.hpp>
+#include <bark/detail/utility.hpp>
 #include <boost/functional/hash.hpp>
 #include <ostream>
 #include <string>

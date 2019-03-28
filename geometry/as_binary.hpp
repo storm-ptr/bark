@@ -3,9 +3,9 @@
 #ifndef BARK_GEOMETRY_AS_BINARY_HPP
 #define BARK_GEOMETRY_AS_BINARY_HPP
 
+#include <bark/detail/utility.hpp>
 #include <bark/geometry/detail/ostream.hpp>
 #include <bark/geometry/geometry.hpp>
-#include <bark/utility.hpp>
 
 namespace bark::geometry {
 namespace detail {
@@ -29,7 +29,7 @@ struct converter {
 template <class T>
 blob as_binary(const T& v)
 {
-    detail::ostream os;
+    ostream os;
     os << v;
     return std::move(os.data);
 }

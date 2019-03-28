@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SQLITE_DETAIL_TABLE_GUIDE_HPP
-#define BARK_DB_SQLITE_DETAIL_TABLE_GUIDE_HPP
+#ifndef BARK_DB_SQLITE_TABLE_GUIDE_HPP
+#define BARK_DB_SQLITE_TABLE_GUIDE_HPP
 
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <stdexcept>
 
-namespace bark::db::sqlite::detail {
+namespace bark::db::sqlite {
 
 template <class T>
 class table_guide {
@@ -113,6 +113,6 @@ private:
     }
 };
 
-}  // namespace bark::db::sqlite::detail
+}  // namespace bark::db::sqlite
 
-#endif  // BARK_DB_SQLITE_DETAIL_TABLE_GUIDE_HPP
+#endif  // BARK_DB_SQLITE_TABLE_GUIDE_HPP

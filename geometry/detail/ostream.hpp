@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_GEOMETRY_DETAIL_OSTREAM_HPP
-#define BARK_GEOMETRY_DETAIL_OSTREAM_HPP
+#ifndef BARK_GEOMETRY_OSTREAM_HPP
+#define BARK_GEOMETRY_OSTREAM_HPP
 
 #include <bark/blob.hpp>
 #include <bark/detail/wkb.hpp>
@@ -9,7 +9,7 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/map.hpp>
 
-namespace bark::geometry::detail {
+namespace bark::geometry {
 
 class ostream {
 public:
@@ -72,6 +72,6 @@ private:
     }
 };
 
-}  // namespace bark::geometry::detail
+}  // namespace bark::geometry
 
-#endif  // BARK_GEOMETRY_DETAIL_OSTREAM_HPP
+#endif  // BARK_GEOMETRY_OSTREAM_HPP

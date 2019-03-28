@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_ADAPT_HPP
-#define BARK_QT_DETAIL_ADAPT_HPP
+#ifndef BARK_QT_ADAPT_HPP
+#define BARK_QT_ADAPT_HPP
 
 #include <QPointF>
 #include <QString>
@@ -11,7 +11,6 @@
 #include <string>
 
 namespace bark::qt {
-namespace detail {
 
 struct adaptor {
     auto operator()(const geometry::point& v) const
@@ -42,14 +41,12 @@ struct adaptor {
     }
 };
 
-}  // namespace detail
-
 template <class T>
-auto adapt(const T& v)
+auto adapt(T&& v)
 {
-    return detail::adaptor{}(v);
+    return adaptor{}(std::forward<T>(v));
 }
 
 }  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_ADAPT_HPP
+#endif  // BARK_QT_ADAPT_HPP

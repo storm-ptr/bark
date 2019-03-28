@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_GDAL_DETAIL_DATASET_HPP
-#define BARK_DB_GDAL_DETAIL_DATASET_HPP
+#ifndef BARK_DB_GDAL_DATASET_HPP
+#define BARK_DB_GDAL_DATASET_HPP
 
 #include <atomic>
 #include <bark/db/gdal/detail/layer.hpp>
@@ -9,7 +9,7 @@
 #include <memory>
 #include <mutex>
 
-namespace bark::db::gdal::detail {
+namespace bark::db::gdal {
 
 class dataset {
 public:
@@ -27,7 +27,7 @@ public:
     {
         spatial_reference_holder srs{
             OSRNewSpatialReference(GDALGetProjectionRef(ds_.get()))};
-        return detail::projection(srs.get());
+        return gdal::projection(srs.get());
     }
 
     blob png() const
@@ -83,6 +83,6 @@ private:
     dataset_holder ds_;
 };
 
-}  // namespace bark::db::gdal::detail
+}  // namespace bark::db::gdal
 
-#endif  // BARK_DB_GDAL_DETAIL_DATASET_HPP
+#endif  // BARK_DB_GDAL_DATASET_HPP

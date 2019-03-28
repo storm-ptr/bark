@@ -16,22 +16,22 @@
 
 namespace bark::db::sqlite {
 
-class provider : private db::detail::cacher<db::sqlite::provider>,
-                 private db::detail::ddl<db::sqlite::provider>,
-                 private db::detail::projection_guide<db::sqlite::provider>,
-                 public db::detail::provider_impl<db::sqlite::provider>,
-                 private db::sqlite::detail::table_guide<db::sqlite::provider> {
-    friend db::detail::cacher<db::sqlite::provider>;
-    friend db::detail::ddl<db::sqlite::provider>;
-    friend db::detail::projection_guide<db::sqlite::provider>;
-    friend db::detail::provider_impl<db::sqlite::provider>;
-    friend db::sqlite::detail::table_guide<db::sqlite::provider>;
+class provider : private cacher<sqlite::provider>,
+                 private ddl<sqlite::provider>,
+                 private projection_guide<sqlite::provider>,
+                 public provider_impl<sqlite::provider>,
+                 private sqlite::table_guide<sqlite::provider> {
+    friend cacher<sqlite::provider>;
+    friend ddl<sqlite::provider>;
+    friend projection_guide<sqlite::provider>;
+    friend provider_impl<sqlite::provider>;
+    friend sqlite::table_guide<sqlite::provider>;
 
 public:
     provider(std::string file)
-        : db::detail::provider_impl<db::sqlite::provider>{
+        : provider_impl<sqlite::provider>{
               [=] { return new db::sqlite::command(file); },
-              std::make_unique<db::sqlite::detail::dialect>()}
+              std::make_unique<sqlite::dialect>()}
     {
         try {
             exec(*this, "SELECT InitSpatialMetaData(1)");

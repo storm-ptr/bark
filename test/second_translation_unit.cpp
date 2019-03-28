@@ -11,4 +11,3 @@
 #include <bark/geometry/geom_from_text.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <bark/proj/transformer.hpp>
-#include <bark/unicode.hpp>

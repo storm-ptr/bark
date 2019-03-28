@@ -3,7 +3,7 @@
 #ifndef BARK_BLOB_HPP
 #define BARK_BLOB_HPP
 
-#include <bark/utility.hpp>
+#include <bark/detail/utility.hpp>
 #include <iomanip>
 #include <sstream>
 #include <vector>

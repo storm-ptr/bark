@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_TREE_IO_HPP
-#define BARK_QT_DETAIL_TREE_IO_HPP
+#ifndef BARK_QT_TREE_IO_HPP
+#define BARK_QT_TREE_IO_HPP
 
 #include <QDataStream>
 #include <QString>
@@ -9,7 +9,7 @@
 #include <bark/qt/detail/tree_ops.hpp>
 #include <unordered_map>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 template <class T>
 T read(QDataStream& is)
@@ -76,6 +76,6 @@ inline std::shared_ptr<tree> read<std::shared_ptr<tree>>(QDataStream& is)
     return res;
 }
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_TREE_IO_HPP
+#endif  // BARK_QT_TREE_IO_HPP

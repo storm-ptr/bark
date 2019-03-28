@@ -21,52 +21,52 @@ namespace bark {
 template <class T>
 class lockable {
 public:
-    explicit lockable(T key) : key_{std::move(key)} {}
-    void lock() { guard().lock(key_); }
-    void unlock() { guard().unlock(key_); }
-    bool try_lock() { return guard().try_lock(key_); }
+    explicit lockable(const T& val) : val_{val} {}
+    void lock() { guard().lock(val_); }
+    void unlock() { guard().unlock(val_); }
+    bool try_lock() { return guard().try_lock(val_); }
 
     template <class Rep, class Period>
     bool try_lock_for(const std::chrono::duration<Rep, Period>& duration)
     {
-        return guard().try_lock_for(key_, duration);
+        return guard().try_lock_for(val_, duration);
     }
 
 private:
-    T key_;
+    T val_;
 
     class lockable_hash_set {
     public:
-        void lock(const T& key)
+        void lock(const T& val)
         {
             std::unique_lock lock{guard_};
-            notifier_.wait(lock, is_free(key));
-            if (!data_.insert(key).second)
+            notifier_.wait(lock, vacant(val));
+            if (!data_.insert(val).second)
                 throw std::logic_error("lockable_hash_set");
         }
 
-        void unlock(const T& key)
+        void unlock(const T& val)
         {
             {
                 std::unique_lock lock{guard_};
-                data_.erase(key);
+                data_.erase(val);
             }
             notifier_.notify_all();
         }
 
-        bool try_lock(const T& key)
+        bool try_lock(const T& val)
         {
             std::unique_lock lock{guard_};
-            return data_.insert(key).second;
+            return data_.insert(val).second;
         }
 
         template <class Rep, class Period>
-        bool try_lock_for(const T& key,
+        bool try_lock_for(const T& val,
                           const std::chrono::duration<Rep, Period>& duration)
         {
             std::unique_lock lock{guard_};
-            return notifier_.wait_for(lock, duration, is_free(key)) &&
-                   data_.insert(key).second;
+            return notifier_.wait_for(lock, duration, vacant(val)) &&
+                   data_.insert(val).second;
         }
 
     private:
@@ -74,9 +74,9 @@ private:
         std::condition_variable notifier_;
         std::unordered_set<T, boost::hash<T>> data_;
 
-        auto is_free(const T& key) const
+        auto vacant(const T& val) const
         {
-            return [key, this] { return data_.find(key) == data_.end(); };
+            return [=] { return data_.find(val) == data_.end(); };
         }
     };
 

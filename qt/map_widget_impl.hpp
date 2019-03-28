@@ -6,11 +6,11 @@
 
 #include <QPainter>
 #include <QtConcurrent/QtConcurrentRun>
+#include <bark/detail/utility.hpp>
 #include <bark/proj/epsg.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <bark/qt/detail/rendering_task.hpp>
 #include <bark/qt/map_widget.hpp>
-#include <bark/utility.hpp>
 #include <exception>
 
 namespace bark::qt {
@@ -20,7 +20,7 @@ inline map_widget::map_widget(QWidget* parent)
     , frm_{frame{} | set_size(size()) |
            set_projection(proj::epsg().find_proj(4326)) |
            qt::fit({{-180., -90.}, {180., 90.}})}
-    , map_{detail::make<detail::canvas>(frm_)}
+    , map_{make<canvas>(frm_)}
 {
     setMouseTracking(true);
 }
@@ -52,7 +52,7 @@ inline void map_widget::start_rendering()
     using namespace std::chrono;
     if (auto render = render_.lock())
         render->cancel();
-    auto render = std::make_shared<detail::rendering_task>(frm_);
+    auto render = std::make_shared<rendering_task>(frm_);
     future_map_ = render->get_future();
     render_ = render;
     render->start(layers_);

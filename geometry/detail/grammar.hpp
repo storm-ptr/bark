@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_GEOMETRY_DETAIL_GRAMMAR_HPP
-#define BARK_GEOMETRY_DETAIL_GRAMMAR_HPP
+#ifndef BARK_GEOMETRY_GRAMMAR_HPP
+#define BARK_GEOMETRY_GRAMMAR_HPP
 
 #include <bark/geometry/detail/utility.hpp>
 #include <bark/geometry/geometry.hpp>
@@ -23,7 +23,7 @@
 #define BARK_GEOMETRY_GRAMMAR_CHAIN(item) \
     BARK_GEOMETRY_GRAMMAR_CHAIN_DO(item, phoenix::push_back(qi::_val, qi::_1))
 
-namespace bark::geometry::detail {
+namespace bark::geometry {
 
 namespace phoenix = boost::phoenix;
 namespace qi = boost::spirit::qi;
@@ -97,6 +97,6 @@ public:
     BARK_GEOMETRY_GRAMMAR_CTOR(geometry_collection);
 };
 
-}  // namespace bark::geometry::detail
+}  // namespace bark::geometry
 
-#endif  // BARK_GEOMETRY_DETAIL_GRAMMAR_HPP
+#endif  // BARK_GEOMETRY_GRAMMAR_HPP

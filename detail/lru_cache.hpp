@@ -6,14 +6,11 @@
 #include <any>
 #include <atomic>
 #include <bark/detail/any_hashable.hpp>
-#include <bark/detail/expected.hpp>
 #include <bark/detail/linked_hash_map.hpp>
 #include <bark/detail/lockable.hpp>
 #include <cstdint>
-#include <functional>
 #include <mutex>
 #include <optional>
-#include <stdexcept>
 
 namespace bark {
 
@@ -22,76 +19,80 @@ namespace bark {
  * @see https://en.wikipedia.org/wiki/Cache_algorithms#LRU
  */
 class lru_cache {
-    static auto& one()
+public:
+    using scope_type = uint64_t;
+    using container_type = linked_hash_map<any_hashable, expected<std::any>>;
+    using key_type = container_type::key_type;
+    using mapped_type = container_type::mapped_type;
+    using value_type = container_type::value_type;
+
+    struct busy_exception : std::runtime_error {
+        busy_exception() : std::runtime_error{"lru_cache is blocked"} {}
+    };
+
+    static scope_type new_scope() { return ++one().scopes_; }
+
+    template <class Key, class F, class... Args>
+    static std::any get_or_invoke(scope_type scope,
+                                  const Key& key,
+                                  F&& f,
+                                  Args&&... args)
+    {
+        key_type scoped_key{std::make_pair(scope, key)};
+        lockable guard{scoped_key};
+        std::unique_lock lock{guard, std::defer_lock};
+        if (!lock.try_lock_for(CacheTimeout))
+            throw busy_exception{};
+        if (auto opt = one().at(scoped_key))
+            return std::move(opt).value().get();
+        auto res = mapped_type::result_of(std::forward<F>(f),
+                                          std::forward<Args>(args)...);
+        one().insert({scoped_key, res});
+        return res.get();
+    }
+
+    template <class Key>
+    static bool contains(scope_type scope, const Key& key)
+    {
+        key_type scoped_key{std::make_pair(scope, key)};
+        return one().contains(scoped_key);
+    }
+
+private:
+    static constexpr size_t MaxSize{10000};
+    std::atomic<scope_type> scopes_{0};
+    std::mutex guard_;
+    container_type data_;
+
+    static lru_cache& one()
     {
         static lru_cache singleton{};
         return singleton;
     }
 
-public:
-    using scope_type = uint64_t;
-    using key_type = any_hashable;
-    using mapped_type = expected<std::any>;
-    using value_type = std::pair<const key_type, mapped_type>;
-    using loader_type = std::function<std::any()>;
-
-    struct busy_exception : std::runtime_error {
-        busy_exception() : std::runtime_error{"lru_cache: blocked"} {}
-    };
-
-    static scope_type next_scope() { return ++one().max_scope_; }
-
-    template <class T>
-    static std::any get_or_load(scope_type scope, T key, loader_type loader)
-    {
-        key_type key_pair{std::make_pair(scope, std::move(key))};
-        lockable mutex{key_pair};
-        std::unique_lock lock{mutex, std::defer_lock};
-        if (!lock.try_lock_for(CacheTimeout))
-            throw busy_exception();
-        auto optional = one().at(key_pair);
-        if (optional)
-            return optional->get();
-        auto expected = make_expected(loader);
-        one().insert({key_pair, expected});
-        return expected.get();
-    }
-
-    template <class T>
-    static bool contains(scope_type scope, T key)
-    {
-        return one().has(key_type{std::make_pair(scope, std::move(key))});
-    }
-
-private:
-    static constexpr size_t MaxSize{10000};
-    std::atomic<scope_type> max_scope_{0};
-    std::mutex guard_;
-    linked_hash_map<key_type, mapped_type> data_;
-
-    bool has(const key_type& key)
+    bool contains(const key_type& key)
     {
         std::lock_guard lock{guard_};
         return data_.find(key) != data_.end();
     }
 
-    void insert(const value_type& val)
+    void insert(value_type val)
     {
         std::lock_guard lock{guard_};
-        if (!data_.insert(data_.end(), val).second)
-            throw std::logic_error("lru_cache: already exists");
+        if (!data_.insert(data_.end(), std::move(val)).second)
+            throw std::logic_error("lru_cache");
         if (data_.size() > MaxSize)
-            data_.pop_front();
+            data_.erase(data_.begin());
     }
 
     std::optional<mapped_type> at(const key_type& key)
     {
         std::lock_guard lock{guard_};
-        auto pos = data_.find(key);
-        if (pos == data_.end())
+        auto it = data_.find(key);
+        if (it == data_.end())
             return {};
-        data_.move(pos, data_.end());
-        return pos->second;
+        data_.move(it, data_.end());
+        return it->second;
     }
 };
 

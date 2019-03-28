@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SQLITE_DETAIL_UTILITY_HPP
-#define BARK_DB_SQLITE_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_SQLITE_UTILITY_HPP
+#define BARK_DB_SQLITE_UTILITY_HPP
 
 #include <memory>
 #include <stdexcept>
@@ -11,7 +11,7 @@
 // strictly ordered
 #include <spatialite.h>
 
-namespace bark::db::sqlite::detail {
+namespace bark::db::sqlite {
 
 struct connection_deleter {
     void operator()(sqlite3* p) const { sqlite3_close_v2(p); }
@@ -49,6 +49,6 @@ inline void check(const connection_holder& con, int r)
     }
 }
 
-}  // namespace bark::db::sqlite::detail
+}  // namespace bark::db::sqlite
 
-#endif  // BARK_DB_SQLITE_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_SQLITE_UTILITY_HPP

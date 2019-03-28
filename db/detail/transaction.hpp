@@ -1,9 +1,9 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_TRANSACTION_HPP
-#define BARK_DB_DETAIL_TRANSACTION_HPP
+#ifndef BARK_DB_TRANSACTION_HPP
+#define BARK_DB_TRANSACTION_HPP
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class transaction {
@@ -30,6 +30,6 @@ private:
     bool autocommit_ = true;
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_TRANSACTION_HPP
+#endif  // BARK_DB_TRANSACTION_HPP

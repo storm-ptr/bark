@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP
-#define BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP
+#ifndef BARK_DB_POSTGRES_BIND_COLUMN_HPP
+#define BARK_DB_POSTGRES_BIND_COLUMN_HPP
 
 #include <bark/db/postgres/detail/utility.hpp>
 #include <bark/db/rowset_ops.hpp>
 #include <boost/predef/other/endian.h>
 #include <stdexcept>
 
-namespace bark::db::postgres::detail {
+namespace bark::db::postgres {
 
 struct column {
     virtual ~column() = default;
@@ -70,6 +70,6 @@ inline column_holder bind_column(Oid type)
     throw std::runtime_error("invalid Postgres type: " + std::to_string(type));
 }
 
-}  // namespace bark::db::postgres::detail
+}  // namespace bark::db::postgres
 
-#endif  // BARK_DB_POSTGRES_DETAIL_BIND_COLUMN_HPP
+#endif  // BARK_DB_POSTGRES_BIND_COLUMN_HPP

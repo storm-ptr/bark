@@ -11,9 +11,8 @@
 
 namespace bark::db::sqlite {
 
-class command : public db::command,
-                private db::detail::transaction<db::sqlite::command> {
-    friend db::detail::transaction<db::sqlite::command>;
+class command : public db::command, private transaction<sqlite::command> {
+    friend transaction<sqlite::command>;
 
 public:
     explicit command(const std::string& file)
@@ -48,7 +47,7 @@ public:
         }
         else {
             for (int i = 0; i < (int)params.size(); ++i)
-                check(con_, detail::bind_param(params[i], stmt_.get(), i));
+                check(con_, bind_param(params[i], stmt_.get(), i));
             step();
         }
         return *this;
@@ -106,9 +105,9 @@ public:
     }
 
 private:
-    detail::connection_holder con_;
-    detail::spatialite_holder spatial_;
-    detail::statement_holder stmt_;
+    connection_holder con_;
+    spatialite_holder spatial_;
+    statement_holder stmt_;
 
     void step()
     {

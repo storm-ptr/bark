@@ -1,13 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_OSM_HPP
-#define BARK_DB_SLIPPY_DETAIL_OSM_HPP
+#ifndef BARK_DB_SLIPPY_OSM_HPP
+#define BARK_DB_SLIPPY_OSM_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <bark/detail/random_index.hpp>
 #include <sstream>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 class osm : public layer {
     random_index subdomain_{3};
@@ -27,6 +26,6 @@ public:
     }
 };
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_OSM_HPP
+#endif  // BARK_DB_SLIPPY_OSM_HPP

@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP
-#define BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP
+#ifndef BARK_DB_POSTGRES_BIND_PARAM_HPP
+#define BARK_DB_POSTGRES_BIND_PARAM_HPP
 
 #include <bark/db/postgres/detail/utility.hpp>
 #include <bark/db/rowset.hpp>
 #include <boost/predef/other/endian.h>
 
-namespace bark::db::postgres::detail {
+namespace bark::db::postgres {
 
 struct param {
     virtual ~param() = default;
@@ -80,6 +80,6 @@ inline param_holder bind_param(const variant_t& v)
         v);
 }
 
-}  // namespace bark::db::postgres::detail
+}  // namespace bark::db::postgres
 
-#endif  // BARK_DB_POSTGRES_DETAIL_BIND_PARAM_HPP
+#endif  // BARK_DB_POSTGRES_BIND_PARAM_HPP

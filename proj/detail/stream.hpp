@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_PROJ_DETAIL_STREAM_HPP
-#define BARK_PROJ_DETAIL_STREAM_HPP
+#ifndef BARK_PROJ_STREAM_HPP
+#define BARK_PROJ_STREAM_HPP
 
 #include <bark/detail/wkb.hpp>
 #include <bark/proj/detail/transform.hpp>
 #include <boost/none.hpp>
 
-namespace bark::proj::detail {
+namespace bark::proj {
 
 class stream {
 public:
@@ -40,8 +40,8 @@ public:
     {
     }
 
-    template <uint32_t Code, class T>
-    void operator()(wkb::tagged<Code, T>)
+    template <class T, uint32_t Code>
+    void operator()(wkb::tagged<T, Code>)
     {
         *this << wkb::HostEndian << Code;
     }
@@ -86,6 +86,6 @@ private:
     }
 };
 
-}  // namespace bark::proj::detail
+}  // namespace bark::proj
 
-#endif  // BARK_PROJ_DETAIL_STREAM_HPP
+#endif  // BARK_PROJ_STREAM_HPP

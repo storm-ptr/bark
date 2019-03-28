@@ -4,7 +4,7 @@
 #define BARK_DB_ROWSET_OPS_HPP
 
 #include <bark/db/rowset.hpp>
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <cctype>

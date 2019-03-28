@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_PROJECTION_GUIDE_HPP
-#define BARK_DB_DETAIL_PROJECTION_GUIDE_HPP
+#ifndef BARK_DB_PROJECTION_GUIDE_HPP
+#define BARK_DB_PROJECTION_GUIDE_HPP
 
 #include <bark/db/detail/utility.hpp>
 #include <bark/proj/bimap.hpp>
@@ -10,7 +10,7 @@
 #include <exception>
 #include <string>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class projection_guide {
@@ -69,6 +69,6 @@ private:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_PROJECTION_GUIDE_HPP
+#endif  // BARK_DB_PROJECTION_GUIDE_HPP

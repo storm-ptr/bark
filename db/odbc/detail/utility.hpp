@@ -1,10 +1,10 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_ODBC_DETAIL_UTILITY_HPP
-#define BARK_DB_ODBC_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_ODBC_UTILITY_HPP
+#define BARK_DB_ODBC_UTILITY_HPP
 
-#include <bark/unicode.hpp>
-#include <bark/utility.hpp>
+#include <bark/detail/unicode.hpp>
+#include <bark/detail/utility.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/map.hpp>
 #include <iostream>
@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark::db::odbc::detail {
+namespace bark::db::odbc {
 
 template <class T>
 constexpr SQLSMALLINT c_type_of()
@@ -68,13 +68,15 @@ struct stmt_deleter {
 using stmt_holder = std::unique_ptr<void, stmt_deleter>;
 
 template <size_t Size>
-struct buffer {
-    static constexpr size_t max_size = Size;
+struct buffer : std::array<SQLWCHAR, Size> {
+    auto data() const { return (SQLWCHAR*)std::array<SQLWCHAR, Size>::data(); }
+    auto max_size() const { return (SQLSMALLINT)Size; }
 
-    SQLWCHAR data[max_size] = {0};
-    SQLSMALLINT len = 0;
-
-    std::string to_string() const { return unicode::to_string<char>(data); }
+    auto to_string() const
+    {
+        auto view = std::basic_string_view<SQLWCHAR>{data()};
+        return unicode::to_string<char>(view);
+    }
 };
 
 template <class HandleHolder>
@@ -89,11 +91,11 @@ void check(const HandleHolder& handle, SQLRETURN r)
                  SQLGetDiagRecW(HandleHolder::deleter_type::handle_type,
                                 handle.get(),
                                 row,
-                                state.data,
+                                state.data(),
                                 &err,
-                                buf.data,
-                                buf.max_size,
-                                &buf.len));
+                                buf.data(),
+                                buf.max_size(),
+                                0));
              ++row) {
             if (!msg.empty())
                 msg += ' ';
@@ -132,9 +134,8 @@ inline void set_attr(const stmt_holder& handle, SQLINTEGER attr, intptr_t val)
 inline std::string get_info(const dbc_holder& handle, SQLUSMALLINT info_type)
 {
     buffer<SQL_MAX_MESSAGE_LENGTH> buf;
-    check(
-        handle,
-        SQLGetInfoW(handle.get(), info_type, buf.data, buf.max_size, &buf.len));
+    check(handle,
+          SQLGetInfoW(handle.get(), info_type, buf.data(), buf.max_size(), 0));
     return buf.to_string();
 }
 
@@ -145,7 +146,7 @@ inline std::string string_attr(const stmt_holder& handle,
     buffer<SQL_MAX_MESSAGE_LENGTH> buf;
     check(handle,
           SQLColAttributeW(
-              handle.get(), col, attr, buf.data, buf.max_size, &buf.len, 0));
+              handle.get(), col, attr, buf.data(), buf.max_size(), 0, 0));
     return buf.to_string();
 }
 
@@ -164,6 +165,6 @@ constexpr SQLSMALLINT SQL_DB2_UNICODE_LONGVARCHAR = -97;
 constexpr SQLSMALLINT SQL_DB2_BLOB = -98;
 constexpr SQLSMALLINT SQL_DB2_CLOB = -99;
 
-}  // namespace bark::db::odbc::detail
+}  // namespace bark::db::odbc
 
-#endif  // BARK_DB_ODBC_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_ODBC_UTILITY_HPP

@@ -16,9 +16,8 @@
 
 namespace bark::db::gdal {
 
-class command : public db::command,
-                private db::detail::transaction<db::gdal::command> {
-    friend db::detail::transaction<db::gdal::command>;
+class command : public db::command, private transaction<gdal::command> {
+    friend transaction<gdal::command>;
 
 public:
     explicit command(const std::string& file) : ds_{file}, lr_(nullptr, nullptr)
@@ -40,11 +39,11 @@ public:
         reset_cols();
         auto feat_def = OGR_L_GetLayerDefn(lr_);
         for (int i = 0; i < OGR_FD_GetGeomFieldCount(feat_def); ++i)
-            geoms_.push_back(std::make_unique<detail::column_geom>());
+            geoms_.push_back(std::make_unique<column_geom>());
         for (int i = 0; i < OGR_FD_GetFieldCount(feat_def); ++i) {
             auto field_def = OGR_FD_GetFieldDefn(feat_def, i);
             auto ogr_type = OGR_Fld_GetType(field_def);
-            cols_.push_back(detail::bind_column(ogr_type));
+            cols_.push_back(bind_column(ogr_type));
         }
         return names(lr_.table().columns);
     }
@@ -55,7 +54,7 @@ public:
             columns();
         if (geoms_.empty() && cols_.empty())
             return false;
-        detail::feature_holder feat{OGR_L_GetNextFeature(lr_)};
+        feature_holder feat{OGR_L_GetNextFeature(lr_)};
         if (!feat)
             return false;
         for (size_t i = 0; i < geoms_.size(); ++i)
@@ -93,10 +92,10 @@ public:
     }
 
 private:
-    detail::dataset ds_;
-    detail::layer lr_;
-    std::vector<detail::column_holder> geoms_;
-    std::vector<detail::column_holder> cols_;
+    dataset ds_;
+    layer lr_;
+    std::vector<column_holder> geoms_;
+    std::vector<column_holder> cols_;
 
     void reset_cols()
     {
@@ -104,7 +103,7 @@ private:
         cols_.clear();
     }
 
-    void reset_lr(detail::layer lr)
+    void reset_lr(layer lr)
     {
         reset_cols();
         lr_ = std::move(lr);

@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_PAINTER_HPP
-#define BARK_QT_DETAIL_PAINTER_HPP
+#ifndef BARK_QT_PAINTER_HPP
+#define BARK_QT_PAINTER_HPP
 
 #include <QPainter>
 #include <QPainterPath>
@@ -12,7 +12,7 @@
 #include <boost/none.hpp>
 #include <functional>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 class painter {
     const frame& frm_;
@@ -73,8 +73,8 @@ public:
     {
     }
 
-    template <uint32_t Code, class T>
-    void operator()(wkb::tagged<Code, T>)
+    template <class T, uint32_t Code>
+    void operator()(wkb::tagged<T, Code>)
     {
     }
 
@@ -104,6 +104,6 @@ public:
     }
 };
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_PAINTER_HPP
+#endif  // BARK_QT_PAINTER_HPP

@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_TILE_HPP
-#define BARK_DB_SLIPPY_DETAIL_TILE_HPP
+#ifndef BARK_DB_SLIPPY_TILE_HPP
+#define BARK_DB_SLIPPY_TILE_HPP
 
 #include <algorithm>
 #include <array>
@@ -10,7 +10,7 @@
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <cmath>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 constexpr int Pixels = 256;
 
@@ -121,6 +121,6 @@ inline tiles tile_coverage(const geometry::box& ext, int z)
     return tls;
 }
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_TILE_HPP
+#endif  // BARK_DB_SLIPPY_TILE_HPP

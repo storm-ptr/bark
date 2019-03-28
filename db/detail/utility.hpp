@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_UTILITY_HPP
-#define BARK_DB_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_UTILITY_HPP
+#define BARK_DB_UTILITY_HPP
 
 #include <algorithm>
 #include <bark/db/sql_builder.hpp>
@@ -13,7 +13,7 @@
 #include <initializer_list>
 #include <sstream>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 inline rtree make_tiles(size_t count, geometry::box ext)
 {
@@ -165,6 +165,6 @@ inline void limit_page_clause(sql_builder& bld, size_t offset, size_t limit)
     bld << "LIMIT " << limit << " OFFSET " << offset;
 }
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_UTILITY_HPP

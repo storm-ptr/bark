@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_GDAL_DETAIL_BIND_COLUMN_HPP
-#define BARK_DB_GDAL_DETAIL_BIND_COLUMN_HPP
+#ifndef BARK_DB_GDAL_BIND_COLUMN_HPP
+#define BARK_DB_GDAL_BIND_COLUMN_HPP
 
 #include <bark/db/gdal/detail/utility.hpp>
 #include <boost/predef/other/endian.h>
 #include <memory>
 #include <stdexcept>
 
-namespace bark::db::gdal::detail {
+namespace bark::db::gdal {
 
 struct column {
     virtual ~column() = default;
@@ -94,6 +94,6 @@ inline column_holder bind_column(OGRFieldType ogr_type)
     }
 }
 
-}  // namespace bark::db::gdal::detail
+}  // namespace bark::db::gdal
 
-#endif  // BARK_DB_GDAL_DETAIL_BIND_COLUMN_HPP
+#endif  // BARK_DB_GDAL_BIND_COLUMN_HPP

@@ -1,12 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_CARTODB_HPP
-#define BARK_DB_SLIPPY_DETAIL_CARTODB_HPP
+#ifndef BARK_DB_SLIPPY_CARTODB_HPP
+#define BARK_DB_SLIPPY_CARTODB_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
 #include <sstream>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 struct cartodb : layer {
     qualified_name name() override { return id("cartodb"); }
@@ -22,6 +22,6 @@ struct cartodb : layer {
     }
 };
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_CARTODB_HPP
+#endif  // BARK_DB_SLIPPY_CARTODB_HPP

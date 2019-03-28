@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_DIALECT_HPP
-#define BARK_DB_DETAIL_DIALECT_HPP
+#ifndef BARK_DB_DIALECT_HPP
+#define BARK_DB_DIALECT_HPP
 
 #include <bark/db/sql_builder.hpp>
 #include <bark/db/table_def.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <memory>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 struct dialect {
     virtual ~dialect() = default;
@@ -68,6 +68,6 @@ struct dialect {
 
 using dialect_holder = std::unique_ptr<dialect>;
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_DIALECT_HPP
+#endif  // BARK_DB_DIALECT_HPP

@@ -8,6 +8,9 @@
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
+#include <mutex>
+#include <random>
+#include <stdexcept>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -100,10 +103,53 @@ auto as(const Rng& rng, Operation op = {})
     return res;
 }
 
+template <class V, class T, size_t I = 0>
+constexpr size_t variant_index()
+{
+    if constexpr (I == std::variant_size_v<V> ||
+                  std::is_same_v<std::variant_alternative_t<I, V>, T>)
+        return I;
+    else
+        return variant_index<V, T, I + 1>();
+}
+
 /**
- * It joins 'items' from a 'range' by adding user defined separator.
- * Additionally there is a version that allows to transform 'items'.
- * @code{.cpp}
+ * expected<T> is either a T or the exception preventing its creation.
+ * Synchronous std::future<T> analogue.
+ */
+template <class T>
+class expected {
+public:
+    template <class F, class... Args>
+    static expected result_of(F&& f, Args&&... args) noexcept
+    {
+        expected res;
+        try {
+            res.state_ =
+                std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+        }
+        catch (const std::exception&) {
+            res.state_ = std::current_exception();
+        }
+        return res;
+    }
+
+    T get()
+    {
+        return std::visit(overloaded{[](T& val) -> T { return std::move(val); },
+                                     [](std::exception_ptr& e) -> T {
+                                         std::rethrow_exception(std::move(e));
+                                     }},
+                          state_);
+    }
+
+private:
+    std::variant<std::exception_ptr, T> state_;
+};
+
+/**
+ * It joins 'items' by adding user defined separator.
+ * @code
  * std::cout << list{{"Hello", "World!"}, ", "};
  * @endcode
  */
@@ -129,15 +175,27 @@ struct list {
 template <class... Ts>
 list(Ts...)->list<Ts...>;
 
-template <class V, class T, size_t I = 0>
-constexpr size_t variant_index()
-{
-    if constexpr (I == std::variant_size_v<V> ||
-                  std::is_same_v<std::variant_alternative_t<I, V>, T>)
-        return I;
-    else
-        return variant_index<V, T, I + 1>();
-}
+class random_index {
+public:
+    using generator_type = std::mt19937;
+    using value_type = generator_type::result_type;
+
+    explicit random_index(value_type size)
+        : gen_(std::random_device()()), dist_(0, size - 1)
+    {
+    }
+
+    value_type operator()()
+    {
+        std::lock_guard lock{guard_};
+        return dist_(gen_);
+    }
+
+private:
+    std::mutex guard_;
+    generator_type gen_;
+    std::uniform_int_distribution<value_type> dist_;
+};
 
 }  // namespace bark
 

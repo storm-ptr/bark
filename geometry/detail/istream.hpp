@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_GEOMETRY_DETAIL_ISTREAM_HPP
-#define BARK_GEOMETRY_DETAIL_ISTREAM_HPP
+#ifndef BARK_GEOMETRY_ISTREAM_HPP
+#define BARK_GEOMETRY_ISTREAM_HPP
 
 #include <bark/detail/wkb.hpp>
 #include <bark/geometry/detail/utility.hpp>
@@ -9,7 +9,7 @@
 #include <boost/mpl/map.hpp>
 #include <functional>
 
-namespace bark::geometry::detail {
+namespace bark::geometry {
 
 class istream {
     wkb::istream data_;
@@ -64,8 +64,8 @@ public:
         push_ring(sum, item.get());
     }
 
-    template <uint32_t Code, class T>
-    void operator()(wkb::tagged<Code, T>)
+    template <class T, uint32_t Code>
+    void operator()(wkb::tagged<T, Code>)
     {
     }
 
@@ -84,6 +84,6 @@ public:
     }
 };
 
-}  // namespace bark::geometry::detail
+}  // namespace bark::geometry
 
-#endif  // BARK_GEOMETRY_DETAIL_ISTREAM_HPP
+#endif  // BARK_GEOMETRY_ISTREAM_HPP

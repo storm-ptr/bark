@@ -5,10 +5,10 @@
 #define BARK_QT_TREE_MODEL_IMPL_HPP
 
 #include <QtConcurrent/QtConcurrentRun>
+#include <bark/detail/utility.hpp>
 #include <bark/qt/detail/tree_io.hpp>
 #include <bark/qt/detail/tree_ops.hpp>
 #include <bark/qt/tree_model.hpp>
-#include <bark/utility.hpp>
 #include <exception>
 
 namespace bark::qt {
@@ -16,22 +16,21 @@ namespace bark::qt {
 inline tree_model::tree_model(QObject* parent) : QAbstractItemModel(parent)
 {
     using namespace std::chrono;
-    root_ = std::make_shared<detail::tree>();
+    root_ = std::make_shared<tree>();
     reset();
     timer_.start(duration_cast<milliseconds>(UiTimeout).count(), this);
 }
 
-inline detail::tree* tree_model::to_ptr(const QModelIndex& idx) const
+inline tree* tree_model::to_ptr(const QModelIndex& idx) const
 {
-    auto ptr = idx.isValid() ? reinterpret_cast<detail::tree*>(idx.internalId())
-                             : nullptr;
+    auto ptr =
+        idx.isValid() ? reinterpret_cast<tree*>(idx.internalId()) : nullptr;
     return ptr ? ptr : root_.get();
 }
 
 inline void tree_model::link_by_uri(QUrl uri)
 {
-    future_branches_.push_back(
-        QtConcurrent::run([=] { return detail::dir(uri); }));
+    future_branches_.push_back(QtConcurrent::run([=] { return dir(uri); }));
 }
 
 inline void tree_model::reset()
@@ -77,17 +76,17 @@ inline void tree_model::timerEvent(QTimerEvent* event)
 
 inline std::optional<link> tree_model::get_link(const QModelIndex& idx) const
 {
-    return detail::get_link(to_ptr(idx));
+    return qt::get_link(to_ptr(idx));
 }
 
 inline std::optional<layer> tree_model::get_layer(const QModelIndex& idx) const
 {
-    return detail::get_layer(to_ptr(idx));
+    return qt::get_layer(to_ptr(idx));
 }
 
 inline void tree_model::set_layer(const QModelIndex& idx, const layer& lr)
 {
-    detail::set_layer(to_ptr(idx), lr);
+    qt::set_layer(to_ptr(idx), lr);
     dataChanged(idx, idx);
 }
 
@@ -178,7 +177,7 @@ inline QDataStream& operator<<(QDataStream& os, const tree_model& that)
 inline QDataStream& operator>>(QDataStream& is, tree_model& that)
 {
     that.future_branches_.clear();
-    auto root = detail::read<std::shared_ptr<detail::tree>>(is);
+    auto root = read<std::shared_ptr<tree>>(is);
     that.removeRows(0, (int)that.root_->children.size());
     that.beginInsertRows({}, 0, (int)root->children.size());
     that.root_ = root;

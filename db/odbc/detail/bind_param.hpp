@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP
-#define BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP
+#ifndef BARK_DB_ODBC_BIND_PARAM_HPP
+#define BARK_DB_ODBC_BIND_PARAM_HPP
 
 #include <bark/db/odbc/detail/utility.hpp>
 #include <bark/db/rowset.hpp>
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <memory>
 
-namespace bark::db::odbc::detail {
+namespace bark::db::odbc {
 
 struct binding {
     virtual ~binding() = default;
@@ -120,6 +120,6 @@ inline binding_holder bind_param(const variant_t* v)
         return std::make_unique<binding_stub>();
 }
 
-}  // namespace bark::db::odbc::detail
+}  // namespace bark::db::odbc
 
-#endif  // BARK_DB_ODBC_DETAIL_BIND_PARAM_HPP
+#endif  // BARK_DB_ODBC_BIND_PARAM_HPP

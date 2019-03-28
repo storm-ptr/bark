@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_MYSQL_DETAIL_BIND_PARAM_HPP
-#define BARK_DB_MYSQL_DETAIL_BIND_PARAM_HPP
+#ifndef BARK_DB_MYSQL_BIND_PARAM_HPP
+#define BARK_DB_MYSQL_BIND_PARAM_HPP
 
 #include <bark/db/mysql/detail/utility.hpp>
 #include <bark/db/rowset.hpp>
 #include <cstring>
 
-namespace bark::db::mysql::detail {
+namespace bark::db::mysql {
 
 inline void bind_param(const variant_t& v, MYSQL_BIND& bnd)
 {
@@ -30,6 +30,6 @@ inline void bind_param(const variant_t& v, MYSQL_BIND& bnd)
         v);
 }
 
-}  // namespace bark::db::mysql::detail
+}  // namespace bark::db::mysql
 
-#endif  // BARK_DB_MYSQL_DETAIL_BIND_PARAM_HPP
+#endif  // BARK_DB_MYSQL_BIND_PARAM_HPP

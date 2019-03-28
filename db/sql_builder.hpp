@@ -46,7 +46,7 @@ param(T)->param<T>;
 
 /**
  * Allows to create database independent SQL queries
- * @code{.cpp}
+ * @code
  * sql_builder bld = builder(cmd);
  * bld << "SELECT * FROM " << id("sqlite_master")
  *     << " WHERE " << id("type") << " = " << param{"view"};

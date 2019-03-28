@@ -15,16 +15,16 @@
 
 namespace bark::db::postgres {
 
-class provider : private db::detail::cacher<db::postgres::provider>,
-                 private db::detail::ddl<db::postgres::provider>,
-                 private db::detail::projection_guide<db::postgres::provider>,
-                 public db::detail::provider_impl<db::postgres::provider>,
-                 private db::detail::table_guide<db::postgres::provider> {
-    friend db::detail::cacher<db::postgres::provider>;
-    friend db::detail::ddl<db::postgres::provider>;
-    friend db::detail::projection_guide<db::postgres::provider>;
-    friend db::detail::provider_impl<db::postgres::provider>;
-    friend db::detail::table_guide<db::postgres::provider>;
+class provider : private cacher<postgres::provider>,
+                 private ddl<postgres::provider>,
+                 private projection_guide<postgres::provider>,
+                 public provider_impl<postgres::provider>,
+                 private table_guide<postgres::provider> {
+    friend cacher<postgres::provider>;
+    friend ddl<postgres::provider>;
+    friend projection_guide<postgres::provider>;
+    friend provider_impl<postgres::provider>;
+    friend table_guide<postgres::provider>;
 
 public:
     provider(std::string host,
@@ -32,11 +32,11 @@ public:
              std::string db,
              std::string usr,
              std::string pwd)
-        : db::detail::provider_impl<db::postgres::provider>{
+        : provider_impl<postgres::provider>{
               [=] {
                   return new db::postgres::command(host, port, db, usr, pwd);
               },
-              std::make_unique<db::detail::postgres_dialect>()}
+              std::make_unique<postgres_dialect>()}
     {
     }
 };

@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_START_THREAD_HPP
-#define BARK_QT_DETAIL_START_THREAD_HPP
+#ifndef BARK_QT_START_THREAD_HPP
+#define BARK_QT_START_THREAD_HPP
 
 #include <QRunnable>
 #include <QThreadPool>
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 constexpr int PriorityNormal{0};
 
@@ -54,6 +54,6 @@ catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
 }
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_START_THREAD_HPP
+#endif  // BARK_QT_START_THREAD_HPP

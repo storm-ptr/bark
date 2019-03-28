@@ -3,8 +3,8 @@
 #ifndef BARK_GEOMETRY_AS_TEXT_HPP
 #define BARK_GEOMETRY_AS_TEXT_HPP
 
+#include <bark/detail/utility.hpp>
 #include <bark/geometry/geometry.hpp>
-#include <bark/utility.hpp>
 #include <boost/lexical_cast.hpp>
 #include <ostream>
 

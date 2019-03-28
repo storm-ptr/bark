@@ -10,16 +10,15 @@
 namespace bark {
 
 /**
- * Polymorphic wrapper of hashable value. std::any analogue
+ * Polymorphic wrapper of hashable value. std::any analogue.
  * @see https://en.wikibooks.org/wiki/More_C++_Idioms/Type_Erasure
  */
 class any_hashable {
 public:
     any_hashable() = delete;
-    any_hashable(const any_hashable&) = default;
 
     template <class T>
-    explicit any_hashable(const T& key) : ptr_{std::make_shared<model<T>>(key)}
+    explicit any_hashable(const T& val) : ptr_{std::make_shared<model<T>>(val)}
     {
     }
 
@@ -47,20 +46,20 @@ private:
 
     template <class T>
     class model : public concept {
-        T key_;
+        T val_;
 
     public:
-        explicit model(const T& key) : key_{key} {}
+        explicit model(const T& val) : val_{val} {}
 
         bool equal_to(const concept& that) const override
         {
-            return this->key_ == dynamic_cast<const model&>(that).key_;
+            return this->val_ == dynamic_cast<const model&>(that).val_;
         }
 
         size_t hash_code() const override
         {
             using boost::hash_value;
-            return hash_value(key_);
+            return hash_value(val_);
         }
     };
 

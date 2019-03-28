@@ -4,10 +4,10 @@
 #define BARK_DB_TABLE_DEF_OPS_HPP
 
 #include <bark/db/table_def.hpp>
+#include <bark/detail/unicode.hpp>
 #include <bark/geometry/as_text.hpp>
 #include <bark/geometry/envelope.hpp>
 #include <bark/proj/print.hpp>
-#include <bark/unicode.hpp>
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/search.hpp>

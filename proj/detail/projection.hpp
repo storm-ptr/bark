@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_PROJ_DETAIL_PROJECTION_HPP
-#define BARK_PROJ_DETAIL_PROJECTION_HPP
+#ifndef BARK_PROJ_PROJECTION_HPP
+#define BARK_PROJ_PROJECTION_HPP
 
 #include <memory>
 #include <proj_api.h>
 #include <stdexcept>
 #include <string>
 
-namespace bark::proj::detail {
+namespace bark::proj {
 
 struct ctx_deleter {
     void operator()(void* p) const { pj_ctx_free(p); }
@@ -51,6 +51,6 @@ private:
     }
 };
 
-}  // namespace bark::proj::detail
+}  // namespace bark::proj
 
-#endif  // BARK_PROJ_DETAIL_PROJECTION_HPP
+#endif  // BARK_PROJ_PROJECTION_HPP

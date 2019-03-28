@@ -1,15 +1,15 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP
-#define BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP
+#ifndef BARK_DB_ODBC_BIND_COLUMN_HPP
+#define BARK_DB_ODBC_BIND_COLUMN_HPP
 
 #include <bark/db/odbc/detail/utility.hpp>
-#include <bark/unicode.hpp>
+#include <bark/detail/unicode.hpp>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
 
-namespace bark::db::odbc::detail {
+namespace bark::db::odbc {
 
 struct column {
     virtual ~column() = default;
@@ -174,6 +174,6 @@ inline column_holder bind_column(const stmt_holder& stmt, SQLUSMALLINT col)
     throw std::runtime_error("invalid ODBC type: " + std::to_string(type));
 }
 
-}  // namespace bark::db::odbc::detail
+}  // namespace bark::db::odbc
 
-#endif  // BARK_DB_ODBC_DETAIL_BIND_COLUMN_HPP
+#endif  // BARK_DB_ODBC_BIND_COLUMN_HPP

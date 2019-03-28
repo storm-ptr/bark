@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_GDAL_DETAIL_UTILITY_HPP
-#define BARK_DB_GDAL_DETAIL_UTILITY_HPP
+#ifndef BARK_DB_GDAL_UTILITY_HPP
+#define BARK_DB_GDAL_UTILITY_HPP
 
 #include <bark/proj/normalize.hpp>
 #include <exception>
@@ -16,7 +16,6 @@
 #include <ogr_srs_api.h>
 
 namespace bark::db::gdal {
-namespace detail {
 
 const char GeometryColumn[] = "GEOMETRY";
 
@@ -103,10 +102,6 @@ catch (const std::exception&) {
     return "";
 }
 
-}  // namespace detail
-
-using detail::check;
-
 }  // namespace bark::db::gdal
 
-#endif  // BARK_DB_GDAL_DETAIL_UTILITY_HPP
+#endif  // BARK_DB_GDAL_UTILITY_HPP

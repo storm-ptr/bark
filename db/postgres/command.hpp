@@ -13,9 +13,8 @@
 
 namespace bark::db::postgres {
 
-class command : public db::command,
-                private db::detail::transaction<db::postgres::command> {
-    friend db::detail::transaction<db::postgres::command>;
+class command : public db::command, private transaction<postgres::command> {
+    friend transaction<postgres::command>;
 
 public:
     command(std::string_view host,
@@ -52,13 +51,13 @@ public:
         auto sql = bld.sql();
         auto params = bld.params();
 
-        std::vector<detail::param_holder> binds;
+        std::vector<param_holder> binds;
         std::vector<Oid> types;
         std::vector<const char*> values;
         std::vector<int> lengths;
         std::vector<int> formats;
         for (size_t i = 0; i < params.size(); ++i) {
-            binds.push_back(detail::bind_param(params[i]));
+            binds.push_back(bind_param(params[i]));
             auto bnd = binds.back().get();
             types.push_back(bnd->type());
             values.push_back(bnd->value());
@@ -72,7 +71,7 @@ public:
                                values.data(),
                                lengths.data(),
                                formats.data(),
-                               detail::PGRES_FORMAT_BINARY));
+                               PGRES_FORMAT_BINARY));
 
         auto r = PQresultStatus(res_.get());
         if (r != PGRES_COMMAND_OK && r != PGRES_TUPLES_OK && params.empty()) {
@@ -92,7 +91,7 @@ public:
         std::vector<std::string> names;
         for (decltype(cols) i = 0; i < cols; ++i) {
             names.push_back(PQfname(res_.get(), i));
-            cols_.push_back(detail::bind_column(PQftype(res_.get(), i)));
+            cols_.push_back(bind_column(PQftype(res_.get(), i)));
         }
         return names;
     }
@@ -127,9 +126,9 @@ public:
     }
 
 private:
-    detail::connection_holder con_;
-    detail::result_holder res_;
-    std::vector<detail::column_holder> cols_;
+    connection_holder con_;
+    result_holder res_;
+    std::vector<column_holder> cols_;
     int row_ = 0;
 
     void reset_res(PGresult* res)

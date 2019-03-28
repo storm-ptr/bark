@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_CANVAS_OPS_HPP
-#define BARK_QT_DETAIL_CANVAS_OPS_HPP
+#ifndef BARK_QT_CANVAS_OPS_HPP
+#define BARK_QT_CANVAS_OPS_HPP
 
 #include <QPainter>
 #include <bark/detail/grid.hpp>
@@ -11,7 +11,7 @@
 #include <bark/qt/detail/canvas.hpp>
 #include <stdexcept>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 inline void check(const canvas& map)
 {
@@ -85,6 +85,6 @@ inline auto transform(const frame& frm)
     };
 }
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_CANVAS_OPS_HPP
+#endif  // BARK_QT_CANVAS_OPS_HPP

@@ -1,12 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_GDAL_DETAIL_FRAME_HPP
-#define BARK_DB_GDAL_DETAIL_FRAME_HPP
+#ifndef BARK_DB_GDAL_FRAME_HPP
+#define BARK_DB_GDAL_FRAME_HPP
 
 #include <bark/db/gdal/detail/utility.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark::db::gdal::detail {
+namespace bark::db::gdal {
 
 /**
  * coefficients for transforming between pixel/line raster space, and projection
@@ -63,6 +63,6 @@ private:
     }
 };
 
-}  // namespace bark::db::gdal::detail
+}  // namespace bark::db::gdal
 
-#endif  // BARK_DB_GDAL_DETAIL_FRAME_HPP
+#endif  // BARK_DB_GDAL_FRAME_HPP

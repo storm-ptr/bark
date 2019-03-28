@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_CACHER_HPP
-#define BARK_DB_DETAIL_CACHER_HPP
+#ifndef BARK_DB_CACHER_HPP
+#define BARK_DB_CACHER_HPP
 
 #include <algorithm>
 #include <atomic>
@@ -12,32 +12,32 @@
 #include <boost/functional/hash.hpp>
 #include <tuple>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 template <class T>
 class cacher {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
-    cacher() : scope_{lru_cache::next_scope()} {}
+    cacher() : scope_{lru_cache::new_scope()} {}
 
     layer_to_type_map cached_dir()
     {
-        return std::any_cast<layer_to_type_map>(lru_cache::get_or_load(
-            scope_, Registry, [&] { return as_mixin().load_dir(); }));
+        return std::any_cast<layer_to_type_map>(lru_cache::get_or_invoke(
+            scope_, Dir, [&] { return as_mixin().load_dir(); }));
     }
 
     proj::bimap cached_projection_bimap()
     {
         return std::any_cast<proj::bimap>(
-            lru_cache::get_or_load(scope_, ProjectionBimap, [&] {
+            lru_cache::get_or_invoke(scope_, ProjectionBimap, [&] {
                 return as_mixin().load_projection_bimap();
             }));
     }
 
     table_def cached_table(const qualified_name& tbl_nm)
     {
-        return std::any_cast<table_def>(lru_cache::get_or_load(
+        return std::any_cast<table_def>(lru_cache::get_or_invoke(
             scope_, tbl_nm, [&] { return as_mixin().load_table(tbl_nm); }));
     }
 
@@ -63,21 +63,23 @@ protected:
                                   const geometry::box& px)
     {
         return std::any_cast<rowset>(
-            lru_cache::get_or_load(scope_, layer_tile{lr_nm, ext}, [&] {
+            lru_cache::get_or_invoke(scope_, layer_tile{lr_nm, ext}, [&] {
                 return as_mixin().load_spatial_objects(lr_nm, ext, px);
             }));
     }
 
     std::string cached_schema()
     {
-        return std::any_cast<std::string>(lru_cache::get_or_load(
-            scope_, Schema, [&] { return as_mixin().load_current_schema(); }));
+        return std::any_cast<std::string>(
+            lru_cache::get_or_invoke(scope_, CurrentSchema, [&] {
+                return as_mixin().load_current_schema();
+            }));
     }
 
-    void reset_cache() { scope_ = lru_cache::next_scope(); }
+    void reset_cache() { scope_ = lru_cache::new_scope(); }
 
 private:
-    enum keys { ProjectionBimap, Registry, Schema };
+    enum keys { CurrentSchema, Dir, ProjectionBimap };
 
     struct layer_tile {
         qualified_name name;
@@ -106,6 +108,6 @@ private:
     std::atomic<lru_cache::scope_type> scope_;
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_CACHER_HPP
+#endif  // BARK_DB_CACHER_HPP

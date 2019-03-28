@@ -1,12 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_SPUTNIK_HPP
-#define BARK_DB_SLIPPY_DETAIL_SPUTNIK_HPP
+#ifndef BARK_DB_SLIPPY_SPUTNIK_HPP
+#define BARK_DB_SLIPPY_SPUTNIK_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
 #include <sstream>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 class sputnik : public layer {
 public:
@@ -23,6 +23,6 @@ public:
     }
 };
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_SPUTNIK_HPP
+#endif  // BARK_DB_SLIPPY_SPUTNIK_HPP

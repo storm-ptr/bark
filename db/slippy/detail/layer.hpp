@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_LAYER_HPP
-#define BARK_DB_SLIPPY_DETAIL_LAYER_HPP
+#ifndef BARK_DB_SLIPPY_LAYER_HPP
+#define BARK_DB_SLIPPY_LAYER_HPP
 
 #include <bark/db/qualified_name.hpp>
 #include <bark/db/slippy/detail/tile.hpp>
@@ -9,7 +9,7 @@
 #include <bark/proj/transformer.hpp>
 #include <string>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 constexpr int LayerEpsg = 3857;
 constexpr int TileEpsg = 4326;
@@ -31,6 +31,6 @@ inline proj::transformer tile_to_layer_transformer()
     return {proj::epsg().find_proj(TileEpsg), projection()};
 }
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_LAYER_HPP
+#endif  // BARK_DB_SLIPPY_LAYER_HPP

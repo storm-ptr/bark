@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_SLIPPY_DETAIL_LAYERS_HPP
-#define BARK_DB_SLIPPY_DETAIL_LAYERS_HPP
+#ifndef BARK_DB_SLIPPY_LAYERS_HPP
+#define BARK_DB_SLIPPY_LAYERS_HPP
 
 #include <bark/db/provider.hpp>
 #include <bark/db/slippy/detail/arcgis.hpp>
@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace bark::db::slippy::detail {
+namespace bark::db::slippy {
 
 class layers {
 public:
@@ -53,6 +53,6 @@ private:
         layers_;
 };
 
-}  // namespace bark::db::slippy::detail
+}  // namespace bark::db::slippy
 
-#endif  // BARK_DB_SLIPPY_DETAIL_LAYERS_HPP
+#endif  // BARK_DB_SLIPPY_LAYERS_HPP

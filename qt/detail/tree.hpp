@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_QT_DETAIL_TREE_HPP
-#define BARK_QT_DETAIL_TREE_HPP
+#ifndef BARK_QT_TREE_HPP
+#define BARK_QT_TREE_HPP
 
 #include <bark/qt/common.hpp>
 #include <memory>
 #include <vector>
 
-namespace bark::qt::detail {
+namespace bark::qt {
 
 using node = std::variant<std::monostate, link, layer_def>;
 
@@ -17,6 +17,6 @@ struct tree : std::enable_shared_from_this<tree> {
     node data;
 };
 
-}  // namespace bark::qt::detail
+}  // namespace bark::qt
 
-#endif  // BARK_QT_DETAIL_TREE_HPP
+#endif  // BARK_QT_TREE_HPP

@@ -18,11 +18,8 @@
 #include <string>
 
 namespace bark::qt {
-namespace detail {
 
 class rendering_task;
-
-}  // namespace detail
 
 /**
  * The class receives events from the window system and represent a cartography
@@ -60,10 +57,10 @@ protected:
 private:
     frame frm_;
     QFuture<frame> future_frm_;
-    detail::canvas map_;
-    std::future<detail::canvas> future_map_;
+    canvas map_;
+    std::future<canvas> future_map_;
     QVector<layer> layers_;
-    std::weak_ptr<detail::rendering_task> render_;
+    std::weak_ptr<rendering_task> render_;
     QPointF press_center_;
     QPoint press_pos_;
     QBasicTimer timer_;

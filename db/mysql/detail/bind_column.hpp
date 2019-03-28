@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP
-#define BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP
+#ifndef BARK_DB_MYSQL_BIND_COLUMN_HPP
+#define BARK_DB_MYSQL_BIND_COLUMN_HPP
 
 #include <bark/db/mysql/detail/utility.hpp>
 #include <cstring>
 #include <stdexcept>
 
-namespace bark::db::mysql::detail {
+namespace bark::db::mysql {
 
 struct column {
     virtual ~column() = default;
@@ -114,6 +114,6 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
     }
 }
 
-}  // namespace bark::db::mysql::detail
+}  // namespace bark::db::mysql
 
-#endif  // BARK_DB_MYSQL_DETAIL_BIND_COLUMN_HPP
+#endif  // BARK_DB_MYSQL_BIND_COLUMN_HPP

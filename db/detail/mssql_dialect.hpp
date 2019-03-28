@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DETAIL_MSSQL_DIALECT_HPP
-#define BARK_DB_DETAIL_MSSQL_DIALECT_HPP
+#ifndef BARK_DB_MSSQL_DIALECT_HPP
+#define BARK_DB_MSSQL_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/utility.hpp>
@@ -10,7 +10,7 @@
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark::db::detail {
+namespace bark::db {
 
 class mssql_dialect : public dialect {
 public:
@@ -160,6 +160,6 @@ public:
     }
 };
 
-}  // namespace bark::db::detail
+}  // namespace bark::db
 
-#endif  // BARK_DB_DETAIL_MSSQL_DIALECT_HPP
+#endif  // BARK_DB_MSSQL_DIALECT_HPP

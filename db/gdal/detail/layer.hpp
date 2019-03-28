@@ -1,12 +1,12 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_GDAL_DETAIL_LAYER_HPP
-#define BARK_DB_GDAL_DETAIL_LAYER_HPP
+#ifndef BARK_DB_GDAL_LAYER_HPP
+#define BARK_DB_GDAL_LAYER_HPP
 
 #include <bark/db/detail/utility.hpp>
 #include <bark/db/table_def.hpp>
 
-namespace bark::db::gdal::detail {
+namespace bark::db::gdal {
 
 class layer {
 public:
@@ -73,11 +73,10 @@ private:
             return rtree{};
         OGREnvelope ext;
         check(OGR_L_GetExtent(lr_.get(), &ext, 1 /*force*/));
-        return db::detail::make_tiles(
-            count, {{ext.MinX, ext.MinY}, {ext.MaxX, ext.MaxY}});
+        return make_tiles(count, {{ext.MinX, ext.MinY}, {ext.MaxX, ext.MaxY}});
     }
 };
 
-}  // namespace bark::db::gdal::detail
+}  // namespace bark::db::gdal
 
-#endif  // BARK_DB_GDAL_DETAIL_LAYER_HPP
+#endif  // BARK_DB_GDAL_LAYER_HPP
