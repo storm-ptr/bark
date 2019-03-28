@@ -30,6 +30,7 @@ for:
     - sh: sudo apt-get update
     - sh: sudo apt-get -y install git
     - sh: sudo apt-get -y install libboost-dev
+    - sh: sudo apt-get -y install libpq-dev
     - sh: sudo apt-get -y install libgdal-dev
     - sh: sudo apt-get -y install libgl1-mesa-dev
     - sh: sudo apt-get -y install libproj-dev

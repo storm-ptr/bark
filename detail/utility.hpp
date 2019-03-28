@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <mutex>
