@@ -15,25 +15,25 @@
 
 namespace bark::db::mysql {
 
-class provider : private cacher<mysql::provider>,
-                 private ddl<mysql::provider>,
-                 private projection_guide<mysql::provider>,
-                 public provider_impl<mysql::provider>,
-                 private table_guide<mysql::provider> {
-    friend cacher<mysql::provider>;
-    friend ddl<mysql::provider>;
-    friend projection_guide<mysql::provider>;
-    friend provider_impl<mysql::provider>;
-    friend table_guide<mysql::provider>;
+class provider : private cacher<provider>,
+                 private ddl<provider>,
+                 private projection_guide<provider>,
+                 public provider_impl<provider>,
+                 private table_guide<provider> {
+    friend cacher<provider>;
+    friend ddl<provider>;
+    friend projection_guide<provider>;
+    friend provider_impl<provider>;
+    friend table_guide<provider>;
 
 public:
-    provider(std::string host,
+    provider(const std::string& host,
              int port,
-             std::string db,
-             std::string usr,
-             std::string pwd)
-        : provider_impl<mysql::provider>{
-              [=] { return new db::mysql::command(host, port, db, usr, pwd); },
+             const std::string& db,
+             const std::string& usr,
+             const std::string& pwd)
+        : provider_impl<provider>{
+              [=] { return new command(host, port, db, usr, pwd); },
               std::make_unique<mysql_dialect>()}
     {
     }

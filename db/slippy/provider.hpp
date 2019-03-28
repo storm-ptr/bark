@@ -13,9 +13,9 @@
 
 namespace bark::db::slippy {
 
-class provider : private cacher<slippy::provider>, public db::provider {
+class provider : private cacher<provider>, public db::provider {
 public:
-    friend cacher<slippy::provider>;
+    friend cacher<provider>;
 
     layer_to_type_map dir() override { return cached_dir(); }
 

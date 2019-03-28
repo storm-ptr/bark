@@ -15,27 +15,25 @@
 
 namespace bark::db::postgres {
 
-class provider : private cacher<postgres::provider>,
-                 private ddl<postgres::provider>,
-                 private projection_guide<postgres::provider>,
-                 public provider_impl<postgres::provider>,
-                 private table_guide<postgres::provider> {
-    friend cacher<postgres::provider>;
-    friend ddl<postgres::provider>;
-    friend projection_guide<postgres::provider>;
-    friend provider_impl<postgres::provider>;
-    friend table_guide<postgres::provider>;
+class provider : private cacher<provider>,
+                 private ddl<provider>,
+                 private projection_guide<provider>,
+                 public provider_impl<provider>,
+                 private table_guide<provider> {
+    friend cacher<provider>;
+    friend ddl<provider>;
+    friend projection_guide<provider>;
+    friend provider_impl<provider>;
+    friend table_guide<provider>;
 
 public:
-    provider(std::string host,
+    provider(const std::string& host,
              int port,
-             std::string db,
-             std::string usr,
-             std::string pwd)
-        : provider_impl<postgres::provider>{
-              [=] {
-                  return new db::postgres::command(host, port, db, usr, pwd);
-              },
+             const std::string& db,
+             const std::string& usr,
+             const std::string& pwd)
+        : provider_impl<provider>{
+              [=] { return new command(host, port, db, usr, pwd); },
               std::make_unique<postgres_dialect>()}
     {
     }

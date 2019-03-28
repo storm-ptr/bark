@@ -16,22 +16,21 @@
 
 namespace bark::db::sqlite {
 
-class provider : private cacher<sqlite::provider>,
-                 private ddl<sqlite::provider>,
-                 private projection_guide<sqlite::provider>,
-                 public provider_impl<sqlite::provider>,
-                 private sqlite::table_guide<sqlite::provider> {
-    friend cacher<sqlite::provider>;
-    friend ddl<sqlite::provider>;
-    friend projection_guide<sqlite::provider>;
-    friend provider_impl<sqlite::provider>;
-    friend sqlite::table_guide<sqlite::provider>;
+class provider : private cacher<provider>,
+                 private ddl<provider>,
+                 private projection_guide<provider>,
+                 public provider_impl<provider>,
+                 private table_guide<provider> {
+    friend cacher<provider>;
+    friend ddl<provider>;
+    friend projection_guide<provider>;
+    friend provider_impl<provider>;
+    friend table_guide<provider>;
 
 public:
-    provider(std::string file)
-        : provider_impl<sqlite::provider>{
-              [=] { return new db::sqlite::command(file); },
-              std::make_unique<sqlite::dialect>()}
+    provider(const std::string& file)
+        : provider_impl<provider>{[=] { return new command(file); },
+                                  std::make_unique<dialect>()}
     {
         try {
             exec(*this, "SELECT InitSpatialMetaData(1)");

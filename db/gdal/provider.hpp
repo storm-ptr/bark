@@ -18,8 +18,8 @@
 
 namespace bark::db::gdal {
 
-class provider : private cacher<gdal::provider>, public db::provider {
-    friend cacher<gdal::provider>;
+class provider : private cacher<provider>, public db::provider {
+    friend cacher<provider>;
 
 public:
     explicit provider(std::string_view file) : file_{file}
@@ -68,7 +68,7 @@ public:
     {
         if (is_raster())
             throw std::logic_error{"not implemented"};
-        return command_holder(new gdal::command(file_),
+        return command_holder(new command(file_),
                               [](db::command* cmd) { delete cmd; });
     }
 
@@ -158,7 +158,7 @@ private:
             return {{"wkb", "image"}, std::move(os.data)};
         }
         else {
-            gdal::command cmd(file_);
+            command cmd(file_);
             cmd.open(lr_nm, ext);
             return fetch_all(cmd);
         }

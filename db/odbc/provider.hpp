@@ -20,24 +20,24 @@
 
 namespace bark::db::odbc {
 
-class provider : private cacher<odbc::provider>,
-                 private ddl<odbc::provider>,
-                 private projection_guide<odbc::provider>,
-                 public provider_impl<odbc::provider>,
-                 private table_guide<odbc::provider> {
-    friend cacher<odbc::provider>;
-    friend ddl<odbc::provider>;
-    friend projection_guide<odbc::provider>;
-    friend provider_impl<odbc::provider>;
-    friend table_guide<odbc::provider>;
+class provider : private cacher<provider>,
+                 private ddl<provider>,
+                 private projection_guide<provider>,
+                 public provider_impl<provider>,
+                 private table_guide<provider> {
+    friend cacher<provider>;
+    friend ddl<provider>;
+    friend projection_guide<provider>;
+    friend provider_impl<provider>;
+    friend table_guide<provider>;
 
 public:
-    explicit provider(std::string conn_str)
-        : provider_impl<odbc::provider>{
-              [=] { return new db::odbc::command(conn_str); },
+    explicit provider(const std::string& conn_str)
+        : provider_impl<provider>{
+              [=] { return new command(conn_str); },
               [=]() -> dialect_holder {
-                  auto dbms_lcase = unicode::to_lower(
-                      db::odbc::command(conn_str).dbms_name());
+                  auto dbms_lcase =
+                      unicode::to_lower(command(conn_str).dbms_name());
                   if (within(dbms_lcase)("db2"))
                       return std::make_unique<db2_dialect>();
                   else if (all_of({"microsoft", "sql", "server"},
