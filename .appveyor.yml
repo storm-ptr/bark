@@ -30,7 +30,7 @@ for:
     - sh: sudo apt-get update
     - sh: sudo apt-get -y install git
     - sh: sudo apt-get -y install libboost-dev
-    - sh: sudo apt-get -y install -t unstable libgdal-dev
+    - sh: sudo apt-get -y install libproj-dev
     - sh: sudo apt-get -y install libgl1-mesa-dev
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
