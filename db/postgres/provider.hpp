@@ -27,11 +27,11 @@ class provider : private cacher<provider>,
     friend table_guide<provider>;
 
 public:
-    provider(const std::string& host,
+    provider(std::string host,
              int port,
-             const std::string& db,
-             const std::string& usr,
-             const std::string& pwd)
+             std::string db,
+             std::string usr,
+             std::string pwd)
         : provider_impl<provider>{
               [=] { return new command(host, port, db, usr, pwd); },
               std::make_unique<postgres_dialect>()}

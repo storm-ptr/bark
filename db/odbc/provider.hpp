@@ -35,7 +35,7 @@ public:
     explicit provider(const std::string& conn_str)
         : provider_impl<provider>{
               [=] { return new command(conn_str); },
-              [=]() -> dialect_holder {
+              [&]() -> dialect_holder {
                   auto dbms_lcase =
                       unicode::to_lower(command(conn_str).dbms_name());
                   if (within(dbms_lcase)("db2"))

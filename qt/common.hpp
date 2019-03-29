@@ -44,9 +44,9 @@ struct layer : link, layer_def {
  */
 struct frame {
     QSize size;
-    std::string projection;
     QPointF center;
     qreal scale = 1.;
+    std::string projection;
 };
 
 }  // namespace bark::qt

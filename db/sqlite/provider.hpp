@@ -28,7 +28,7 @@ class provider : private cacher<provider>,
     friend table_guide<provider>;
 
 public:
-    provider(const std::string& file)
+    provider(std::string file)
         : provider_impl<provider>{[=] { return new command(file); },
                                   std::make_unique<dialect>()}
     {
