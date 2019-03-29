@@ -40,7 +40,6 @@ for:
     - sh: sudo apt-get -y install libgl1-mesa-dev
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
-    - sh: psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
     - sh: source /opt/qt512/bin/qt512-env.sh
     - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
@@ -57,6 +56,9 @@ for:
     - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN
     - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control.ubuntu.1804 $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN/control
     - sh: dpkg-deb --build $APPVEYOR_BUILD_FOLDER/$DEB_NAME
+
+  before_test:
+    - sh: psql -d postgres -U postgres -c "CREATE EXTENSION postgis;"
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
