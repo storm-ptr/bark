@@ -132,7 +132,6 @@ ubuntu
       sudo apt-get install libboost-dev
       sudo apt-get install libgdal-dev
       sudo apt-get install libgl1-mesa-dev
-      sudo apt-get install libproj-dev
       sudo apt-get install qt512-meta-minimal
       sudo apt-get install qt512imageformats
       ```
@@ -146,7 +145,6 @@ ubuntu
       sudo apt-get -y install libboost-dev
       sudo apt-get -y install libgdal-dev
       sudo apt-get -y install libgl1-mesa-dev
-      sudo apt-get -y install libproj-dev
       sudo apt-get -y install qt512-meta-minimal
       sudo apt-get -y install qt512imageformats
       ```
