@@ -91,6 +91,8 @@ for:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
     OSGEO4W_ROOT: C:\OSGeo4W64
+    PGUSER: postgres
+    PGPASSWORD: Password12!
 
   install:
     - mkdir %OSGEO4W_ROOT%
@@ -120,7 +122,7 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
   before_test:
-    - call "C:\Program Files\PostgreSQL\10\bin\psql" 'host=localhost dbname=postgres user=postgres password=Password12!' -c "CREATE EXTENSION postgis;"
+    - call "C:\Program Files\PostgreSQL\10\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
