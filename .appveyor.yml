@@ -41,6 +41,10 @@ for:
     - sh: source /opt/qt512/bin/qt512-env.sh
     - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
+#https://help.appveyor.com/discussions/problems/20764-postgres-peer-authentication-failed
+  init:
+    - sh: sudo sed -i -E -e 's/(local\s+all\s+postgres\s+)peer/\1trust/' /etc/postgresql/11/main/pg_hba.conf
+  
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
     - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
@@ -56,6 +60,7 @@ for:
     - sh: dpkg-deb --build $APPVEYOR_BUILD_FOLDER/$DEB_NAME
 
   before_test:
+     - sh: sudo -u postgres psql -c "ALTER USER postgres with password 'Password12!';" postgres
      - sh: psql 'host=localhost dbname=postgres user=postgres password=Password12!' -c "CREATE EXTENSION postgis;"
 
   test_script:
@@ -86,8 +91,6 @@ for:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
     OSGEO4W_ROOT: C:\OSGeo4W64
-    PGUSER: postgres
-    PGPASSWORD: Password12!
 
   install:
     - mkdir %OSGEO4W_ROOT%
@@ -117,7 +120,7 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
   before_test:
-    - call "C:\Program Files\PostgreSQL\10\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+    - call "C:\Program Files\PostgreSQL\10\bin\psql" 'host=localhost dbname=postgres user=postgres password=Password12!' -c "CREATE EXTENSION postgis;"
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
