@@ -10,8 +10,8 @@
 #include <QVBoxLayout>
 
 column_matching_dialog::column_matching_dialog(QWidget* parent,
-                                               layer_columns from,
-                                               layer_columns to)
+                                               const layer_columns& from,
+                                               const layer_columns& to)
     : QDialog(parent)
 {
     setWindowTitle("match columns to paste");
@@ -28,8 +28,7 @@ column_matching_dialog::column_matching_dialog(QWidget* parent,
         combo->addItem(QString{});
         for (auto& col_from : from.cols)
             combo->addItem(QString::fromStdString(col_from));
-        int pos = combo->findText(col_to, Qt::MatchFixedString);
-        if (pos >= 0)
+        if (int pos = combo->findText(col_to, Qt::MatchFixedString); pos >= 0)
             combo->setCurrentIndex(pos);
         grid_->addWidget(combo, i, 1);
     }
@@ -53,18 +52,15 @@ column_matching_dialog::column_matching_dialog(QWidget* parent,
 string_map column_matching_dialog::matching() const
 {
     string_map res;
-    for (int row(0); row < grid_->rowCount(); ++row) {
-        auto from =
-            static_cast<QLabel*>(grid_->itemAtPosition(row, 0)->widget())
-                ->text()
-                .toStdString();
-        auto to =
-            static_cast<QComboBox*>(grid_->itemAtPosition(row, 1)->widget())
-                ->currentText()
-                .toStdString();
-        if (to.empty())
-            continue;
-        res.insert({from, to});
+    for (int i(0); i < grid_->rowCount(); ++i) {
+        auto from = static_cast<QLabel*>(grid_->itemAtPosition(i, 0)->widget())
+                        ->text()
+                        .toStdString();
+        auto to = static_cast<QComboBox*>(grid_->itemAtPosition(i, 1)->widget())
+                      ->currentText()
+                      .toStdString();
+        if (!to.empty())
+            res.insert({from, to});
     }
     return res;
 }

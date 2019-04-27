@@ -62,8 +62,7 @@ inline link make_odbc_link(const QUrl& uri)
     if (!uri.host().isEmpty())
         os << "SERVER=" << adapt(uri.host()) << ";"
            << "HOSTNAME=" << adapt(uri.host()) << ";";
-    auto port = uri.port(-1);
-    if (port > 0)
+    if (auto port = uri.port(0); port > 0)
         os << "PORT=" << port << ";";
     if (!uri.path().isEmpty())
         os << "DATABASE=" << adapt(trimmed_path(uri)) << ";";
@@ -73,8 +72,7 @@ inline link make_odbc_link(const QUrl& uri)
 
 inline link make_link(const QUrl& uri)
 {
-    auto scm = uri.scheme();
-    if (scm == "gdal")
+    if (auto scm = uri.scheme(); scm == "gdal")
         return make_file_link<db::gdal::provider>(uri);
     else if (scm == "mysql")
         return make_server_link<db::mysql::provider, 3306>(uri);
@@ -93,24 +91,24 @@ inline QString to_string(tree* ptr)
 {
     return std::visit(
         overloaded{[](const std::monostate&) { return QString{}; },
-                   [](const link& v) {
-                       return v.uri.toDisplayString(QUrl::DecodeReserved);
+                   [](const link& lnk) {
+                       return lnk.uri.toDisplayString(QUrl::DecodeReserved);
                    },
-                   [](const layer_def& v) {
-                       return adapt(boost::lexical_cast<std::string>(v.name));
+                   [](const layer_def& def) {
+                       return adapt(boost::lexical_cast<std::string>(def.name));
                    }},
         ptr->data);
 }
 
 inline auto binary_search(tree* parent, tree* child)
 {
-    return std::equal_range(
-        parent->children.begin(),
-        parent->children.end(),
-        child->shared_from_this(),
-        [](const std::shared_ptr<tree>& lhs, const std::shared_ptr<tree>& rhs) {
-            return to_string(lhs.get()) < to_string(rhs.get());
-        });
+    return std::equal_range(parent->children.begin(),
+                            parent->children.end(),
+                            child->shared_from_this(),
+                            [](const auto& lhs, const auto& rhs) {
+                                return to_string(lhs.get()) <
+                                       to_string(rhs.get());
+                            });
 }
 
 inline std::shared_ptr<tree> dir(const QUrl& uri)
@@ -131,12 +129,10 @@ inline std::shared_ptr<tree> dir(const QUrl& uri)
 
 inline void copy_children_data(tree* from, tree* to)
 {
-    for (auto& child : to->children) {
-        auto rng = binary_search(from, child.get());
-        if (rng.first != rng.second) {
+    for (auto& child : to->children)
+        if (auto rng = binary_search(from, child.get());
+            rng.first != rng.second)
             child->data = (*rng.first)->data;
-        }
-    }
 }
 
 inline bool is_link(tree* ptr)
@@ -158,19 +154,16 @@ inline std::optional<Qt::CheckState> state(tree* ptr)
 
 inline bool toggle(tree* ptr)
 {
-    if (!is_layer(ptr))
-        return {};
-    auto& lr = std::get<layer_def>(ptr->data);
-    switch (lr.state) {
-        case Qt::Unchecked:
-            lr.state = Qt::Checked;
-            return true;
-        case Qt::Checked:
-            lr.state = Qt::Unchecked;
-            return true;
-        default:
-            return false;
-    }
+    if (is_layer(ptr))
+        switch (auto& def = std::get<layer_def>(ptr->data); def.state) {
+            case Qt::Unchecked:
+                def.state = Qt::Checked;
+                return true;
+            case Qt::Checked:
+                def.state = Qt::Unchecked;
+                return true;
+        }
+    return false;
 }
 
 inline std::optional<link> get_link(tree* ptr)

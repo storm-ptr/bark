@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 
 sql_widget::sql_widget(QWidget* parent, bark::qt::link lnk)
-    : QWidget(parent), lnk_(lnk)
+    : QWidget(parent), lnk_(std::move(lnk))
 {
     auto tools = new QToolBar;
     tools->setFloatable(false);

@@ -12,16 +12,16 @@ const size_t MaxRowNumber = 1000000;
 const size_t MaxVariableNumber = 999;  // @see https://sqlite.org/limits.html
 const qint64 TimeoutMs = 3000;
 
-auto column_map(bark::qt::layer lr)
+auto column_map(const bark::qt::layer& lr)
 {
     string_map res;
-    for (auto& col : attr_names(lr))
+    for (const auto& col : attr_names(lr))
         res.insert({col, col});
     return res;
 }
 
 template <class RandomAccessRng, class Functor>
-void for_each_slice(RandomAccessRng&& rng, size_t slice_size, Functor f)
+void for_each_slice(const RandomAccessRng& rng, size_t slice_size, Functor f)
 {
     for (size_t pos = 0, sz = std::size(rng); pos < sz;) {
         auto prev = pos;
@@ -33,7 +33,7 @@ void for_each_slice(RandomAccessRng&& rng, size_t slice_size, Functor f)
 class inserter {
 public:
     inserter(task& tsk, bark::qt::layer lr)
-        : tsk_{tsk}, lr_{lr}, cmd_{lr_.provider->make_command()}
+        : tsk_{tsk}, lr_{std::move(lr)}, cmd_{lr_.provider->make_command()}
     {
         cmd_->set_autocommit(false);
         timer_.start();
@@ -70,17 +70,18 @@ private:
 insertion_task::insertion_task(QVector<bark::qt::layer> from,
                                bark::qt::link to,
                                action act)
-    : f_(([=](insertion_task* self) {
+    : f_(([from = std::move(from), to = std::move(to), act](
+              insertion_task& self) {
         if (action::PrintSqlOnly == act)
-            self->push_output("-- print only --");
-        self->push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
-        for (auto& lr_from : from) {
+            self.push_output("-- print only --");
+        self.push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
+        for (const auto& lr_from : from) {
             if (action::PrintSqlOnly == act)
-                ::push_output(*self, script(lr_from, to).sql);
+                ::push_output(self, script(lr_from, to).sql);
             else {
-                auto lr_to = self->create(lr_from, to);
-                emit self->refresh_sig();
-                self->insert(lr_from, lr_to, column_map(lr_from));
+                auto lr_to = self.create(lr_from, to);
+                emit self.refresh_sig();
+                self.insert(lr_from, lr_to, column_map(lr_from));
             }
         }
     }))
@@ -90,14 +91,16 @@ insertion_task::insertion_task(QVector<bark::qt::layer> from,
 insertion_task::insertion_task(bark::qt::layer from,
                                bark::qt::layer to,
                                string_map cols)
-    : f_(([=](insertion_task* self) {
-        self->push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
-        self->insert(from, to, cols);
+    : f_(([from = std::move(from), to = std::move(to), cols = std::move(cols)](
+              insertion_task& self) {
+        self.push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
+        self.insert(from, to, cols);
     }))
 {
 }
 
-bark::qt::layer insertion_task::create(bark::qt::layer from, bark::qt::link to)
+bark::qt::layer insertion_task::create(const bark::qt::layer& from,
+                                       const bark::qt::link& to)
 {
     auto scr = script(from, to);
     exec(*to.provider, scr.sql);
@@ -108,8 +111,8 @@ bark::qt::layer insertion_task::create(bark::qt::layer from, bark::qt::link to)
     return {to, def};
 }
 
-void insertion_task::insert(bark::qt::layer from,
-                            bark::qt::layer to,
+void insertion_task::insert(const bark::qt::layer& from,
+                            const bark::qt::layer& to,
                             string_map cols)
 {
     cols.insert({from.name.back(), to.name.back()});
@@ -128,16 +131,16 @@ void insertion_task::insert(bark::qt::layer from,
             if (!tf.is_trivial())
                 bark::db::for_each_blob(slice, geom_pos, tf.inplace_forward());
             insert(cols | boost::adaptors::map_values, slice);
-            insert.commit(false /*force*/);
+            insert.commit(/*force*/ false);
         });
         if (rng.size() < MaxRowNumber)
             break;
     }
-    insert.commit(true /*force*/);
+    insert.commit(/*force*/ true);
     to.provider->refresh();
 }
 
 void insertion_task::run_event()
 {
-    f_(this);
+    f_(*this);
 }

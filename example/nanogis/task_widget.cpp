@@ -43,8 +43,7 @@ void task_widget::start()
 void task_widget::timerEvent(QTimerEvent* event)
 {
     if (event->timerId() == timer_.timerId()) {
-        auto out = tsk_->pop_output();
-        if (!out.isEmpty())
+        if (auto out = tsk_->pop_output(); !out.isEmpty())
             edit_->appendPlainText(out);
         auto status = tsk_->state();
         if (status == task::status::Failed ||
@@ -53,9 +52,8 @@ void task_widget::timerEvent(QTimerEvent* event)
             timer_.stop();
         }
     }
-    else {
+    else
         QWidget::timerEvent(event);
-    }
 }
 
 void task_widget::close_slot()

@@ -15,6 +15,11 @@
 
 namespace bark::qt {
 
+inline bool queryable(const link& lnk)
+{
+    return lnk.queryable;
+}
+
 inline auto projection(const layer& lr)
 {
     return lr.provider->projection(lr.name);
@@ -113,13 +118,13 @@ inline QPointF offset(const frame& lhs, const frame& rhs)
 template <class Functor>
 frame operator|(frame frm, Functor f)
 {
-    return f(frm);
+    return f(std::move(frm));
 }
 
 template <class Size>
 auto set_size(Size sz)
 {
-    return [=](frame frm) {
+    return [sz = std::move(sz)](frame frm) {
         frm.size = {sz.width(), sz.height()};
         return frm;
     };
@@ -127,7 +132,7 @@ auto set_size(Size sz)
 
 inline auto set_projection(std::string pj)
 {
-    return [=](frame frm) {
+    return [pj = std::move(pj)](frame frm) {
         frm.projection = pj;
         return frm;
     };
@@ -136,7 +141,7 @@ inline auto set_projection(std::string pj)
 template <class Point>
 auto set_center(Point pos)
 {
-    return [=](frame frm) {
+    return [pos = std::move(pos)](frame frm) {
         frm.center = {pos.x(), pos.y()};
         return frm;
     };
@@ -150,43 +155,44 @@ inline auto set_scale(qreal sc)
     };
 }
 
-inline auto resize(QMargins margins)
+inline auto resize(QMargins mar)
 {
-    return [=](frame frm) {
-        auto sz = QRect{{}, frm.size}.marginsAdded(margins);
-        return frm | set_size(sz);
+    return [mar = std::move(mar)](frame frm) {
+        auto sz = QRect{{}, frm.size}.marginsAdded(mar);
+        return std::move(frm) | set_size(sz);
     };
 }
 
 inline auto intersect(geometry::box ext)
 {
-    return [=](frame frm) {
+    return [ext = std::move(ext)](frame frm) {
         auto rect = forward(frm, ext).intersected({{}, frm.size});
         auto pos = backward(frm, rect.center());
         auto sz = rect.toAlignedRect().size();
-        return frm | set_center(pos) | set_size(sz);
+        return std::move(frm) | set_center(pos) | set_size(sz);
     };
 }
 
 inline auto fit(geometry::box ext)
 {
-    return [=](frame frm) {
+    return [ext = std::move(ext)](frame frm) {
         auto pos = boost::geometry::return_centroid<geometry::point>(ext);
         auto sc = geometry::max_scale(ext, frm.size);
-        return frm | set_center(pos) | set_scale(sc);
+        return std::move(frm) | set_center(pos) | set_scale(sc);
     };
 };
 
 inline auto undistort(layer lr)
 {
-    return [=](frame frm) {
+    return [lr = std::move(lr)](frame frm) {
         auto pj = projection(lr);
         auto tf = proj::transformer{frm.projection, pj};
         auto pos = tf.forward(adapt(frm.center));
         auto px = tf.forward(pixel(frm));
         px = lr.provider->undistorted_pixel(lr.name, px);
         auto sc = geometry::max_scale(px);
-        return frm | set_projection(pj) | set_center(pos) | set_scale(sc);
+        return std::move(frm) | set_projection(pj) | set_center(pos) |
+               set_scale(sc);
     };
 }
 

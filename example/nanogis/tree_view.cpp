@@ -13,6 +13,7 @@
 #include <QMap>
 #include <QMenu>
 #include <QMessageBox>
+#include <bark/qt/common_ops.hpp>
 #include <bark/qt/tree_model_impl.hpp>
 
 #define ACTION(action, icon_id, text)                       \
@@ -69,11 +70,12 @@ tree_view::tree_view(QWidget* parent) : QTreeView(parent), model_(nullptr)
 void tree_view::menu_slot(QPoint point)
 {
     menu_idx_ = indexAt(point);
-    QList<QAction*> acts;
-    if (!match_checked([](auto& lr) { return lr.queryable; }).empty())
-        acts.append(copy_checked_act_);
-
     auto lr = model_.get_layer(menu_idx_);
+    auto lnk = model_.get_link(menu_idx_);
+    QList<QAction*> acts;
+
+    if (!match_checked(bark::qt::queryable).empty())
+        acts.append(copy_checked_act_);
     if (lr && lr->provider) {
         if (lr->queryable) {
             acts.append(copy_act_);
@@ -90,24 +92,19 @@ void tree_view::menu_slot(QPoint point)
         if (lr->queryable)
             acts.append(del_act_);
     }
-
-    auto lnk = model_.get_link(menu_idx_);
     if (lnk) {
         if (lnk->queryable) {
-            if (!clipboard_.empty()) {
+            if (!clipboard_.empty())
                 acts.append(paste_act_);
-            }
             acts.append(terminal_act_);
         }
         acts.append(refresh_act_);
     }
-
     acts.append(separator1_act_);
     acts.append(attach_files_act_);
     acts.append(attach_uri_act_);
     if (lnk)
         acts.append(detach_act_);
-
     acts.append(separator2_act_);
     acts.append(create_act_);
     acts.append(open_act_);
@@ -132,8 +129,7 @@ void tree_view::open_slot()
         this, "open project", "", "project (*.nanogis)");
     if (file_name.isEmpty())
         return;
-    QFile file(file_name);
-    if (file.open(QIODevice::ReadOnly)) {
+    if (QFile file(file_name); file.open(QIODevice::ReadOnly)) {
         QDataStream is(&file);
         is.setVersion(QDataStream::Qt_5_2);
         is >> model_;
@@ -146,8 +142,7 @@ void tree_view::save_slot()
         this, "save project", "", "project (*.nanogis)");
     if (file_name.isEmpty())
         return;
-    QFile file(file_name);
-    if (file.open(QIODevice::WriteOnly)) {
+    if (QFile file(file_name); file.open(QIODevice::WriteOnly)) {
         QDataStream os(&file);
         os.setVersion(QDataStream::Qt_5_2);
         os << model_;
@@ -219,7 +214,7 @@ void tree_view::paste_slot()
     }
 }
 
-void tree_view::insert_slot(layer_columns from, layer_columns to)
+void tree_view::insert_slot(const layer_columns& from, const layer_columns& to)
 {
     column_matching_dialog dlg(this, from, to);
     if (dlg.exec() == QDialog::Accepted)
@@ -244,102 +239,90 @@ void tree_view::del_slot()
 void tree_view::update_slot()
 {
     menu_idx_ = {};
-    emit show_sig(match_checked([](auto&) { return true; }));
+    emit show_sig(match_checked([](auto) { return true; }));
 };
 
 void tree_view::copy_slot()
 {
     clipboard_.clear();
-    auto lr = model_.get_layer(menu_idx_);
-    if (lr)
+    if (auto lr = model_.get_layer(menu_idx_))
         clipboard_ = {*lr};
 }
 
 void tree_view::copy_checked_slot()
 {
-    clipboard_ = match_checked([](auto& lr) { return lr.queryable; });
+    clipboard_ = match_checked(bark::qt::queryable);
 }
 
 void tree_view::fit_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (lr)
+    if (auto lr = model_.get_layer(menu_idx_))
         emit fit_sig(*lr);
 }
 
 void tree_view::attributes_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (lr)
+    if (auto lr = model_.get_layer(menu_idx_))
         emit attributes_sig(*lr);
 }
 
 void tree_view::metadata_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (lr) {
-        auto tsk = std::make_shared<metadata_task>(*lr);
-        emit task_sig(tsk);
-    }
+    if (auto lr = model_.get_layer(menu_idx_))
+        emit task_sig(std::make_shared<metadata_task>(*lr));
 }
 
 void tree_view::undistort_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (lr)
+    if (auto lr = model_.get_layer(menu_idx_))
         emit undistort_sig(*lr);
 }
 
 void tree_view::brush_color_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (!lr)
-        return;
-    auto color = QColorDialog::getColor(
-        lr->brush.color(), this, QString(), QColorDialog::ShowAlphaChannel);
-    if (color.isValid()) {
-        lr->brush.setStyle(color.alpha() ? Qt::SolidPattern : Qt::NoBrush);
-        lr->brush.setColor(color);
-        model_.set_layer(menu_idx_, *lr);
+    if (auto lr = model_.get_layer(menu_idx_)) {
+        auto color = QColorDialog::getColor(
+            lr->brush.color(), this, QString(), QColorDialog::ShowAlphaChannel);
+        if (color.isValid()) {
+            lr->brush.setStyle(color.alpha() ? Qt::SolidPattern : Qt::NoBrush);
+            lr->brush.setColor(color);
+            model_.set_layer(menu_idx_, *lr);
+        }
     }
 }
 
 void tree_view::pen_color_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (!lr)
-        return;
-    auto color = QColorDialog::getColor(lr->pen.color(), this);
-    if (color.isValid()) {
-        lr->pen.setColor(color);
-        model_.set_layer(menu_idx_, *lr);
+    if (auto lr = model_.get_layer(menu_idx_)) {
+        auto color = QColorDialog::getColor(lr->pen.color(), this);
+        if (color.isValid()) {
+            lr->pen.setColor(color);
+            model_.set_layer(menu_idx_, *lr);
+        }
     }
 }
 
 void tree_view::pen_width_slot()
 {
-    auto lr = model_.get_layer(menu_idx_);
-    if (!lr)
-        return;
-    bool ok = false;
-    int width = QInputDialog::getInt(
-        this, "outline width", "pixels:", lr->pen.width(), 1, 10, 1, &ok);
-    if (ok) {
-        lr->pen.setWidth(width);
-        model_.set_layer(menu_idx_, *lr);
+    if (auto lr = model_.get_layer(menu_idx_)) {
+        bool ok = false;
+        int width = QInputDialog::getInt(
+            this, "outline width", "pixels:", lr->pen.width(), 1, 10, 1, &ok);
+        if (ok) {
+            lr->pen.setWidth(width);
+            model_.set_layer(menu_idx_, *lr);
+        }
     }
 }
 
 void tree_view::terminal_slot()
 {
-    auto lnk = model_.get_link(menu_idx_);
-    if (lnk)
+    if (auto lnk = model_.get_link(menu_idx_))
         emit terminal_sig(*lnk);
 }
 
 void tree_view::detach_slot()
 {
-    auto lnk = model_.get_link(menu_idx_);
-    if (lnk)
+    if (auto lnk = model_.get_link(menu_idx_))
         model_.removeRows(menu_idx_.row(), 1);
 }

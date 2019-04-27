@@ -14,8 +14,8 @@ class column_matching_dialog : public QDialog {
 
 public:
     column_matching_dialog(QWidget* parent,
-                           layer_columns from,
-                           layer_columns to);
+                           const layer_columns& from,
+                           const layer_columns& to);
 
     string_map matching() const;
 

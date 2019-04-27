@@ -83,7 +83,7 @@ main_window::main_window()
     setWindowTitle("nanogis");
 }
 
-void main_window::proj_slot(std::string pj)
+void main_window::proj_slot(const std::string& pj)
 {
     proj_lbl_->setText(
         rich_text("map",
@@ -93,7 +93,7 @@ void main_window::proj_slot(std::string pj)
     proj_lbl_->setToolTip(QString::fromStdString(pj));
 }
 
-void main_window::coords_slot(QPointF lon_lat)
+void main_window::coords_slot(const QPointF& lon_lat)
 {
     if (std::isfinite(lon_lat.x()) && std::isfinite(lon_lat.y()))
         coords_lbl_->setText(rich_text("globe",
@@ -122,7 +122,7 @@ void main_window::idle_map_slot()
 
 void main_window::open_sql_slot(bark::qt::link lnk)
 {
-    auto wgt = new sql_widget(nullptr, lnk);
+    auto wgt = new sql_widget(nullptr, std::move(lnk));
     tab_->addTab(wgt, east_icon("sql"), "");
     tab_->setCurrentWidget(wgt);
     connect(wgt, &sql_widget::close_sig, this, &main_window::tab_remove_slot);
@@ -155,6 +155,6 @@ void main_window::idle_task_slot(QWidget* wgt)
 void main_window::attributes_slot(bark::qt::layer lr)
 {
     auto frm = static_cast<map_widget*>(tab_->widget(map_tab_))->get_frame();
-    auto tsk = std::make_shared<attributes_task>(lr, frm);
+    auto tsk = std::make_shared<attributes_task>(std::move(lr), std::move(frm));
     open_task_slot(tsk);
 }

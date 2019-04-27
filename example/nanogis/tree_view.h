@@ -39,7 +39,7 @@ private slots:
     void del_slot();
     void detach_slot();
     void fit_slot();
-    void insert_slot(layer_columns from, layer_columns to);
+    void insert_slot(const layer_columns& from, const layer_columns& to);
     void menu_slot(QPoint);
     void metadata_slot();
     void open_slot();
@@ -78,29 +78,26 @@ private:
     QAction* terminal_act_;
     QAction* undistort_act_;
 
-    template <class Filter>
-    QVector<bark::qt::layer> match_checked(Filter filter) const
+    template <class Predicate>
+    QVector<bark::qt::layer> match_checked(Predicate p) const
     {
         QVector<bark::qt::layer> res;
-        for (auto& idx : model_.match(
-                 {}, Qt::CheckStateRole, Qt::Checked, -1, Qt::MatchRecursive)) {
-            auto lr = model_.get_layer(idx);
-            if (lr && lr->provider && filter(*lr))
+        for (const auto& idx : model_.match(
+                 {}, Qt::CheckStateRole, Qt::Checked, -1, Qt::MatchRecursive))
+            if (auto lr = model_.get_layer(idx); lr && lr->provider && p(*lr))
                 res.push_back(*lr);
-        }
         return res;
     }
 
-    auto refreshable(QModelIndex idx)
+    auto refreshable(const QModelIndex& idx)
     {
         return [this, displayRole = model_.data(idx, Qt::DisplayRole)] {
-            for (auto& idx : model_.match({},
-                                          Qt::DisplayRole,
-                                          displayRole,
-                                          -1,
-                                          Qt::MatchRecursive)) {
-                auto lnk = model_.get_link(idx);
-                if (lnk)
+            for (const auto& idx : model_.match({},
+                                                Qt::DisplayRole,
+                                                displayRole,
+                                                -1,
+                                                Qt::MatchRecursive)) {
+                if (auto lnk = model_.get_link(idx))
                     model_.link_by_uri(lnk->uri);
             }
         };

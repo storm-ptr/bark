@@ -101,7 +101,7 @@ void runnable::start(task_ptr tsk)
 }
 
 columns_task::columns_task(bark::qt::layer lhs, bark::qt::layer rhs)
-    : lhs_{lhs}, rhs_{rhs}
+    : lhs_{std::move(lhs)}, rhs_{std::move(rhs)}
 {
 }
 
@@ -110,7 +110,7 @@ void columns_task::run_event()
     emit columns_sig({lhs_, attr_names(lhs_)}, {rhs_, attr_names(rhs_)});
 }
 
-deletion_task::deletion_task(bark::qt::layer lr) : lr_{lr} {}
+deletion_task::deletion_task(bark::qt::layer lr) : lr_{std::move(lr)} {}
 
 void deletion_task::run_event()
 {
@@ -140,9 +140,9 @@ attributes_task::attributes_task(bark::qt::layer lr, bark::qt::frame frm)
 {
 }
 
-static auto make_intersects(const bark::geometry::box& ext)
+static auto make_intersects(bark::geometry::box ext)
 {
-    return [ext](auto&& row) {
+    return [ext = std::move(ext)](const auto& row) {
         auto wkb = std::get<bark::blob_view>(row[0]);
         auto geom = bark::geometry::geom_from_wkb(wkb);
         auto bbox = bark::geometry::envelope(geom);
@@ -165,7 +165,7 @@ void attributes_task::run_event()
     auto intersects = make_intersects(ext);
 
     std::optional<db::rowset> res;
-    for (auto&& tl : tile_coverage(lr_, ext, px)) {
+    for (const auto& tl : tile_coverage(lr_, ext, px)) {
         auto objects = spatial_objects(lr_, tl, px);
         auto rng = range(objects);
         if (res) {
@@ -178,8 +178,8 @@ void attributes_task::run_event()
 
         size_t counter = 0;
         db::variant_ostream os;
-        for (auto&& row : rng | uniqued | filtered(intersects)) {
-            for (auto&& cell : row)
+        for (const auto& row : rng | uniqued | filtered(intersects)) {
+            for (const auto& cell : row)
                 os << cell;
             if (++counter >= Limit)
                 break;

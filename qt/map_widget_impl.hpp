@@ -62,12 +62,12 @@ inline void map_widget::start_rendering()
 
 inline void map_widget::fit(frame frm)
 {
-    set_frame([frm] { return frm; });
+    set_frame([frm = std::move(frm)] { return frm; });
 }
 
 inline void map_widget::fit(layer lr)
 {
-    set_future_frame([frm = frm_, lr] {
+    set_future_frame([frm = frm_, lr = std::move(lr)] {
         auto tf = proj::transformer{projection(lr), frm.projection};
         return frm | qt::fit(tf.forward(extent(lr)));
     });
@@ -81,7 +81,8 @@ inline void map_widget::show(QVector<layer> lrs)
 
 inline void map_widget::undistort(layer lr)
 {
-    set_future_frame([frm = frm_, lr] { return frm | qt::undistort(lr); });
+    set_future_frame(
+        [frm = frm_, lr = std::move(lr)] { return frm | qt::undistort(lr); });
 }
 
 inline QPointF map_widget::lon_lat(QMouseEvent* event) const try {
@@ -97,9 +98,8 @@ catch (const std::exception&) {
 
 inline void map_widget::timerEvent(QTimerEvent* event)
 {
-    if (event->timerId() != timer_.timerId()) {
+    if (event->timerId() != timer_.timerId())
         QWidget::timerEvent(event);
-    }
     else if (future_frm_.resultCount() && future_frm_.isResultReadyAt(0)) {
         decltype(future_frm_) tmp;
         std::swap(tmp, future_frm_);
@@ -107,8 +107,7 @@ inline void map_widget::timerEvent(QTimerEvent* event)
         start_rendering();
     }
     else if (auto render = render_.lock()) {
-        auto map = render->get_recent();
-        if (!map.img.isNull()) {
+        if (auto map = render->get_recent(); !map.img.isNull()) {
             map_ = std::move(map);
             update();
         }
@@ -123,9 +122,8 @@ inline void map_widget::timerEvent(QTimerEvent* event)
 
 inline void map_widget::paintEvent(QPaintEvent*)
 {
-    if (size() != frm_.size) {
-        set_frame([&] { return frm_ | set_size(this->size()); });
-    }
+    if (size() != frm_.size)
+        set_frame([this] { return frm_ | set_size(this->size()); });
     else if (frm_ == map_.frm) {
         QPainter painter(this);
         painter.drawImage(rect(), map_.img);

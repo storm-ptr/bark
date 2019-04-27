@@ -19,8 +19,6 @@ signals:
     void close_sig(QWidget*);
     void idle_sig(QWidget*);
 
-public slots:
-
 protected:
     void timerEvent(QTimerEvent*) override;
 

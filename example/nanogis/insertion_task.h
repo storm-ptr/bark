@@ -13,10 +13,7 @@ class insertion_task : public task {
 
 public:
     enum class action { Execute, PrintSqlOnly };
-
-    insertion_task(QVector<bark::qt::layer> from,
-                   bark::qt::link to,
-                   action act);
+    insertion_task(QVector<bark::qt::layer> from, bark::qt::link to, action);
     insertion_task(bark::qt::layer from, bark::qt::layer to, string_map cols);
 
 signals:
@@ -26,12 +23,14 @@ protected:
     void run_event() override;
 
 private:
-    using function_type = std::function<void(insertion_task*)>;
+    std::function<void(insertion_task&)> f_;
 
-    function_type f_;
+    bark::qt::layer create(const bark::qt::layer& from,
+                           const bark::qt::link& to);
 
-    bark::qt::layer create(bark::qt::layer from, bark::qt::link to);
-    void insert(bark::qt::layer from, bark::qt::layer to, string_map cols);
+    void insert(const bark::qt::layer& from,
+                const bark::qt::layer& to,
+                string_map cols);
 };
 
 #endif  // INSERTION_TASK_H

@@ -23,14 +23,15 @@ inline tree_model::tree_model(QObject* parent) : QAbstractItemModel(parent)
 
 inline tree* tree_model::to_ptr(const QModelIndex& idx) const
 {
-    auto ptr =
+    auto res =
         idx.isValid() ? reinterpret_cast<tree*>(idx.internalId()) : nullptr;
-    return ptr ? ptr : root_.get();
+    return res ? res : root_.get();
 }
 
 inline void tree_model::link_by_uri(QUrl uri)
 {
-    future_branches_.push_back(QtConcurrent::run([=] { return dir(uri); }));
+    future_branches_.push_back(
+        QtConcurrent::run([uri = std::move(uri)] { return dir(uri); }));
 }
 
 inline void tree_model::reset()
@@ -46,8 +47,7 @@ inline void tree_model::timerEvent(QTimerEvent* event)
     if (event->timerId() != timer_.timerId())
         return QAbstractItemModel::timerEvent(event);
 
-    auto it = future_branches_.begin();
-    while (it != future_branches_.end()) {
+    for (auto it = future_branches_.begin(); it != future_branches_.end();) {
         if (it->resultCount() && it->isResultReadyAt(0)) {
             try {
                 auto branch = it->resultAt(0);
@@ -68,9 +68,8 @@ inline void tree_model::timerEvent(QTimerEvent* event)
             }
             it = future_branches_.erase(it);
         }
-        else {
+        else
             ++it;
-        }
     }
 }
 
@@ -100,11 +99,10 @@ inline QVariant tree_model::data(const QModelIndex& idx, int role) const
     switch (role) {
         case Qt::DisplayRole:
             return to_string(to_ptr(idx));
-        case Qt::CheckStateRole: {
-            auto opt = state(to_ptr(idx));
-            if (opt)
+        case Qt::CheckStateRole:
+            if (auto opt = state(to_ptr(idx)); opt)
                 return *opt;
-        } break;
+            break;
     }
     return {};
 }
@@ -124,7 +122,7 @@ inline QModelIndex tree_model::index(int row,
     auto ptr = to_ptr(parent);
     if (row < 0 || row >= (int)ptr->children.size())
         return {};
-    return createIndex(row, 0, to_ptr(parent)->children[row].get());
+    return createIndex(row, 0, ptr->children[row].get());
 }
 
 inline QModelIndex tree_model::parent(const QModelIndex& idx) const
