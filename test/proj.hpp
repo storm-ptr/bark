@@ -26,17 +26,17 @@ TEST_CASE("proj")
         auto wkb(as_binary(geom_from_text(wkt1)));
         latlong_to_mercator.inplace_forward(wkb);
         auto wkt2 = as_text(geom_from_wkb(wkb));
-        REQUIRE(wkt1 != wkt2);
+        CHECK(wkt1 != wkt2);
         latlong_to_mercator.inplace_backward(wkb);
-        REQUIRE(wkt1 == as_text(geom_from_wkb(wkb)));
+        CHECK(wkt1 == as_text(geom_from_wkb(wkb)));
     }
 
     auto bbox = box{{0, 80}, {1, 81}};
     auto wkt = as_text(bbox);
     bbox = latlong_to_mercator.forward(bbox);
-    REQUIRE(wkt != as_text(bbox));
+    CHECK(wkt != as_text(bbox));
     bbox = latlong_to_mercator.backward(bbox);
-    REQUIRE(wkt == as_text(bbox));
+    CHECK(wkt == as_text(bbox));
 }
 
 #endif  // BARK_TEST_PROJ_HPP

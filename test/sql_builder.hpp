@@ -16,8 +16,8 @@ TEST_CASE("sql_builder")
     sql_builder bld(sql_syntax{});
     bld << param{"Hello!"s} << param{0ll} << param{"Bark"} << param{1.}
         << param{geometry::as_binary({{-118, 26}, {-111, 33}})};
-    REQUIRE(boost::lexical_cast<std::string>(list{bld.params(), ", "}) ==
-            "Hello!, 0, Bark, 1, 93 bytes");
+    CHECK(boost::lexical_cast<std::string>(list{bld.params(), ", "}) ==
+          "Hello!, 0, Bark, 1, 93 bytes");
 }
 
 #endif  // BARK_TEST_SQL_BUILDER_HPP

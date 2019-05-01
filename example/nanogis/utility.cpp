@@ -1,6 +1,6 @@
 // Andrew Naplavkov
 
-#include "tools.h"
+#include "utility.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <boost/algorithm/string.hpp>

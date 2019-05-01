@@ -39,7 +39,7 @@ for:
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
     - sh: source /opt/qt512/bin/qt512-env.sh
-    - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
+    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.7.1/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
 #https://help.appveyor.com/discussions/problems/20764-postgres-peer-authentication-failed
   init:

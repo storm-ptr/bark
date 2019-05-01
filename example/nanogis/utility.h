@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef UTILITY_H
+#define UTILITY_H
 
 #include <QIcon>
 #include <QString>
@@ -33,4 +33,4 @@ QString limited_text(QString text, Qt::AlignmentFlag alignment);
 
 QString trim_right_copy(const QString&);
 
-#endif  // TOOLS_H
+#endif  // UTILITY_H

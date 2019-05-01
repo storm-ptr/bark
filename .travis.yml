@@ -28,7 +28,7 @@ matrix:
 install:
 - source /opt/qt512/bin/qt512-env.sh
 script:
-- wget -P $TRAVIS_BUILD_DIR/.. https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
+- wget -P $TRAVIS_BUILD_DIR/.. https://github.com/catchorg/Catch2/releases/download/v2.7.1/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
 - make -f ./makefile.ubuntu test CXX=$COMPILER
 - cd $TRAVIS_BUILD_DIR/example/nanogis

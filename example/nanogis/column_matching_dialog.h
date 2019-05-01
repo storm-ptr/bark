@@ -3,7 +3,7 @@
 #ifndef COLUMN_MATCHING_DIALOG_H
 #define COLUMN_MATCHING_DIALOG_H
 
-#include "tools.h"
+#include "utility.h"
 #include <QDialog>
 #include <QGridLayout>
 #include <QObject>

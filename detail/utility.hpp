@@ -23,6 +23,7 @@ constexpr std::chrono::seconds DbTimeout(60);
 constexpr std::chrono::milliseconds CacheTimeout(50);
 constexpr std::chrono::milliseconds UiTimeout(250);
 
+/// @see https://en.cppreference.com/w/cpp/utility/variant/visit
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -31,11 +32,13 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
+/// @see https://en.cppreference.com/w/cpp/iterator/iter_t
 template <class It>
 using iter_value_t = typename std::iterator_traits<It>::value_type;
 
+/// @see https://en.cppreference.com/w/cpp/ranges/iterator_t
 template <class Rng>
-using iterator_t = decltype(std::begin(std::declval<Rng>()));
+using iterator_t = decltype(std::begin(std::declval<Rng&>()));
 
 template <class Rng>
 using range_value_t = iter_value_t<iterator_t<Rng>>;

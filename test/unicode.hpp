@@ -28,7 +28,7 @@ TEST_CASE("unicode")
     auto u8(to_upper(to_string<char>(u16)));  // UTF-8
     auto u32(to_string<char32_t>(u8));        // UTF-32
     auto w(to_string<wchar_t>(u32));          // UTF-16 or UTF-32
-    REQUIRE(to_string<char>(w) == u8);
+    CHECK(to_string<char>(w) == u8);
     // std::locale::global(std::locale("rus"));
     std::wcout << w << std::endl;
 }

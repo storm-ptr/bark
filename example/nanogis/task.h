@@ -3,7 +3,7 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include "tools.h"
+#include "utility.h"
 #include <QObject>
 #include <QRunnable>
 #include <QString>

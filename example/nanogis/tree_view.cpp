@@ -3,7 +3,7 @@
 #include "tree_view.h"
 #include "column_matching_dialog.h"
 #include "insertion_task.h"
-#include "tools.h"
+#include "utility.h"
 #include <QColorDialog>
 #include <QDataStream>
 #include <QFile>
