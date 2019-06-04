@@ -52,8 +52,8 @@ public:
                         std::string_view) override
     {
         auto& col = col_nm.back();
-        auto& tbl = reverse_at(col_nm, 1);
-        auto& scm = reverse_at(col_nm, 2);
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
         bld << "(SELECT ST_SRID(" << id(col) << ") FROM " << qualifier(col_nm)
             << " LIMIT 1) UNION ALL (SELECT COLUMN_COMMENT FROM "
                "INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = "
@@ -63,7 +63,7 @@ public:
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = reverse_at(tbl_nm, 1);
+        auto& scm = tbl_nm.at(-2);
         bld << "SELECT NULL, index_name, column_name, index_name = "
             << param{"PRIMARY"} << ", collation = " << param{"D"}
             << " FROM information_schema.statistics WHERE table_schema = "

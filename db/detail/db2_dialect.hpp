@@ -29,7 +29,7 @@ public:
 
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = reverse_at(tbl_nm, 1);
+        auto& scm = tbl_nm.at(-2);
         bld << "SELECT colname, (CASE typeschema WHEN " << param{"SYSIBM"}
             << " THEN typename WHEN " << param{"DB2GSE"}
             << " THEN typename ELSE RTRIM(typeschema) || " << param{"."}
@@ -52,8 +52,8 @@ public:
                         std::string_view) override
     {
         auto& col = col_nm.back();
-        auto& tbl = reverse_at(col_nm, 1);
-        auto& scm = reverse_at(col_nm, 2);
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
         bld << "SELECT srs_id FROM db2gse.st_geometry_columns WHERE "
                "table_schema = "
             << param{scm} << " AND table_name = " << param{tbl}
@@ -62,7 +62,7 @@ public:
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = reverse_at(tbl_nm, 1);
+        auto& scm = tbl_nm.at(-2);
         bld << "SELECT RTRIM(i.indschema), i.indname, colname, uniquerule = "
             << param{"P"} << ", colorder = " << param{"D"}
             << " FROM syscat.indexes i JOIN syscat.indexcoluse "

@@ -27,7 +27,7 @@ public:
 
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = reverse_at(tbl_nm, 1);
+        auto& scm = tbl_nm.at(-2);
         bld << "SELECT column_name, (CASE data_type WHEN "
             << param{"USER-DEFINED"}
             << " THEN udt_name ELSE data_type END), numeric_scale FROM "
@@ -63,7 +63,7 @@ public:
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = reverse_at(tbl_nm, 1);
+        auto& scm = tbl_nm.at(-2);
         bld << R"(
 WITH indexes AS (
   SELECT s.nspname scm, t.oid tbl, o.relname nm,
@@ -143,7 +143,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
                                  std::string_view col_nm,
                                  int srid) override
     {
-        auto& scm = reverse_at(tbl.name, 1);
+        auto& scm = tbl.name.at(-2);
         bld << "SELECT AddGeometryColumn(" << param{scm} << ", "
             << param{tbl.name.back()} << ", " << param{col_nm} << ", " << srid
             << ", " << param{"GEOMETRY"} << ", 2)";

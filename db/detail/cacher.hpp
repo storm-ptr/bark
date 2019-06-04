@@ -88,12 +88,12 @@ private:
         friend bool operator==(const layer_tile& lhs, const layer_tile& rhs)
         {
             return lhs.tie() == rhs.tie();
-        };
+        }
 
         friend size_t hash_value(const layer_tile& that)
         {
             return boost::hash_value(that.tie());
-        };
+        }
 
         auto tie() const
         {

@@ -47,7 +47,7 @@ inline void iso_layers_sql(sql_builder& bld,
 
 inline void iso_columns_sql(sql_builder& bld, const qualified_name& tbl_nm)
 {
-    auto& scm = reverse_at(tbl_nm, 1);
+    auto& scm = tbl_nm.at(-2);
     bld << "SELECT column_name, data_type, numeric_scale FROM "
            "information_schema.columns WHERE table_schema = "
         << param{scm} << " AND table_name = " << param{tbl_nm.back()}
@@ -101,8 +101,8 @@ inline column_type iso_type(std::string_view type_lcase, int scale)
 
 inline void ogc_projection_sql(sql_builder& bld, const qualified_name& col_nm)
 {
-    auto& tbl = reverse_at(col_nm, 1);
-    auto& scm = reverse_at(col_nm, 2);
+    auto& tbl = col_nm.at(-2);
+    auto& scm = col_nm.at(-3);
     bld << "SELECT srid FROM geometry_columns WHERE ";
     if (!scm.empty())
         bld << "LOWER(f_table_schema) = LOWER(" << param{scm} << ") AND ";

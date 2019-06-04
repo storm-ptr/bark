@@ -48,8 +48,8 @@ public:
                         std::string_view) override
     {
         auto& col = col_nm.back();
-        auto& tbl = reverse_at(col_nm, 1);
-        auto& scm = reverse_at(col_nm, 2);
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
         bld << "(SELECT TOP 1 " << id(col) << ".STSrid FROM "
             << qualifier(col_nm)
             << ") UNION ALL (SELECT CAST(value AS int) FROM "
@@ -127,7 +127,7 @@ public:
                                  std::string_view col_nm,
                                  int srid) override
     {
-        auto& scm = reverse_at(tbl.name, 1);
+        auto& scm = tbl.name.at(-2);
         bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
             << " geometry;\nEXEC sp_addextendedproperty @name = "
             << param{"SRID"} << ", @value = " << srid

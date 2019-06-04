@@ -19,6 +19,17 @@ namespace bark::db {
  * or <table>.<column>
  */
 struct qualified_name : std::vector<std::string> {
+    /**
+     * @param pos is 0-based, and accepts negative indices for indexing from the
+     * end of the array
+     */
+    const std::string& at(int pos) const
+    {
+        static const std::string Empty{};
+        if (pos < 0)
+            pos += (int)size();
+        return pos < 0 || pos >= (int)size() ? Empty : (*this)[pos];
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const qualified_name& name)
@@ -29,12 +40,6 @@ inline std::ostream& operator<<(std::ostream& os, const qualified_name& name)
 inline size_t hash_value(const qualified_name& name)
 {
     return boost::hash_range(name.begin(), name.end());
-}
-
-inline const std::string& reverse_at(const qualified_name& name, size_t pos)
-{
-    static const std::string Empty{};
-    return pos < name.size() ? name[name.size() - pos - 1] : Empty;
 }
 
 inline qualified_name qualifier(qualified_name name)

@@ -50,9 +50,11 @@ using if_arithmetic_t =
 template <class T>
 if_arithmetic_t<T, T> reversed(T val)
 {
-    auto first = reinterpret_cast<std::byte*>(&val);
-    auto last = first + sizeof(T);
-    std::reverse(first, last);
+    if constexpr (sizeof(T) > 1) {
+        auto first = reinterpret_cast<std::byte*>(&val);
+        auto last = first + sizeof(T);
+        std::reverse(first, last);
+    }
     return val;
 }
 
