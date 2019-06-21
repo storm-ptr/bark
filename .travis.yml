@@ -25,6 +25,7 @@ matrix:
         - libgl1-mesa-dev
         - qt512-meta-minimal
         - qt512imageformats
+        - doxygen
 install:
 - source /opt/qt512/bin/qt512-env.sh
 script:
@@ -43,6 +44,8 @@ script:
 - mkdir $DEB_ROOT/DEBIAN
 - cp $TRAVIS_BUILD_DIR/example/nanogis/control.ubuntu.1604 $DEB_ROOT/DEBIAN/control
 - dpkg-deb --build $DEB_ROOT
+- cd $TRAVIS_BUILD_DIR
+- doxygen Doxyfile
 deploy:
 - provider: releases
   overwrite: true
