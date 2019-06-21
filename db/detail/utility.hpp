@@ -80,7 +80,7 @@ inline bool is_ogc_type(std::string_view type_lcase)
             "polygon",             //
             "surface"              // non-instantiable
         },
-        equal_to(type_lcase));
+        equals(type_lcase));
 }
 
 inline column_type iso_type(std::string_view type_lcase, int scale)
@@ -92,7 +92,7 @@ inline column_type iso_type(std::string_view type_lcase, int scale)
         return column_type::Text;
     if (any_of({"real", "float", "double"}, within(type_lcase)))
         return column_type::Real;
-    if (any_of({"decimal", "number", "numeric"}, equal_to(type_lcase)))
+    if (any_of({"decimal", "number", "numeric"}, equals(type_lcase)))
         return scale ? column_type::Real : column_type::Integer;
     if (any_of({"binary", "blob"}, within(type_lcase)))
         return column_type::Blob;

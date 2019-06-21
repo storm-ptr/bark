@@ -4,7 +4,7 @@
 #define BARK_DB_MYSQL_BIND_PARAM_HPP
 
 #include <bark/db/mysql/detail/utility.hpp>
-#include <bark/db/rowset.hpp>
+#include <bark/db/variant.hpp>
 #include <cstring>
 
 namespace bark::db::mysql {

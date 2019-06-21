@@ -19,12 +19,12 @@ public:
 private slots:
     void active_map_slot();
     void attributes_slot(bark::qt::layer);
-    void coords_slot(const QPointF& lon_lat);
+    void coordinates_slot(const QPointF& lon_lat);
     void idle_map_slot();
     void idle_task_slot(QWidget*);
     void open_sql_slot(bark::qt::link);
     void open_task_slot(task_ptr);
-    void proj_slot(const std::string& pj);
+    void projection_event(const std::string& pj);
     void tab_remove_slot(QWidget*);
 
 private:

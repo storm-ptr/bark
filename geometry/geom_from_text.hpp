@@ -12,56 +12,55 @@ namespace bark::geometry {
 namespace detail {
 
 template <class T>
-T parse_wkt(std::string_view wkt)
+T parse_wkt(std::string_view v)
 {
     T res;
     grammar<T> gr;
-    return qi::phrase_parse(
-               wkt.data(), wkt.data() + wkt.size(), gr, qi::blank, res)
+    return qi::phrase_parse(v.data(), v.data() + v.size(), gr, qi::blank, res)
                ? res
-               : throw std::runtime_error(std::string{wkt});
+               : throw std::runtime_error(std::string{v});
 }
 
 }  // namespace detail
 
-inline auto geom_from_text(std::string_view wkt)
+inline auto geom_from_text(std::string_view v)
 {
-    return detail::parse_wkt<geometry>(wkt);
+    return detail::parse_wkt<geometry>(v);
 }
 
-inline auto point_from_text(std::string_view wkt)
+inline auto point_from_text(std::string_view v)
 {
-    return detail::parse_wkt<point>(wkt);
+    return detail::parse_wkt<point>(v);
 }
 
-inline auto line_from_text(std::string_view wkt)
+inline auto line_from_text(std::string_view v)
 {
-    return detail::parse_wkt<linestring>(wkt);
+    return detail::parse_wkt<linestring>(v);
 }
 
-inline auto poly_from_text(std::string_view wkt)
+inline auto poly_from_text(std::string_view v)
 {
-    return detail::parse_wkt<polygon>(wkt);
+    return detail::parse_wkt<polygon>(v);
 }
 
-inline auto mpoint_from_text(std::string_view wkt)
+inline auto mpoint_from_text(std::string_view v)
 {
-    return detail::parse_wkt<multi_point>(wkt);
+    return detail::parse_wkt<multi_point>(v);
 }
 
-inline auto mline_from_text(std::string_view wkt)
+inline auto mline_from_text(std::string_view v)
 {
-    return detail::parse_wkt<multi_linestring>(wkt);
+    return detail::parse_wkt<multi_linestring>(v);
 }
 
-inline auto mpoly_from_text(std::string_view wkt)
+inline auto mpoly_from_text(std::string_view v)
 {
-    return detail::parse_wkt<multi_polygon>(wkt);
+    return detail::parse_wkt<multi_polygon>(v);
 }
 
-inline auto geom_coll_from_text(std::string_view wkt)
+inline auto geom_coll_from_text(std::string_view v)
 {
-    return detail::parse_wkt<geometry_collection>(wkt);
+    return detail::parse_wkt<geometry_collection>(v);
 }
 
 }  // namespace bark::geometry

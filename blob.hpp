@@ -6,16 +6,16 @@
 #include <bark/detail/utility.hpp>
 #include <iomanip>
 #include <sstream>
-#include <vector>
 
 namespace bark {
 
-/// Binary Large OBject (BLOB) - contiguous byte storage
+/// Read-only binary view
 struct blob_view : std::basic_string_view<std::byte> {
     using std::basic_string_view<std::byte>::basic_string_view;
     blob_view(const std::byte*) = delete;
 };
 
+/// Binary Large OBject (BLOB) is a contiguous byte storage
 struct blob : std::vector<std::byte> {
     using std::vector<std::byte>::vector;
     operator blob_view() const noexcept { return {data(), size()}; }
@@ -77,6 +77,8 @@ blob& operator<<(blob& dest, const T& src)
     write(src, dest);
     return dest;
 }
+
+/// I/O manipulator.
 
 /// Bytes inserted into the stream are expressed in hexadecimal base (radix 16)
 struct hex {

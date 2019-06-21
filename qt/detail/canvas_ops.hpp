@@ -7,8 +7,8 @@
 #include <bark/detail/grid.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 #include <bark/proj/transformer.hpp>
-#include <bark/qt/common_ops.hpp>
 #include <bark/qt/detail/canvas.hpp>
+#include <bark/qt/detail/frame_ops.hpp>
 #include <stdexcept>
 
 namespace bark::qt {

@@ -4,7 +4,7 @@
 #define BARK_DB_SQL_BUILDER_HPP
 
 #include <bark/db/qualified_name.hpp>
-#include <bark/db/rowset_ops.hpp>
+#include <bark/db/variant.hpp>
 #include <functional>
 #include <limits>
 #include <locale>
@@ -14,45 +14,36 @@
 
 namespace bark::db {
 
+/// SQL dialect settings.
 struct sql_syntax {
-    /**
-     * The character string that is used as the starting and ending delimiter of
-     * a quoted (delimited) identifier in SQL statements.
-     */
+    /// The character string that is used as the starting and ending delimiter
+    /// of a quoted (delimited) identifier in SQL statements.
     std::string identifier_quote = "\"";
 
-    /**
-     * A parameter marker is a place holder in an SQL statement whose value is
-     * obtained during statement execution. Empty marker means embedding the
-     * parameters in the SQL text (with quotations if needed).
-     */
+    /// A parameter marker is a place holder in an SQL statement whose value is
+    /// obtained during statement execution. Empty marker means embedding the
+    /// parameters in the SQL text (with quotations if needed).
     std::function<std::string(size_t param_order)> parameter_marker =
         [](size_t) { return "?"; };
 };
 
-inline sql_syntax embeded_params(sql_syntax syntax)
-{
-    syntax.parameter_marker = nullptr;
-    return syntax;
-}
-
+/// SQL manipulator.
 template <class T>
 struct param {
-    const T& data;
+    const T& val;
 };
 
 template <class T>
 param(T)->param<T>;
 
-/**
- * Allows to create database independent SQL queries
- * @code
- * sql_builder bld = builder(cmd);
- * bld << "SELECT * FROM " << id("sqlite_master")
- *     << " WHERE " << id("type") << " = " << param{"view"};
- * cmd.exec(bld);
- * @endcode
- */
+/// Provides a convenient interface to creating and running database queries.
+
+/// @code
+/// sql_builder bld = builder(cmd);
+/// bld << "SELECT * FROM " << id("sqlite_master")
+///     << " WHERE " << id("type") << " = " << param{"view"};
+/// cmd.exec(bld);
+/// @endcode
 class sql_builder {
 public:
     explicit sql_builder(sql_syntax syntax) : syntax_{std::move(syntax)}
@@ -65,7 +56,7 @@ public:
 
     auto params() const
     {
-        auto res = row_t{};
+        auto res = std::vector<variant_t>{};
         for (auto is = variant_istream{params_.data}; !is.data.empty();)
             res.push_back(read(is));
         return res;
@@ -90,22 +81,22 @@ public:
     {
         if (syntax_.parameter_marker) {
             sql_ << syntax_.parameter_marker(param_counter_++);
-            params_ << manip.data;
+            params_ << manip.val;
         }
         else
-            embed_param(manip.data);
+            embed_param(manip.val);
         return *this;
     }
 
     sql_builder& operator<<(const param<qualified_name>& manip)
     {
-        return *this << param{(sql_builder{syntax_} << manip.data).sql()};
+        return *this << param{(sql_builder{syntax_} << manip.val).sql()};
     }
 
     template <class T>
-    if_arithmetic_t<T, sql_builder&> operator<<(const T& data)
+    if_arithmetic_t<T, sql_builder&> operator<<(const T& val)
     {
-        sql_ << data;
+        sql_ << val;
         return *this;
     }
 
@@ -125,20 +116,20 @@ private:
         }
     };
 
-    void embed_param(const variant_t& v)
+    void embed_param(const variant_t& var)
     {
         std::visit(
             overloaded{[&](std::monostate) { sql_ << "NULL"; },
-                       [&](auto v) { sql_ << v; },
-                       [&](std::string_view v) { sql_ << "'" << v << "'"; },
-                       [&](blob_view v) { sql_ << "X'" << hex{v} << "'"; }},
-            v);
+                       [&](auto val) { sql_ << val; },
+                       [&](std::string_view val) { sql_ << "'" << val << "'"; },
+                       [&](blob_view val) { sql_ << "X'" << hex{val} << "'"; }},
+            var);
     }
 
     template <class T>
-    if_arithmetic_t<T> embed_param(T v)
+    if_arithmetic_t<T> embed_param(T val)
     {
-        sql_ << v;
+        sql_ << val;
     }
 };
 

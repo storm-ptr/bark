@@ -4,11 +4,12 @@
 #define BARK_DB_MSSQL_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/sql_builder_ops.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
-#include <bark/db/sql_builder_ops.hpp>
-#include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
+#include <boost/algorithm/cxx11/any_of.hpp>
 
 namespace bark::db {
 
@@ -34,7 +35,7 @@ public:
 
     column_type type(std::string_view type_lcase, int scale) override
     {
-        if (any_of({"geometry", "geography"}, equal_to(type_lcase)))
+        if (any_of({"geometry", "geography"}, equals(type_lcase)))
             return column_type::Geometry;
         if (type_lcase == "bit")
             return column_type::Integer;
@@ -143,15 +144,15 @@ public:
                                   const table_def& tbl,
                                   const index_def& idx) override
     {
-        using geometry::operator<<;
-        if (boost::range::find_if(tbl.indexes, same{index_type::Primary}) ==
-            tbl.indexes.end())
+        using namespace geometry;
+        if (!boost::algorithm::any_of(tbl.indexes, same{index_type::Primary}))
             return;
         auto col_nm = idx.columns.front();
+        auto ext = extent(*db::find(tbl.columns, col_nm));
         bld << "CREATE SPATIAL INDEX " << index_name(tbl.name, idx.columns)
             << " ON " << tbl.name << " (" << id(col_nm)
-            << ")\n\tWITH(BOUNDING_BOX=("
-            << extent(*db::find(tbl.columns, col_nm)) << "))";
+            << ")\n\tWITH(BOUNDING_BOX=(" << left(ext) << "," << bottom(ext)
+            << "," << right(ext) << "," << top(ext) << "))";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override

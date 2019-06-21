@@ -3,11 +3,14 @@
 #ifndef BARK_DB_FWD_HPP
 #define BARK_DB_FWD_HPP
 
+#include <functional>
 #include <memory>
 
 namespace bark::db {
 
-enum class layer_type { Invalid, Geometry, Raster };
+struct command;
+
+using command_holder = std::unique_ptr<command, std::function<void(command*)>>;
 
 struct provider;
 

@@ -4,8 +4,8 @@
 #define BARK_DB_DDL_HPP
 
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/sql_builder.hpp>
-#include <bark/db/table_def_ops.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <sstream>
@@ -17,7 +17,7 @@ class ddl {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
-    table_script make_script(table_def tbl)
+    std::pair<qualified_name, std::string> make_script(table_def tbl)
     {
         tbl.name = id(as_mixin().cached_schema(), tbl.name.back());
         sql_builder bld{embeded_params(as_mixin().make_command()->syntax())};
@@ -45,7 +45,7 @@ private:
         auto& dial = as_mixin().as_dialect();
         bld << "CREATE TABLE " << tbl.name << " (\n\t"
             << list{tbl.columns | boost::adaptors::filtered(
-                                      not_same{column_type::Geometry}),
+                                      std::not_fn(same{column_type::Geometry})),
                     ",\n\t",
                     [&](auto& col) {
                         auto name = col.name;

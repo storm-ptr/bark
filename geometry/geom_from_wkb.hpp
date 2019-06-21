@@ -8,44 +8,44 @@
 
 namespace bark::geometry {
 
-inline auto geom_from_wkb(blob_view data)
+inline auto geom_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::geometry>();
+    return istream{v}.read<wkb::geometry>();
 }
 
-inline auto point_from_wkb(blob_view data)
+inline auto point_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::point>();
+    return istream{v}.read<wkb::point>();
 }
 
-inline auto line_from_wkb(blob_view data)
+inline auto line_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::linestring>();
+    return istream{v}.read<wkb::linestring>();
 }
 
-inline auto poly_from_wkb(blob_view data)
+inline auto poly_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::polygon>();
+    return istream{v}.read<wkb::polygon>();
 }
 
-inline auto mpoint_from_wkb(blob_view data)
+inline auto mpoint_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::multi_point>();
+    return istream{v}.read<wkb::multi_point>();
 }
 
-inline auto mline_from_wkb(blob_view data)
+inline auto mline_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::multi_linestring>();
+    return istream{v}.read<wkb::multi_linestring>();
 }
 
-inline auto mpoly_from_wkb(blob_view data)
+inline auto mpoly_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::multi_polygon>();
+    return istream{v}.read<wkb::multi_polygon>();
 }
 
-inline auto geom_coll_from_wkb(blob_view data)
+inline auto geom_coll_from_wkb(blob_view v)
 {
-    return istream{data}.read<wkb::geometry_collection>();
+    return istream{v}.read<wkb::geometry_collection>();
 }
 
 }  // namespace bark::geometry

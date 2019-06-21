@@ -67,9 +67,9 @@ inline auto within(std::string_view rhs)
 
 /// @see https://youtu.be/qL6zUn7iiLg?t=477
 template <class T>
-auto equal_to(T rhs)
+auto equals(const T& lhs)
 {
-    return [rhs](auto&& lhs) { return lhs == rhs; };
+    return [lhs](const auto& rhs) { return lhs == rhs; };
 }
 
 template <class T, class Predicate>
@@ -202,6 +202,20 @@ private:
     generator_type gen_;
     std::uniform_int_distribution<value_type> dist_;
 };
+
+template <class Type>
+struct same {
+    Type type;
+
+    template <class T>
+    bool operator()(const T& val) const
+    {
+        return type == val.type;
+    }
+};
+
+template <class T>
+same(T)->same<T>;
 
 }  // namespace bark
 

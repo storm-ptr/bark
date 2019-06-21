@@ -1,14 +1,14 @@
 // Andrew Naplavkov
 
-#ifndef BARK_PROJ_PRINT_HPP
-#define BARK_PROJ_PRINT_HPP
+#ifndef BARK_PROJ_ABBREVIATION_HPP
+#define BARK_PROJ_ABBREVIATION_HPP
 
 #include <bark/proj/epsg.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace bark::proj {
 
-inline std::string print(const std::string& pj) try {
+inline std::string abbreviation(const std::string& pj) try {
     return "EPSG:" + std::to_string(epsg().find_srid(pj));
 }
 catch (const std::out_of_range&) {
@@ -17,4 +17,4 @@ catch (const std::out_of_range&) {
 
 }  // namespace bark::proj
 
-#endif  // BARK_PROJ_PRINT_HPP
+#endif  // BARK_PROJ_ABBREVIATION_HPP

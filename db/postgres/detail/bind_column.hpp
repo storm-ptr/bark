@@ -4,7 +4,7 @@
 #define BARK_DB_POSTGRES_BIND_COLUMN_HPP
 
 #include <bark/db/postgres/detail/utility.hpp>
-#include <bark/db/rowset_ops.hpp>
+#include <bark/db/variant.hpp>
 #include <boost/predef/other/endian.h>
 #include <stdexcept>
 

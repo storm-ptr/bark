@@ -19,14 +19,24 @@
 
 namespace bark::qt {
 
+/// Displays a hierarchical collection of data sets
 class tree_model : public QAbstractItemModel {
 public:
     explicit tree_model(QObject* parent);
 
+    /// Adds new data source
     void link_by_uri(QUrl);
+
+    /// Returns data source
     std::optional<link> get_link(const QModelIndex&) const;
+
+    /// Returns data set
     std::optional<layer> get_layer(const QModelIndex&) const;
+
+    /// Updates layer settings
     void set_layer(const QModelIndex&, const layer&);
+
+    /// Makes blank tree
     void reset();
 
     friend QDataStream& operator<<(QDataStream& os, const tree_model& that);

@@ -4,7 +4,7 @@
 #define BARK_DB_ODBC_BIND_PARAM_HPP
 
 #include <bark/db/odbc/detail/utility.hpp>
-#include <bark/db/rowset.hpp>
+#include <bark/db/variant.hpp>
 #include <bark/detail/unicode.hpp>
 #include <memory>
 

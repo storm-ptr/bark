@@ -3,8 +3,8 @@
 #ifndef BARK_DB_SQLITE_BIND_PARAM_HPP
 #define BARK_DB_SQLITE_BIND_PARAM_HPP
 
-#include <bark/db/rowset.hpp>
 #include <bark/db/sqlite/detail/utility.hpp>
+#include <bark/db/variant.hpp>
 
 namespace bark::db::sqlite {
 

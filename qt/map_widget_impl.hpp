@@ -34,7 +34,7 @@ void map_widget::set_frame(Functor f) try {
     check(tmp);
     std::swap(frm_, tmp);
     if (frm_.projection != tmp.projection)
-        transform_event(frm_.projection);
+        projection_event(frm_.projection);
     update();
 }
 catch (const std::exception&) {
@@ -163,7 +163,7 @@ inline void map_widget::mouseMoveEvent(QMouseEvent* event)
             return frm_ | set_center(backward(frm_, pos + offset));
         });
     else
-        mouse_move_event(lon_lat(event));
+        coordinates_event(lon_lat(event));
 }
 
 inline void map_widget::mouseReleaseEvent(QMouseEvent* event)
@@ -193,7 +193,7 @@ inline void map_widget::resizeEvent(QResizeEvent* event)
 
 inline void map_widget::leaveEvent(QEvent*)
 {
-    mouse_move_event({NAN, NAN});
+    coordinates_event({NAN, NAN});
 }
 
 inline void map_widget::closeEvent(QCloseEvent*)
@@ -205,7 +205,7 @@ inline void map_widget::closeEvent(QCloseEvent*)
 inline void map_widget::showEvent(QShowEvent* event)
 {
     if (!event->spontaneous())
-        transform_event(frm_.projection);
+        projection_event(frm_.projection);
 }
 
 }  // namespace bark::qt

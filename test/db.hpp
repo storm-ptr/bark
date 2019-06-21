@@ -11,8 +11,48 @@
 #include <bark/test/wkb_unifier.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/preprocessor/stringize.hpp>
+#include <boost/range/algorithm/equal.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <iostream>
+
+namespace bark::db {
+
+inline bool operator==(const rowset& lhs, const rowset& rhs)
+{
+    return std::make_tuple(lhs.columns.size(),
+                           static_cast<blob_view>(lhs.data)) ==
+           std::make_tuple(rhs.columns.size(),
+                           static_cast<blob_view>(rhs.data));
+}
+
+inline bool operator==(const column_def& lhs, const column_def& rhs)
+{
+    return unicode::case_insensitive_equal_to{}(lhs.name, rhs.name) &&
+           lhs.type == rhs.type &&
+           proj::normalize(lhs.projection) == proj::normalize(rhs.projection);
+}
+
+inline bool operator==(const index_def& lhs, const index_def& rhs)
+{
+    return lhs.type == rhs.type &&
+           boost::range::equal(
+               lhs.columns, rhs.columns, unicode::case_insensitive_equal_to{});
+}
+
+inline bool operator==(const table_def& lhs, const table_def& rhs)
+{
+    /// the table name is not compared (structure only)
+    return std::is_permutation(lhs.columns.begin(),
+                               lhs.columns.end(),
+                               rhs.columns.begin(),
+                               rhs.columns.end()) &&
+           std::is_permutation(lhs.indexes.begin(),
+                               lhs.indexes.end(),
+                               rhs.indexes.begin(),
+                               rhs.indexes.end());
+}
+
+}  // namespace bark::db
 
 inline auto random_name()
 {
@@ -21,7 +61,7 @@ inline auto random_name()
     return bark::db::id(os.str());
 }
 
-const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
+inline const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
 {
     using namespace bark;
     static const auto Drivers = db::odbc::drivers();
@@ -72,14 +112,6 @@ inline std::vector<bark::db::provider_ptr> make_write_providers()
     };
 }
 
-inline bool operator==(const bark::db::rowset& lhs, const bark::db::rowset& rhs)
-{
-    return std::make_tuple(lhs.columns.size(),
-                           static_cast<bark::blob_view>(lhs.data)) ==
-           std::make_tuple(rhs.columns.size(),
-                           static_cast<bark::blob_view>(rhs.data));
-}
-
 TEST_CASE("db_geometry")
 {
     using namespace bark::db;
@@ -101,12 +133,12 @@ TEST_CASE("db_geometry")
     REQUIRE(!rows_from.data.empty());
 
     for (auto& pvd_to : make_write_providers()) {
-        auto scr =
+        auto [name, sql] =
             pvd_to->script({random_name(), tbl_from.columns, tbl_from.indexes});
-        REQUIRE_THROWS(pvd_to->table(scr.name));
-        exec(*pvd_to, scr.sql);
+        REQUIRE_THROWS(pvd_to->table(name));
+        exec(*pvd_to, sql);
         pvd_to->refresh();
-        auto tbl_to = pvd_to->table(scr.name);
+        auto tbl_to = pvd_to->table(name);
         REQUIRE(tbl_from == tbl_to);
 
         auto cmd = pvd_to->make_command();
@@ -134,7 +166,7 @@ TEST_CASE("gdal_raster")
     REQUIRE(!reg.empty());
     auto layer = reg.begin()->first;
     std::cout << layer << '\n'
-              << proj::print(pvd.projection(layer)) << '\n'
+              << proj::abbreviation(pvd.projection(layer)) << '\n'
               << geometry::wkt{pvd.extent(layer)} << std::endl;
 }
 

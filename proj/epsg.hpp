@@ -9,13 +9,14 @@
 
 namespace bark::proj {
 
+/// Applied geodesy organization
 inline const bimap& epsg()
 {
     static const bimap singleton = [] {
         using namespace db;
         enum columns { Srid, Proj4 };
         auto res = bimap{};
-        sqlite::command cmd{":memory:"};
+        auto cmd = sqlite::command{":memory:"};
         exec(cmd, "SELECT InitSpatialMetaData(1)");
         auto bld = builder(cmd);
         bld << "SELECT auth_srid, proj4text FROM spatial_ref_sys"
@@ -29,12 +30,10 @@ inline const bimap& epsg()
             res.insert(boost::lexical_cast<int>(row[Srid]),
                        boost::lexical_cast<std::string>(row[Proj4]));
 
-        /**
-         * @see http://spatialreference.org/ref/epsg/4326/proj4/
-         * @see
-         * http://spatialreference.org/ref/sr-org/epsg3857-wgs84-web-mercator-auxiliary-sphere/proj4/
-         */
+        /// @see http://spatialreference.org/ref/epsg/4326/proj4/
         res.insert(4326, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+        /// @see
+        /// http://spatialreference.org/ref/sr-org/epsg3857-wgs84-web-mercator-auxiliary-sphere/proj4/
         res.insert(
             3857,
             "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 "

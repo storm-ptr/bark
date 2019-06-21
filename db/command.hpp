@@ -3,31 +3,38 @@
 #ifndef BARK_DB_COMMAND_HPP
 #define BARK_DB_COMMAND_HPP
 
+#include <bark/db/fwd.hpp>
+#include <bark/db/rowset.hpp>
 #include <bark/db/sql_builder.hpp>
-#include <boost/lexical_cast.hpp>
-#include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
 namespace bark::db {
 
-/// NOT thread-safe low-level interface
+/// Not thread-safe interface to execute SQL statements
 struct command {
     virtual ~command() = default;
+
+    /// Returns the options for constructing @ref sql_builder
     virtual sql_syntax syntax() = 0;
+
+    /// Executes the SQL in @ref sql_builder
     virtual command& exec(const sql_builder&) = 0;
+
+    /// Returns the field information for the current query
     virtual std::vector<std::string> columns() = 0;
+
+    /// @ref variant_ostream is populated with the row's values
     virtual bool fetch(variant_ostream&) = 0;
+
+    /// By default, each statement is automatically committed
     virtual command& set_autocommit(bool) = 0;
+
+    /// Commits a transaction to the database
     virtual command& commit() = 0;
 };
 
-using command_allocator = std::function<command*()>;
-using command_deleter = std::function<void(command*)>;
-using command_holder = std::unique_ptr<command, command_deleter>;
-
-inline auto builder(command& cmd)
+inline sql_builder builder(command& cmd)
 {
     return sql_builder{cmd.syntax()};
 }
@@ -50,14 +57,6 @@ inline rowset fetch_all(command& cmd)
     while (cmd.fetch(os))
         ;
     return {std::move(cols), std::move(os.data)};
-}
-
-template <class T>
-T fetch_or_default(command& cmd)
-{
-    auto rows = fetch_all(cmd);
-    auto is = variant_istream{rows.data};
-    return is.data.empty() ? T{} : boost::lexical_cast<T>(read(is));
 }
 
 }  // namespace bark::db

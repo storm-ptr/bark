@@ -46,7 +46,7 @@ private:
         if (ctx_)
             msg = pj_strerrno(pj_ctx_get_errno(ctx_.get()));
         if (msg.empty())
-            msg = "proj error";
+            msg = "invalid projection";
         return msg;
     }
 };

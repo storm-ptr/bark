@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/storm-ptr/bark.svg?branch=master)](https://travis-ci.org/storm-ptr/bark)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/storm-ptr/bark?svg=true&branch=master)](https://ci.appveyor.com/project/storm-ptr/bark/branch/master)
-[![Latest GitHub Release](https://img.shields.io/github/release/storm-ptr/bark.svg)](https://github.com/storm-ptr/bark/releases/latest)
+[![Latest GitHub Release](https://img.shields.io/github/release/storm-ptr/bark.svg?)](https://github.com/storm-ptr/bark/releases/latest)
 
 ## Introduction
 
@@ -12,213 +12,113 @@ Submodules:
 - proj: WKB reprojection from one coordinate reference system to another
 - qt: visualization of raster and vector geospatial data
 
-## example/nanogis
+## Documentation
+
+* [doxygen](https://storm-ptr.github.io/bark/)
+
+## How to run example/nanogis
 
 ![](https://user-images.githubusercontent.com/3381451/38042411-f93918b8-32bc-11e8-8be0-433668c62d42.png)
 
-## Getting Started
+[download](https://github.com/storm-ptr/bark/releases/latest)
 
-windows
-
-* <details><summary>how to run example/nanogis</summary><p>
-
-  download [nanogis.windows.zip](https://github.com/storm-ptr/bark/releases/latest) for windows 10, extract and run
+<table><tr><th>windows</th><th>ubuntu</th></tr><tr><td>
+  extract
   ```
-  ./nanogis/vc_redist.x64.exe
-  ./nanogis/nanogis.exe
+    ./nanogis/vc_redist.x64.exe
+    ./nanogis/nanogis.exe
   ```
-  </p></details>
-* <details><summary>how to set up the development environment</summary><p>
+</td><td>
+  * 16.04
+  ```
+    sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo add-apt-repository ppa:ubuntugis/ppa
+    sudo apt-get update
+    sudo dpkg -i ./nanogis.ubuntu.1604.deb
+  ```
+  * 18.04
+  ```
+    sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+    sudo apt-get update
+    sudo dpkg -i ./nanogis.ubuntu.1804.deb
+  ```
+  * common
+  ```
+    sudo apt-get install -f
+    nanogis
+  ```
+</td></tr></table>
 
-  - download OSGeo4W
-  
-    PowerShell
-    ```
+## How to set up the development environment
+
+<table><tr><th>windows</th><th>ubuntu</th></tr><tr><td>
+  * OSGeo4W<br>
+  PowerShell
+  ```
     mkdir C:\OSGeo4W64
     Invoke-WebRequest -Uri http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\OSGeo4W64\osgeo4w-setup-x86_64.exe
     C:\OSGeo4W64\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R C:\OSGeo4W64
-    ```
-
-  - add environment variables
-  
-    GDAL_DATA
-    ```
+  ```
+  environment variables<br>
+  GDAL_DATA
+  ```
     C:\OSGeo4W64\share\gdal
-    ```
-    INCLUDE
-    ```
+  ```
+  INCLUDE
+  ```
     C:\OSGeo4W64\include
     C:\OSGeo4W64\include\libpq
     C:\OSGeo4W64\include\mysql
-    ```
-    LIB
-    ```
+  ```
+  LIB
+  ```
     C:\OSGeo4W64\lib
-    ```
-    PATH
-    ```
+  ```
+  PATH
+  ```
     C:\OSGeo4W64\bin
-    ```
-
-  - put [boost](https://www.boost.org/users/download/) headers to C:\OSGeo4W64\include\boost
-
-  - download Catch2 library
-
-    PowerShell
-    ```
+  ```
+  * copy [boost](https://www.boost.org/users/download/) library to ```C:\OSGeo4W64\include\boost```
+  * Catch2 library<br>
+  PowerShell
+  ```
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
-    ```
-
-  - install [git](https://git-scm.com/downloads) and clone bark library
-
-    ```
+  ```
+  * install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
+  * install [Qt](https://www.qt.io/download) libraries and creator (Open Source)
+  * install [git](https://git-scm.com/downloads)
+  * Bark library
+  ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
-    ```
-
-  - install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
-
-  - install [Qt](https://www.qt.io/download) libraries and creator (Open Source)
-
-  </p></details>
-* <details><summary>how to test</summary><p>
-
-  - start the [virtual machine](https://yadi.sk/d/sdEDsIjC3TkeM6) with databases
-
-  - run in C:\OSGeo4W64\include\bark\test
-
-    ```
-    SET CXXFLAGS=/DBARK_TEST_DATABASE_SERVER=192.168.170.128 /DBARK_TEST_DATABASE_PWD=E207cGYM&& nmake -f ./makefile.windows test
-    nmake -f ./makefile.windows clean
-    ```
-  </p></details>
-
-ubuntu
-* <details><summary>how to run example/nanogis</summary><p>
-
-  download [debian package](https://github.com/storm-ptr/bark/releases/latest) and run
-
-  ubuntu 16.04
   ```
-  sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
-  sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  sudo add-apt-repository ppa:ubuntugis/ppa
-  sudo apt-get update
-  sudo dpkg -i ./nanogis.ubuntu.1604.deb
-  sudo apt-get install -f
-  nanogis
+</td><td>
+  * 16.04
   ```
-
-  ubuntu 18.04
+	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+	sudo add-apt-repository ppa:ubuntugis/ppa
+	sudo apt-get update
+	sudo apt-get -y install g++-8
   ```
-  sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-  sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-  sudo apt-get update
-  sudo dpkg -i ./nanogis.ubuntu.1804.deb
-  sudo apt-get install -f
+  * 18.04
   ```
-  </p></details>
-* <details><summary>how to set up the development environment</summary><p>
-  
-  - install packages
-
-      ubuntu 16.04
-      ```
-      sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
-      sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-      sudo add-apt-repository ppa:ubuntugis/ppa
-      sudo apt-get update
-      sudo apt-get install g++-8
-      sudo apt-get install git
-      sudo apt-get install libboost-dev
-      sudo apt-get install libgdal-dev
-      sudo apt-get install libgl1-mesa-dev
-      sudo apt-get install qt512-meta-minimal
-      sudo apt-get install qt512imageformats
-      ```
-
-      ubuntu 18.04
-      ```
-      sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-      sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-      sudo apt-get update
-      sudo apt-get -y install git
-      sudo apt-get -y install libboost-dev
-      sudo apt-get -y install libgdal-dev
-      sudo apt-get -y install libgl1-mesa-dev
-      sudo apt-get -y install qt512-meta-minimal
-      sudo apt-get -y install qt512imageformats
-      ```
-  
-  - install odbc drivers
-
-    ibm db2: download and extract
-
-    [mssql](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)
-
-    [mysql](https://dev.mysql.com/downloads/connector/odbc/)
-
-    postgres: ```apt-get install odbc-postgresql```
-
-    <details><summary>check</summary><p>
-
-    ```
-    cat /etc/odbcinst.ini
-  
-    [ODBC Driver 17 for SQL Server]
-    Description=Microsoft ODBC Driver 17 for SQL Server
-    Driver=/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.0.so.1.1
-    UsageCount=1
-
-    [IBM DATA SERVER DRIVER for ODBC]
-    Description=IBM DATA SERVER DRIVER for ODBC - /home/dev/clidriver
-    Driver=/home/dev/clidriver/lib/libdb2o.so.1
-    UsageCount=1
-
-    [MySQL ODBC 5.3 Unicode Driver]
-    Description=MySQL ODBC 5.3 Unicode Driver - /home/dev/mysql-connector-odbc
-    Driver=/home/dev/mysql-connector-odbc/lib/libmyodbc5w.so
-    UsageCount=1
-
-    [PostgreSQL ANSI]
-    Description=PostgreSQL ODBC driver (ANSI version)
-    Driver=psqlodbca.so
-    Setup=libodbcpsqlS.so
-    Debug=0
-    CommLog=1
-    UsageCount=1
-
-    [PostgreSQL Unicode]
-    Description=PostgreSQL ODBC driver (Unicode version)
-    Driver=psqlodbcw.so
-    Setup=libodbcpsqlS.so
-    Debug=0
-    CommLog=1
-    UsageCount=1
-    ```
-    </p></details>
-
-  - download Catch2 library
-
-    ```
+	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+	sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+	sudo apt-get update
+  ```
+  * common
+  ```
+	sudo apt-get -y install git
+	sudo apt-get -y install libboost-dev
+	sudo apt-get -y install libgdal-dev
+	sudo apt-get -y install libgl1-mesa-dev
+	sudo apt-get -y install qt512-meta-minimal
+	sudo apt-get -y install qt512imageformats
     wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
-    ```
-
-  - clone bark library
-
-    ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git
-    ```
-  </p></details>
-* <details><summary>how to test</summary><p>
-
-  - start the [virtual machine](https://yadi.sk/d/sdEDsIjC3TkeM6) with databases
-
-  - run in bark/test
-
-    ```
-    make -f ./makefile.ubuntu test CXX=g++-8 CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_DATABASE_SERVER=192.168.170.128 CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=E207cGYM
-    make -f ./makefile.ubuntu clean
-    ```
-  </p></details>
+  ```
+</td></tr></table>
 
 andrew.naplavkov@gmail.com

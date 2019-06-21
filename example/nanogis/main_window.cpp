@@ -13,7 +13,7 @@
 #include <QPixmap>
 #include <QSplitter>
 #include <QStatusBar>
-#include <bark/proj/print.hpp>
+#include <bark/proj/abbreviation.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
 #define META_TYPE(T) qRegisterMetaType<T>(BOOST_PP_STRINGIZE(T))
@@ -76,24 +76,28 @@ main_window::main_window()
 
     connect(map, &map_widget::active_sig, this, &main_window::active_map_slot);
     connect(map, &map_widget::idle_sig, this, &main_window::idle_map_slot);
-    connect(map, &map_widget::mouse_move_sig, this, &main_window::coords_slot);
-    connect(map, &map_widget::transform_sig, this, &main_window::proj_slot);
+    connect(map,
+            &map_widget::coordinates_sig,
+            this,
+            &main_window::coordinates_slot);
+    connect(
+        map, &map_widget::projection_sig, this, &main_window::projection_event);
 
     setWindowIcon(icon("wheel"));
     setWindowTitle("nanogis");
 }
 
-void main_window::proj_slot(const std::string& pj)
+void main_window::projection_event(const std::string& pj)
 {
-    proj_lbl_->setText(
-        rich_text("map",
-                  limited_text(QString::fromStdString(bark::proj::print(pj)),
-                               Qt::AlignLeft),
-                  Qt::AlignLeft));
+    proj_lbl_->setText(rich_text(
+        "map",
+        limited_text(QString::fromStdString(bark::proj::abbreviation(pj)),
+                     Qt::AlignLeft),
+        Qt::AlignLeft));
     proj_lbl_->setToolTip(QString::fromStdString(pj));
 }
 
-void main_window::coords_slot(const QPointF& lon_lat)
+void main_window::coordinates_slot(const QPointF& lon_lat)
 {
     if (std::isfinite(lon_lat.x()) && std::isfinite(lon_lat.y()))
         coords_lbl_->setText(rich_text("globe",

@@ -10,6 +10,11 @@
 
 namespace bark::db {
 
+inline bool test(const variant_t& v)
+{
+    return !is_null(v) && boost::lexical_cast<int64_t>(v);
+}
+
 template <class T>
 class table_guide {
     T& as_mixin() { return static_cast<T&>(*this); }

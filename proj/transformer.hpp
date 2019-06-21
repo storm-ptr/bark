@@ -10,51 +10,54 @@
 
 namespace bark::proj {
 
+/// For performing conversions between cartographic projections.
+
+/// PROJ.4 library wrapper.
+/// @see https://en.wikipedia.org/wiki/PROJ
 class transformer {
 public:
+    /// @param pj_from is a source PROJ.4 string;
+    /// @param pj_to is a target PROJ.4 string.
     transformer(const std::string& pj_from, const std::string& pj_to)
-        : pj_from_(pj_from), pj_to_(pj_to)
+        : from_(pj_from), to_(pj_to)
     {
     }
 
-    bool is_trivial() const { return pj_from_.get_def() == pj_to_.get_def(); }
+    bool is_trivial() const { return from_.get_def() == to_.get_def(); }
 
-    geometry::point forward(const geometry::point& point) const
+    geometry::point forward(const geometry::point& val) const
     {
-        return transformed(pj_from_, pj_to_, point);
+        return transformed(from_, to_, val);
     }
 
-    geometry::point backward(const geometry::point& point) const
+    geometry::point backward(const geometry::point& val) const
     {
-        return transformed(pj_to_, pj_from_, point);
+        return transformed(to_, from_, val);
     }
 
-    geometry::box forward(const geometry::box& box) const
+    geometry::box forward(const geometry::box& val) const
     {
-        return transformed(pj_from_, pj_to_, box);
+        return transformed(from_, to_, val);
     }
 
-    geometry::box backward(const geometry::box& box) const
+    geometry::box backward(const geometry::box& val) const
     {
-        return transformed(pj_to_, pj_from_, box);
+        return transformed(to_, from_, val);
     }
 
-    void inplace_forward(double* begin, double* end) const
+    void inplace_forward(double* first, double* last) const
     {
-        transform(pj_from_, pj_to_, begin, end);
+        transform(from_, to_, first, last);
     }
 
-    void inplace_backward(double* begin, double* end) const
+    void inplace_backward(double* first, double* last) const
     {
-        transform(pj_to_, pj_from_, begin, end);
+        transform(to_, from_, first, last);
     }
 
-    void inplace_forward(blob_view wkb) const { stream{pj_from_, pj_to_}(wkb); }
+    void inplace_forward(blob_view wkb) const { stream{from_, to_}(wkb); }
 
-    void inplace_backward(blob_view wkb) const
-    {
-        stream{pj_to_, pj_from_}(wkb);
-    }
+    void inplace_backward(blob_view wkb) const { stream{to_, from_}(wkb); }
 
     auto inplace_forward() const
     {
@@ -67,8 +70,8 @@ public:
     }
 
 private:
-    projection pj_from_;
-    projection pj_to_;
+    projection from_;
+    projection to_;
 };
 
 }  // namespace bark::proj

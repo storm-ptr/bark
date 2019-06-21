@@ -32,9 +32,9 @@ public:
                          boost::lexical_cast<std::string>(name));
     }
 
-    layer_to_type_map dir()
+    std::map<qualified_name, layer_type> dir()
     {
-        layer_to_type_map res;
+        std::map<qualified_name, layer_type> res;
         boost::fusion::for_each(layers_, [&](auto& lr) {
             res.insert({lr.name(), layer_type::Raster});
         });

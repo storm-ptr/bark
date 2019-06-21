@@ -17,7 +17,7 @@ class provider : private cacher<provider>, public db::provider {
 public:
     friend cacher<provider>;
 
-    layer_to_type_map dir() override { return cached_dir(); }
+    std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
 
     std::string projection(const qualified_name&) override
     {
@@ -36,7 +36,7 @@ public:
         auto tf = tile_to_layer_transformer();
         auto lr = layers_[lr_nm];
         auto tl = match(tf.backward(px), lr->zmax());
-        return geometry::move_to(tf.forward(slippy::pixel(tl)), px);
+        return geometry::shift(tf.forward(slippy::pixel(tl)), px);
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
@@ -63,7 +63,7 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    table_script script(const table_def&) override
+    std::pair<qualified_name, std::string> script(const table_def&) override
     {
         throw std::logic_error{"not implemented"};
     }
@@ -78,7 +78,7 @@ public:
 private:
     layers layers_;
 
-    layer_to_type_map load_dir() { return layers_.dir(); }
+    std::map<qualified_name, layer_type> load_dir() { return layers_.dir(); }
 
     geometry::multi_box make_tile_coverage(const qualified_name& lr_nm,
                                            const geometry::box& ext,

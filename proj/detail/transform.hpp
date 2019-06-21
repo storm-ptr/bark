@@ -14,38 +14,36 @@
 
 namespace bark::proj {
 
-inline void transform(projPJ pj_from, projPJ pj_to, double* begin, double* end)
+inline void transform(projPJ from, projPJ to, double* first, double* last)
 {
-    if (pj_is_latlong(pj_from))
+    if (pj_is_latlong(from))
         std::transform(
-            begin, end, begin, [](double coord) { return coord * DEG_TO_RAD; });
+            first, last, first, [](double v) { return v * DEG_TO_RAD; });
 
-    auto size = std::distance(begin, end);
-    auto res = pj_transform(
-        pj_from, pj_to, (long)size / 2, 2, begin, begin + 1, nullptr);
+    auto size = std::distance(first, last);
+    auto res =
+        pj_transform(from, to, (long)size / 2, 2, first, first + 1, nullptr);
     if (res != 0)
         throw std::runtime_error(pj_strerrno(res));
 
-    if (pj_is_latlong(pj_to))
+    if (pj_is_latlong(to))
         std::transform(
-            begin, end, begin, [](double coord) { return coord * RAD_TO_DEG; });
+            first, last, first, [](double v) { return v * RAD_TO_DEG; });
 }
 
-inline geometry::point transformed(projPJ pj_from,
-                                   projPJ pj_to,
-                                   const geometry::point& point)
+inline geometry::point transformed(projPJ from,
+                                   projPJ to,
+                                   const geometry::point& v)
 {
-    double coords[] = {point.x(), point.y()};
-    transform(pj_from, pj_to, std::begin(coords), std::end(coords));
+    double coords[] = {v.x(), v.y()};
+    transform(from, to, std::begin(coords), std::end(coords));
     return {coords[0], coords[1]};
 }
 
-inline geometry::box transformed(projPJ pj_from,
-                                 projPJ pj_to,
-                                 const geometry::box& box)
+inline geometry::box transformed(projPJ from, projPJ to, const geometry::box& v)
 {
-    grid gr(box, 32, 32);
-    transform(pj_from, pj_to, gr.begin(), gr.end());
+    grid gr(v, 32, 32);
+    transform(from, to, gr.begin(), gr.end());
     auto points = gr.rows() * gr.cols();
     std::vector<double> xs, ys;
     xs.reserve(points);
@@ -61,7 +59,7 @@ inline geometry::box transformed(projPJ pj_from,
                 ys.push_back(y);
         }
     if (xs.empty() || ys.empty())
-        throw std::runtime_error("transform box error");
+        throw std::runtime_error("transformed box");
     auto minmax_x = std::minmax_element(xs.begin(), xs.end());
     auto minmax_y = std::minmax_element(ys.begin(), ys.end());
     return {{*minmax_x.first, *minmax_y.first},

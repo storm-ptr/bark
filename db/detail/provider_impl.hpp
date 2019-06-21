@@ -19,13 +19,16 @@ class provider_impl : public db::provider {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 public:
-    provider_impl(command_allocator alloc, dialect_holder dialect)
+    provider_impl(std::function<command*()> alloc, dialect_holder dialect)
         : pool_{std::make_shared<pool>(std::move(alloc))}
         , dialect_{std::move(dialect)}
     {
     }
 
-    layer_to_type_map dir() override { return as_mixin().cached_dir(); }
+    std::map<qualified_name, layer_type> dir() override
+    {
+        return as_mixin().cached_dir();
+    }
 
     std::string projection(const qualified_name& lr_nm) override
     {
@@ -64,7 +67,7 @@ public:
         return as_mixin().cached_table(tbl_nm);
     }
 
-    table_script script(const table_def& tbl) override
+    std::pair<qualified_name, std::string> script(const table_def& tbl) override
     {
         return as_mixin().make_script(tbl);
     }
@@ -79,9 +82,9 @@ public:
 protected:
     dialect& as_dialect() { return *dialect_.get(); }
 
-    layer_to_type_map load_dir() try {
+    std::map<qualified_name, layer_type> load_dir() try {
         enum columns { Schema, Table, Column };
-        auto res = layer_to_type_map{};
+        auto res = std::map<qualified_name, layer_type>{};
         auto bld = builder(as_mixin());
         as_dialect().geometries_sql(bld);
         auto rows = fetch_all(as_mixin(), bld);

@@ -4,9 +4,9 @@
 #define BARK_DB_DB2_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/sql_builder_ops.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
-#include <bark/db/sql_builder_ops.hpp>
-#include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
 namespace bark::db {
@@ -42,7 +42,7 @@ public:
     {
         if (is_ogc_type(type_lcase))
             return column_type::Geometry;
-        if (any_of({"graphic", "vargraphic"}, equal_to(type_lcase)))
+        if (any_of({"graphic", "vargraphic"}, equals(type_lcase)))
             return column_type::Text;
         return iso_type(type_lcase, scale);
     }

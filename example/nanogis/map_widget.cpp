@@ -28,12 +28,12 @@ void map_widget::idle_event()
     emit idle_sig();
 }
 
-void map_widget::mouse_move_event(QPointF lon_lat)
+void map_widget::coordinates_event(QPointF lon_lat)
 {
-    emit mouse_move_sig(lon_lat);
+    emit coordinates_sig(lon_lat);
 }
 
-void map_widget::transform_event(std::string pj)
+void map_widget::projection_event(std::string pj)
 {
-    emit transform_sig(std::move(pj));
+    emit projection_sig(std::move(pj));
 }

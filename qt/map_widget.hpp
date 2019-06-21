@@ -21,27 +21,40 @@ namespace bark::qt {
 
 class rendering_task;
 
-/**
- * The class receives events from the window system and represent a cartography
- * interface on the screen (panning, zooming).
- */
+/// The cartography interface on the screen (panning, zooming)
 class map_widget : public QWidget {
 public:
     explicit map_widget(QWidget* parent);
 
+    /// Returns drawing space
     const frame& get_frame() const { return frm_; }
 
+    /// Zooms to fit drawing space
     void fit(frame);
+
+    /// Zooms to fit data set
     void fit(layer);
+
+    /// Draws data sets
     void show(QVector<layer>);
+
+    /// Changes projection and scale to avoid distortion
     void undistort(layer);
 
 protected:
+    /// Occurs when the map starts to draw
     virtual void active_event() {}
-    virtual void idle_event() {}
-    virtual void mouse_move_event(QPointF /*lon_lat*/) {}
-    virtual void transform_event(std::string /*pj*/) {}
 
+    /// Occurs when the map finishes to draw
+    virtual void idle_event() {}
+
+    /// Occurs when the mouse cursor is moved
+    virtual void coordinates_event(QPointF /*lon_lat*/) {}
+
+    /// Occurs when the spatial reference system is changed
+    virtual void projection_event(std::string /*pj*/) {}
+
+    // override
     void closeEvent(QCloseEvent*) override;
     void leaveEvent(QEvent*) override;
     void mouseDoubleClickEvent(QMouseEvent*) override;

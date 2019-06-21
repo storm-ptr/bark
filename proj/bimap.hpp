@@ -11,6 +11,7 @@
 
 namespace bark::proj {
 
+/// Bidirectional relations between projections and identifiers
 class bimap {
 public:
     bool empty() const { return index_.empty(); }

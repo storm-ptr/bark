@@ -47,7 +47,7 @@ protected:
     }
 
 private:
-    void copy(const row_t& from, proj::bimap& to)
+    void copy(const std::vector<variant_t>& from, proj::bimap& to)
     {
         enum columns { Srid, Epsg, Proj4 };
         auto srid = boost::lexical_cast<int>(from[Srid]);

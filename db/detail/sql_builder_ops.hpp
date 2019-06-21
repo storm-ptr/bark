@@ -36,7 +36,7 @@ encoder(column_def, T)->encoder<T>;
 template <class Columns>
 struct row_encoder {
     const Columns& cols;
-    const row_t& row;
+    const std::vector<variant_t>& row;
 
     friend sql_builder& operator<<(sql_builder& bld, const row_encoder& that)
     {
@@ -52,7 +52,7 @@ struct row_encoder {
 };
 
 template <class Columns>
-row_encoder(Columns, row_t)->row_encoder<Columns>;
+row_encoder(Columns, std::vector<variant_t>)->row_encoder<Columns>;
 
 }  // namespace bark::db
 

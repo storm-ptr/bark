@@ -2,6 +2,7 @@
 
 #include "insertion_task.h"
 #include <QElapsedTimer>
+#include <bark/proj/transformer.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/sliced.hpp>
@@ -77,7 +78,7 @@ insertion_task::insertion_task(QVector<bark::qt::layer> from,
         self.push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
         for (const auto& lr_from : from) {
             if (action::PrintSqlOnly == act)
-                ::push_output(self, script(lr_from, to).sql);
+                ::push_output(self, script(lr_from, to).second);
             else {
                 auto lr_to = self.create(lr_from, to);
                 emit self.refresh_sig();
@@ -102,12 +103,12 @@ insertion_task::insertion_task(bark::qt::layer from,
 bark::qt::layer insertion_task::create(const bark::qt::layer& from,
                                        const bark::qt::link& to)
 {
-    auto scr = script(from, to);
-    exec(*to.provider, scr.sql);
+    auto [name, sql] = script(from, to);
+    exec(*to.provider, sql);
     to.provider->refresh();
-    ::push_output(*this, scr.sql);
+    ::push_output(*this, sql);
     bark::qt::layer_def def;
-    def.name = id(scr.name, from.name.back());
+    def.name = id(name, from.name.back());
     return {to, def};
 }
 

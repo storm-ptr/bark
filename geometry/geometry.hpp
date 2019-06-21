@@ -1,10 +1,5 @@
 // Andrew Naplavkov
 
-/**
- * @see
- * http://ibis.colostate.edu/WebContent/IBIS/BlueSpray/UsersGuide/GeometryClasses.png
- */
-
 #ifndef BARK_GEOMETRY_GEOMETRY_HPP
 #define BARK_GEOMETRY_GEOMETRY_HPP
 

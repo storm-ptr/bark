@@ -11,18 +11,16 @@
 
 namespace bark::db {
 
-/**
- * SQL permits names that consist of a single identifier or multiple
- * identifiers. When one named item belongs to another named item, you can (and
- * sometimes must) qualify the name of the "child" item with the name of the
- * "parent" item, using dot notation. For example: <db>.<schema>.<table>
- * or <table>.<column>
- */
+/// An unambiguous name.
+
+/// SQL permits names that consist of a single identifier or multiple
+/// identifiers. When one named item belongs to another named item, you can (and
+/// sometimes must) qualify the name of the "child" item with the name of the
+/// "parent" item, using dot notation. For example:
+/// @code<schema>.<table>@endcode or @code<table>.<column>@endcode
 struct qualified_name : std::vector<std::string> {
-    /**
-     * @param pos is 0-based, and accepts negative indices for indexing from the
-     * end of the array
-     */
+    /// @param pos is 0-based, and accepts negative indices
+    /// for indexing from the end.
     const std::string& at(int pos) const
     {
         static const std::string Empty{};

@@ -28,7 +28,7 @@ public:
             frame_ = frame{dataset{file_}};
     }
 
-    layer_to_type_map dir() override { return cached_dir(); }
+    std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
 
     std::string projection(const qualified_name& lr_nm) override
     {
@@ -47,7 +47,7 @@ public:
     geometry::box undistorted_pixel(const qualified_name&,
                                     const geometry::box& px) override
     {
-        return is_raster() ? geometry::move_to(frame_->pixel(), px) : px;
+        return is_raster() ? geometry::shift(frame_->pixel(), px) : px;
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
@@ -69,7 +69,7 @@ public:
         if (is_raster())
             throw std::logic_error{"not implemented"};
         return command_holder(new command(file_),
-                              [](db::command* cmd) { delete cmd; });
+                              std::default_delete<db::command>());
     }
 
     db::table_def table(const qualified_name& tbl_nm) override
@@ -77,7 +77,7 @@ public:
         return cached_table(tbl_nm);
     }
 
-    table_script script(const table_def&) override
+    std::pair<qualified_name, std::string> script(const table_def&) override
     {
         throw std::logic_error{"not implemented"};
     }
@@ -93,9 +93,9 @@ private:
     const std::string file_;
     std::optional<frame> frame_;
 
-    layer_to_type_map load_dir()
+    std::map<qualified_name, layer_type> load_dir()
     {
-        layer_to_type_map res;
+        std::map<qualified_name, layer_type> res;
         for (auto& item : dataset{file_}.layers())
             res.emplace(item, layer_type::Geometry);
         if (res.empty())
@@ -119,8 +119,8 @@ private:
             qry.columns | boost::adaptors::filtered([&](auto& col) {
                 return db::find(tbl.columns, col.name) == std::end(tbl.columns);
             });
-        auto it =
-            boost::range::find_if(tbl.columns, not_same{column_type::Geometry});
+        auto it = boost::range::find_if(
+            tbl.columns, std::not_fn(same{column_type::Geometry}));
         auto count = tbl.columns.size();
         tbl.columns.insert(it, std::begin(diff), std::end(diff));
         if (tbl.columns.size() - count == 1)

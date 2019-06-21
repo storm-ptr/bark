@@ -11,13 +11,13 @@ namespace bark::proj {
 
 class stream {
 public:
-    stream(projPJ pj_from, projPJ pj_to) : pj_from_(pj_from), pj_to_(pj_to) {}
+    stream(projPJ from, projPJ to) : from_(from), to_(to) {}
 
-    void operator()(blob_view data)
+    void operator()(blob_view wkb)
     {
-        wkb::istream is(data);
-        data_ = data;
-        coords_begin_ = coords_end();
+        wkb::istream is(wkb);
+        wkb_ = wkb;
+        begin_ = end();
         wkb::geometry::accept(is, *this);
         flush();
     }
@@ -53,36 +53,36 @@ public:
     }
 
 private:
-    const projPJ pj_from_;
-    const projPJ pj_to_;
-    blob_view data_;
-    double* coords_begin_ = nullptr;
+    const projPJ from_;
+    const projPJ to_;
+    blob_view wkb_;
+    double* begin_ = nullptr;
 
-    double* coords_end() { return (double*)data_.data(); }
+    double* end() { return (double*)wkb_.data(); }
 
     template <class T>
-    stream& operator<<(T val)
+    stream& operator<<(T v)
     {
         flush();
-        *(T*)data_.data() = val;
-        data_.remove_prefix(sizeof(T));
-        coords_begin_ = coords_end();
+        *(T*)wkb_.data() = v;
+        wkb_.remove_prefix(sizeof(T));
+        begin_ = end();
         return *this;
     }
 
-    stream& operator<<(double val)
+    stream& operator<<(double v)
     {
-        *(double*)data_.data() = val;
-        data_.remove_prefix(sizeof(double));
+        *(double*)wkb_.data() = v;
+        wkb_.remove_prefix(sizeof(double));
         return *this;
     }
 
     void flush()
     {
-        if (coords_begin_ == coords_end())
+        if (begin_ == end())
             return;
-        transform(pj_from_, pj_to_, coords_begin_, coords_end());
-        coords_begin_ = coords_end();
+        transform(from_, to_, begin_, end());
+        begin_ = end();
     }
 };
 

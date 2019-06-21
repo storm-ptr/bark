@@ -4,11 +4,13 @@
 #define BARK_DB_PROVIDER_OPS_HPP
 
 #include <algorithm>
+#include <bark/db/detail/command_ops.hpp>
+#include <bark/db/detail/sql_builder_ops.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/db/provider.hpp>
-#include <bark/db/sql_builder_ops.hpp>
-#include <bark/db/table_def_ops.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/algorithm/find_if.hpp>
 #include <exception>
 
 namespace bark::db {

@@ -21,14 +21,14 @@ public slots:
 signals:
     void active_sig();
     void idle_sig();
-    void mouse_move_sig(QPointF lon_lat);
-    void transform_sig(std::string pj);
+    void coordinates_sig(QPointF lon_lat);
+    void projection_sig(std::string pj);
 
 protected:
     void active_event() override;
     void idle_event() override;
-    void mouse_move_event(QPointF lon_lat) override;
-    void transform_event(std::string pj) override;
+    void coordinates_event(QPointF lon_lat) override;
+    void projection_event(std::string pj) override;
 };
 
 #endif  // MAP_WIDGET_H

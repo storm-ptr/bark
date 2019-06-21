@@ -23,7 +23,7 @@ struct tile {
 
 using tiles = std::vector<tile>;
 
-inline auto sub(const tile& tl)
+inline auto split(const tile& tl)
 {
     std::array<tile, 4> res;
     for (int i = 0; i < 2; ++i)
@@ -65,7 +65,7 @@ void depth_first_search(tiles& tls, const tile& tl, const Predicate& p)
     if (!p(tl))
         return;
     tls.push_back(tl);
-    for (auto& sub_tl : sub(tl))
+    for (auto& sub_tl : split(tl))
         depth_first_search(tls, sub_tl, p);
 }
 
@@ -82,7 +82,7 @@ inline tile match(const geometry::box& px, int zmax)
     using namespace boost::geometry;
 
     auto px_area = area(px);
-    auto sub_px_area = area(geometry::sub(px).front());
+    auto sub_px_area = px_area / 4.;
 
     auto tiny = [&](const tile& tl) {
         return tl.z > zmax || area(pixel(tl)) < sub_px_area;
@@ -111,7 +111,7 @@ inline tiles tile_coverage(const geometry::box& ext, int z)
             return true;
         geometry::box visible{};
         boost::geometry::intersection(ext, extent(tl), visible);
-        auto sub_pixel = pixel(sub(tl).front());
+        auto sub_pixel = pixel(split(tl).front());
         return geometry::width(visible) > geometry::width(sub_pixel) &&
                geometry::height(visible) > geometry::height(sub_pixel);
     };

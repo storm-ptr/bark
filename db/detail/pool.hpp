@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <bark/db/command.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -16,7 +17,7 @@ namespace bark::db {
 /// thread-safe reuse interface to prevent the connection time overhead
 class pool : public std::enable_shared_from_this<pool> {
 public:
-    explicit pool(command_allocator alloc) : alloc_{std::move(alloc)} {}
+    explicit pool(std::function<command*()> alloc) : alloc_{std::move(alloc)} {}
 
     command_holder make_command()
     {
@@ -35,7 +36,7 @@ public:
 
 private:
     std::mutex guard_;
-    command_allocator alloc_;
+    std::function<command*()> alloc_;
     std::queue<command_holder> commands_;
 
     void push(command* cmd) try {

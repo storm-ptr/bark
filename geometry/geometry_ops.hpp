@@ -3,115 +3,59 @@
 #ifndef BARK_GEOMETRY_GEOMETRY_OPS_HPP
 #define BARK_GEOMETRY_GEOMETRY_OPS_HPP
 
-#include <algorithm>
-#include <array>
 #include <bark/geometry/geometry.hpp>
 #include <cmath>
 #include <stdexcept>
 
 namespace bark::geometry {
 
-inline double left(const box& box)
+inline double left(const box& val)
 {
-    return std::min<>(box.min_corner().x(), box.max_corner().x());
+    return val.min_corner().x();
 }
 
-inline double right(const box& box)
+inline double right(const box& val)
 {
-    return std::max<>(box.min_corner().x(), box.max_corner().x());
+    return val.max_corner().x();
 }
 
-inline double bottom(const box& box)
+inline double bottom(const box& val)
 {
-    return std::min<>(box.min_corner().y(), box.max_corner().y());
+    return val.min_corner().y();
 }
 
-inline double top(const box& box)
+inline double top(const box& val)
 {
-    return std::max<>(box.min_corner().y(), box.max_corner().y());
+    return val.max_corner().y();
 }
 
-inline point left_top(const box& box)
+inline double width(const box& val)
 {
-    return point{left(box), top(box)};
+    return right(val) - left(val);
 }
 
-inline point right_bottom(const box& box)
+inline double height(const box& val)
 {
-    return point{right(box), bottom(box)};
+    return top(val) - bottom(val);
 }
 
-inline double width(const box& box)
-{
-    return right(box) - left(box);
-}
-
-inline double height(const box& box)
-{
-    return top(box) - bottom(box);
-}
-
-template <class Size>
-double width(const Size& size)
-{
-    return size.width();
-}
-
-template <class Size>
-double height(const Size& size)
-{
-    return size.height();
-}
-
-template <class Size>
-double max_scale(const Size& size)
-{
-    return std::max<>(width(size), height(size));
-}
-
-template <class LhsSize, class RhsSize>
-double max_scale(const LhsSize& lhs, const RhsSize& rhs)
-{
-    return std::max<>(width(lhs) / width(rhs), height(lhs) / height(rhs));
-}
-
-template <class Point>
-void check(const Point& point)
-{
-    if (!std::isfinite(point.x()) || !std::isfinite(point.y()))
-        throw std::runtime_error("point error");
-}
-
-/// @see "https://en.wikipedia.org/wiki/Quadrant_(plane_geometry)"
-inline std::array<box, 4> sub(const box& ext)
-{
-    auto min = ext.min_corner();
-    auto med = boost::geometry::return_centroid<point>(ext);
-    auto max = ext.max_corner();
-    return {box{med, max},
-            box{{min.get<0>(), med.get<1>()}, {med.get<0>(), max.get<1>()}},
-            box{min, med},
-            box{{med.get<0>(), min.get<1>()}, {max.get<0>(), med.get<1>()}}};
-}
-
-template <class OStream>
-OStream& operator<<(OStream& os, const box& ext)
-{
-    return os << left(ext) << "," << bottom(ext) << "," << right(ext) << ","
-              << top(ext);
-}
-
-template <class RhsGeom>
-box move_to(const box& lhs, const RhsGeom& rhs)
+inline box shift(const box& from, const box& to)
 {
     using namespace boost::geometry;
-    auto diff = return_centroid<point>(lhs);
-    subtract_point(diff, return_centroid<point>(rhs));
-    auto min_corner = lhs.min_corner();
-    auto max_corner = lhs.max_corner();
+    auto diff = return_centroid<point>(from);
+    subtract_point(diff, return_centroid<point>(to));
+    auto min_corner = from.min_corner();
+    auto max_corner = from.max_corner();
     add_point(min_corner, diff);
     add_point(max_corner, diff);
     return {min_corner, max_corner};
+}
+
+template <class Point>
+void check(const Point& val)
+{
+    if (!std::isfinite(val.x()) || !std::isfinite(val.y()))
+        throw std::runtime_error("invalid point");
 }
 
 }  // namespace bark::geometry

@@ -15,12 +15,14 @@
 
 namespace bark::qt {
 
+/// Spatial data source
 struct link {
     QUrl uri;
     db::provider_ptr provider;
     bool queryable = false;
 };
 
+/// Describes how to display spatial data set
 struct layer_def {
     db::qualified_name name;
     Qt::CheckState state = Qt::Unchecked;
@@ -28,6 +30,7 @@ struct layer_def {
     QBrush brush;
 };
 
+/// Map layer is used to display and work with a data set
 struct layer : link, layer_def {
     layer() = default;
 
@@ -37,11 +40,11 @@ struct layer : link, layer_def {
     }
 };
 
-/**
- * An abstraction of a two-dimensional space that can be drawn on.
- * Its origin is located at the top-left corner.
- * X increases to the right and Y increases downwards. The unit is one pixel.
- */
+/// A two-dimensional space that can be drawn on.
+
+/// Its origin is located at the top-left corner.
+/// X increases to the right and Y increases downwards.
+/// The unit is one pixel.
 struct frame {
     QSize size;
     QPointF center;

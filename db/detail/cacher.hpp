@@ -21,10 +21,11 @@ class cacher {
 protected:
     cacher() : scope_{lru_cache::new_scope()} {}
 
-    layer_to_type_map cached_dir()
+    std::map<qualified_name, layer_type> cached_dir()
     {
-        return std::any_cast<layer_to_type_map>(lru_cache::get_or_invoke(
-            scope_, Dir, [&] { return as_mixin().load_dir(); }));
+        return std::any_cast<std::map<qualified_name, layer_type>>(
+            lru_cache::get_or_invoke(
+                scope_, Dir, [&] { return as_mixin().load_dir(); }));
     }
 
     proj::bimap cached_projection_bimap()

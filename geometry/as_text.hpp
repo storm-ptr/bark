@@ -10,6 +10,10 @@
 
 namespace bark::geometry {
 
+/// I/O manipulator.
+
+/// @see
+/// https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry
 template <class T>
 struct wkt {
     const T& val;
@@ -23,6 +27,8 @@ struct wkt {
 template <class T>
 wkt(T)->wkt<T>;
 
+namespace detail {
+
 struct make_wkt {
     template <class T>
     constexpr auto operator()(const T& val) const
@@ -31,14 +37,16 @@ struct make_wkt {
     };
 };
 
+}  // namespace detail
+
 template <>
 struct wkt<geometry_collection> {
     const geometry_collection& val;
 
     friend std::ostream& operator<<(std::ostream& os, const wkt& that)
     {
-        return os << "GEOMETRYCOLLECTION(" << list{that.val, ",", make_wkt{}}
-                  << ")";
+        return os << "GEOMETRYCOLLECTION("
+                  << list{that.val, ",", detail::make_wkt{}} << ")";
     }
 };
 
@@ -48,8 +56,8 @@ struct wkt<geometry> {
 
     friend std::ostream& operator<<(std::ostream& os, const wkt& that)
     {
-        boost::apply_visitor([&os](const auto& val) { os << make_wkt{}(val); },
-                             that.val);
+        boost::apply_visitor(
+            [&](const auto& val) { os << detail::make_wkt{}(val); }, that.val);
         return os;
     }
 };

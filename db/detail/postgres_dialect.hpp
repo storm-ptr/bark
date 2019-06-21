@@ -4,9 +4,9 @@
 #define BARK_DB_POSTGRES_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
+#include <bark/db/detail/sql_builder_ops.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
-#include <bark/db/sql_builder_ops.hpp>
-#include <bark/db/table_def_ops.hpp>
 #include <bark/geometry/as_binary.hpp>
 
 namespace bark::db {
@@ -40,11 +40,11 @@ public:
     {
         if (within(type_lcase)("array"))
             return column_type::Invalid;
-        if (any_of({"geography", "geometry"}, equal_to(type_lcase)))
+        if (any_of({"geography", "geometry"}, equals(type_lcase)))
             return column_type::Geometry;
         if (within(type_lcase)("serial"))
             return column_type::Integer;
-        if (any_of({"json", "jsonb", "xml", "hstore"}, equal_to(type_lcase)))
+        if (any_of({"json", "jsonb", "xml", "hstore"}, equals(type_lcase)))
             return column_type::Text;
         if (type_lcase == "bytea")
             return column_type::Blob;
