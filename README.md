@@ -22,13 +22,16 @@ Submodules:
 
 [download](https://github.com/storm-ptr/bark/releases/latest)
 
-<table><tr><th>windows</th><th>ubuntu</th></tr><tr><td>
-  extract
+#### windows
+
+  * extract and run
   ```
     ./nanogis/vc_redist.x64.exe
     ./nanogis/nanogis.exe
   ```
-</td><td>
+
+#### ubuntu
+
   * 16.04
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
@@ -49,11 +52,11 @@ Submodules:
     sudo apt-get install -f
     nanogis
   ```
-</td></tr></table>
 
 ## How to set up the development environment
 
-<table><tr><th>windows</th><th>ubuntu</th></tr><tr><td>
+#### windows
+
   * OSGeo4W<br>
   PowerShell
   ```
@@ -93,7 +96,9 @@ Submodules:
   ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
   ```
-</td><td>
+
+#### ubuntu
+
   * 16.04
   ```
 	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
@@ -119,6 +124,5 @@ Submodules:
     wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```
-</td></tr></table>
 
 andrew.naplavkov@gmail.com

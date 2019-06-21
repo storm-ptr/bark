@@ -44,7 +44,7 @@ script:
 - cp $TRAVIS_BUILD_DIR/example/nanogis/control.ubuntu.1604 $DEB_ROOT/DEBIAN/control
 - dpkg-deb --build $DEB_ROOT
 deploy:
-  provider: releases
+- provider: releases
   overwrite: true
   skip_cleanup: true
   target_commitish: $TRAVIS_COMMIT
@@ -55,3 +55,9 @@ deploy:
   - "nanogis.ubuntu.1604.deb"
   on:
     tags: true
+- provider: pages
+  skip_cleanup: true
+  local_dir: html
+  github_token: $GH_REPO_TOKEN
+  on:
+    branch: master
