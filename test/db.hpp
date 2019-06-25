@@ -118,7 +118,7 @@ TEST_CASE("db_geometry")
     static constexpr size_t Limit = 10;
 
     boost::io::ios_flags_saver ifs(std::cout);
-    gdal::provider pvd_from(R"(./data/mexico.sqlite)");
+    gdal::provider pvd_from("./data/mexico.sqlite");
     auto lr_from = pvd_from.dir().begin()->first;
     auto tbl_from = pvd_from.table(qualifier(lr_from));
     std::cout << tbl_from << std::endl;
@@ -127,11 +127,12 @@ TEST_CASE("db_geometry")
     auto cols = names(tbl_from.columns);
     auto col = std::distance(tbl_from.columns.begin(),
                              find(tbl_from.columns, lr_from.back()));
-    auto rows_from = select(pvd_from, tbl_from.name, cols, 1, Limit);
-    unify(rows_from, col);
-    std::cout << rows_from << std::endl;
-    REQUIRE(!rows_from.data.empty());
-
+    auto rowset_from =
+        fetch_all(pvd_from, select_sql(pvd_from, tbl_from.name, 1, Limit));
+    std::cout << rowset_from << std::endl;
+    REQUIRE(!rowset_from.data.empty());
+    auto rows_from = select(cols, rowset_from);
+    bark::db::for_each_blob(rows_from, col, wkb_unifier{});
     for (auto& pvd_to : make_write_providers()) {
         auto [name, sql] =
             pvd_to->script({random_name(), tbl_from.columns, tbl_from.indexes});
@@ -142,15 +143,18 @@ TEST_CASE("db_geometry")
         REQUIRE(tbl_from == tbl_to);
 
         auto cmd = pvd_to->make_command();
-        cmd->set_autocommit(false)
-            .exec(insert_sql(*pvd_to, tbl_to.name, cols, range(rows_from)))
-            .commit();
+        cmd->set_autocommit(false);
+        cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, rows_from));
+        cmd->commit();
         pvd_to->refresh();
-        auto rows_to = select(*pvd_to, tbl_to.name, cols, 0, Limit);
-        unify(rows_to, col);
+        auto rowset_from =
+            fetch_all(*pvd_to, select_sql(*pvd_to, tbl_to.name, 0, Limit));
+        auto rows_to = select(cols, rowset_from);
+        bark::db::for_each_blob(rows_to, col, wkb_unifier{});
         REQUIRE(rows_from == rows_to);
 
-        cmd->exec(drop_sql(*pvd_to, tbl_to.name)).commit();
+        cmd->exec(drop_sql(*pvd_to, tbl_to.name));
+        cmd->commit();
         pvd_to->refresh();
         REQUIRE_THROWS(pvd_to->table(tbl_to.name));
     }

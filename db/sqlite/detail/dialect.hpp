@@ -29,10 +29,10 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    column_type type(std::string_view type_lcase, int scale) override
+    column_type type(std::string_view type, int scale) override
     {
-        return is_ogc_type(type_lcase) ? column_type::Geometry
-                                       : iso_type(type_lcase, scale);
+        return is_ogc_type(type) ? column_type::Geometry
+                                 : iso_type(type, scale);
     }
 
     void projection_sql(sql_builder& bld,
@@ -47,11 +47,11 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    column_decoder geometry_decoder() override { return ogc_decoder(); }
+    column_decoder geometry_decoder() override { return st_as_binary(); }
 
     column_encoder geometry_encoder(std::string_view, int srid) override
     {
-        return ogc_encoder(srid);
+        return st_geom_from_wkb(srid);
     }
 
     void extent_sql(sql_builder& bld,
@@ -65,18 +65,20 @@ public:
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
                        std::string_view col_nm,
-                       const geometry::box& extent) override
+                       const geometry::box& ext) override
     {
         using namespace geometry;
         auto cols = {col_nm};
         if (indexed(tbl.indexes, cols))
             bld << "rowid IN (SELECT pkid FROM " << index_name(tbl.name, cols)
-                << " WHERE xmax >= " << param{left(extent)}
-                << " AND xmin <= " << param{right(extent)}
-                << " AND ymax >= " << param{bottom(extent)}
-                << " AND ymin <= " << param{top(extent)} << ")";
+                << " WHERE xmax >= " << param{left(ext)}
+                << " AND xmin <= " << param{right(ext)}
+                << " AND ymax >= " << param{bottom(ext)}
+                << " AND ymin <= " << param{top(ext)} << ")";
         else
-            ogc_window_clause(bld, col_nm, extent);
+            bld << "ST_EnvIntersects(" << id(col_nm) << ", " << param{left(ext)}
+                << ", " << param{bottom(ext)} << ", " << param{right(ext)}
+                << ", " << param{top(ext)} << ")";
     }
 
     void current_schema_sql(sql_builder& bld) override { bld << "SELECT NULL"; }

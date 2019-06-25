@@ -33,16 +33,16 @@ private:
         auto bld = builder(as_mixin());
         bld << "PRAGMA TABLE_INFO(" << tbl.name << ")";
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             column_def col;
             col.name = boost::lexical_cast<std::string>(row[1]);
-            auto type_lcase =
+            auto type =
                 unicode::to_lower(boost::lexical_cast<std::string>(row[2]));
-            col.type = dial.type(type_lcase, -1);
+            col.type = dial.type(type, -1);
             if (col.type == column_type::Geometry)
-                as_mixin().prepare_geometry_column(tbl.name, col, type_lcase);
+                as_mixin().prepare_geometry_column(tbl.name, col, type);
             if (col.type == column_type::Invalid)
-                std::cerr << "unknown type: " << type_lcase << "("
+                std::cerr << "unknown type: " << type << "("
                           << id(tbl.name, col.name) << ")" << std::endl;
             else
                 tbl.columns.push_back(col);
@@ -58,7 +58,7 @@ private:
         auto bld = builder(as_mixin());
         bld << "PRAGMA TABLE_INFO(" << tbl.name << ")";
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             if (is_null(row[5]))
                 continue;
             auto key = boost::lexical_cast<int>(row[5]);  // one-based
@@ -78,7 +78,7 @@ private:
         bld << "PRAGMA INDEX_INFO(" << idx_nm << ")";
         res.type = index_type::Secondary;
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows))
+        for (auto& row : select(rows))
             resize_and_assign(res.columns,
                               boost::lexical_cast<int>(row[0]),
                               boost::lexical_cast<std::string>(row[2]));
@@ -90,7 +90,7 @@ private:
         auto bld = builder(as_mixin());
         bld << "PRAGMA INDEX_LIST(" << tbl.name << ")";
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             auto idx = load_index(id(boost::lexical_cast<std::string>(row[1])));
             if (!idx.columns.empty() && !indexed(tbl.indexes, idx.columns))
                 tbl.indexes.push_back(std::move(idx));
@@ -104,7 +104,7 @@ private:
                "spatial_index_enabled AND LOWER(f_table_name) = LOWER("
             << param{tbl.name.back()} << ")";
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             auto idx = index_def{};
             idx.type = index_type::Secondary;
             idx.columns.push_back(boost::lexical_cast<std::string>(row[0]));

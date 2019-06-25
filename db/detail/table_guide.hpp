@@ -3,16 +3,15 @@
 #ifndef BARK_DB_TABLE_GUIDE_HPP
 #define BARK_DB_TABLE_GUIDE_HPP
 
-#include <bark/detail/unicode.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <stdexcept>
 
 namespace bark::db {
 
-inline bool test(const variant_t& v)
+inline bool test(const variant_t& var)
 {
-    return !is_null(v) && boost::lexical_cast<int64_t>(v);
+    return !is_null(var) && boost::lexical_cast<int64_t>(var);
 }
 
 template <class T>
@@ -32,15 +31,15 @@ protected:
 private:
     column_def make_column(const qualified_name& tbl_nm,
                            std::string_view name,
-                           std::string_view type_lcase,
+                           std::string_view type,
                            int scale)
     {
         column_def res;
         auto& dial = as_mixin().as_dialect();
         res.name = name;
-        res.type = dial.type(type_lcase, scale);
+        res.type = dial.type(type, scale);
         if (column_type::Geometry == res.type)
-            as_mixin().prepare_geometry_column(tbl_nm, res, type_lcase);
+            as_mixin().prepare_geometry_column(tbl_nm, res, type);
         else if (column_type::Text == res.type)
             res.decoder = [type = dial.type_name(res.type)](
                               sql_builder& bld, std::string_view col_nm) {
@@ -56,15 +55,14 @@ private:
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().columns_sql(bld, tbl.name);
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             auto name = boost::lexical_cast<std::string>(row[Name]);
-            auto type_lcase =
-                unicode::to_lower(boost::lexical_cast<std::string>(row[Type]));
+            auto type = boost::lexical_cast<std::string>(row[Type]);
             auto scale =
                 is_null(row[Scale]) ? -1 : boost::lexical_cast<int>(row[Scale]);
-            auto col = make_column(tbl.name, name, type_lcase, scale);
+            auto col = make_column(tbl.name, name, type, scale);
             if (col.type == column_type::Invalid)
-                std::cerr << "unknown type: " << type_lcase << "("
+                std::cerr << "unknown type: " << type << "("
                           << id(tbl.name, col.name) << ")" << std::endl;
             else
                 tbl.columns.push_back(col);
@@ -82,7 +80,7 @@ private:
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().indexes_sql(bld, tbl.name);
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows)) {
+        for (auto& row : select(rows)) {
             auto name = id(boost::lexical_cast<std::string>(row[Schema]),
                            boost::lexical_cast<std::string>(row[Name]));
             if (name != idx_nm) {

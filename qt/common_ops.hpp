@@ -3,7 +3,7 @@
 #ifndef BARK_QT_COMMON_OPS_HPP
 #define BARK_QT_COMMON_OPS_HPP
 
-#include <bark/db/provider_ops.hpp>
+#include <bark/db/provider.hpp>
 #include <bark/qt/common.hpp>
 #include <bark/qt/detail/adapt.hpp>
 #include <bark/qt/detail/frame_proj.hpp>

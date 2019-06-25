@@ -39,12 +39,15 @@ public:
 
     sql_syntax syntax() override
     {
-        db::sql_syntax res{};
-        res.identifier_quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR);
+        sql_syntax res{};
+        auto quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR);
+        res.delimited_identifier = [=](const auto& id) {
+            return quote + id + quote;
+        };
         return res;
     }
 
-    command& exec(const sql_builder& bld) override
+    void exec(const sql_builder& bld) override
     {
         prepare(bld.sql());
         auto bnds = bind_params(bld.params());
@@ -52,7 +55,6 @@ public:
         if (SQL_NO_DATA != r)
             check(stmt_, r);
         more_results();
-        return *this;
     }
 
     std::vector<std::string> columns() override
@@ -83,25 +85,23 @@ public:
         return true;
     }
 
-    command& set_autocommit(bool autocommit) override
+    void set_autocommit(bool autocommit) override
     {
         reset_stmt(nullptr);
         if (get_autocommit() == autocommit)
-            return *this;
+            return;
         if (autocommit)
             check(dbc_, SQLEndTran(SQL_HANDLE_DBC, dbc_.get(), SQL_ROLLBACK));
         set_attr(dbc_,
                  SQL_ATTR_AUTOCOMMIT,
                  autocommit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF);
-        return *this;
     }
 
-    command& commit() override
+    void commit() override
     {
         reset_stmt(nullptr);
         if (!get_autocommit())
             check(dbc_, SQLEndTran(SQL_HANDLE_DBC, dbc_.get(), SQL_COMMIT));
-        return *this;
     }
 
     std::string dbms_name() const { return get_info(dbc_, SQL_DBMS_NAME); }

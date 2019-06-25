@@ -45,12 +45,14 @@ public:
 
     sql_syntax syntax() override
     {
-        db::sql_syntax res{};
-        res.identifier_quote = "`";
+        sql_syntax res{};
+        res.delimited_identifier = [](const auto& id) {
+            return '`' + id + '`';
+        };
         return res;
     }
 
-    command& exec(const sql_builder& bld) override
+    void exec(const sql_builder& bld) override
     {
         auto sql = bld.sql();
         auto params = bld.params();
@@ -72,7 +74,6 @@ public:
                 check(stmt_, mysql_stmt_bind_param(stmt_.get(), binds.data()));
             check(stmt_, mysql_stmt_execute(stmt_.get()));
         }
-        return *this;
     }
 
     std::vector<std::string> columns() override
@@ -116,17 +117,12 @@ public:
         return true;
     }
 
-    command& set_autocommit(bool autocommit) override
+    void set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
-        return *this;
     }
 
-    command& commit() override
-    {
-        transaction::commit();
-        return *this;
-    }
+    void commit() override { transaction::commit(); }
 
 private:
     connection_holder con_;

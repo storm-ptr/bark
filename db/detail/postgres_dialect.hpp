@@ -4,7 +4,6 @@
 #define BARK_DB_POSTGRES_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/sql_builder_ops.hpp>
 #include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
@@ -28,7 +27,7 @@ public:
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
         auto& scm = tbl_nm.at(-2);
-        bld << "SELECT column_name, (CASE data_type WHEN "
+        bld << "SELECT column_name, LOWER(CASE data_type WHEN "
             << param{"USER-DEFINED"}
             << " THEN udt_name ELSE data_type END), numeric_scale FROM "
                "information_schema.columns WHERE table_schema = "
@@ -36,26 +35,26 @@ public:
             << " ORDER BY ordinal_position";
     }
 
-    column_type type(std::string_view type_lcase, int scale) override
+    column_type type(std::string_view type, int scale) override
     {
-        if (within(type_lcase)("array"))
+        if (within(type)("array"))
             return column_type::Invalid;
-        if (any_of({"geography", "geometry"}, equals(type_lcase)))
+        if (any_of({"geography", "geometry"}, equals(type)))
             return column_type::Geometry;
-        if (within(type_lcase)("serial"))
+        if (within(type)("serial"))
             return column_type::Integer;
-        if (any_of({"json", "jsonb", "xml", "hstore"}, equals(type_lcase)))
+        if (any_of({"json", "jsonb", "xml", "hstore"}, equals(type)))
             return column_type::Text;
-        if (type_lcase == "bytea")
+        if (type == "bytea")
             return column_type::Blob;
-        return iso_type(type_lcase, scale);
+        return iso_type(type, scale);
     }
 
     void projection_sql(sql_builder& bld,
                         const qualified_name& col_nm,
-                        std::string_view type_lcase) override
+                        std::string_view type) override
     {
-        if (type_lcase == "geography")
+        if (type == "geography")
             bld << "SELECT 4326";
         else
             ogc_projection_sql(bld, col_nm);
@@ -85,24 +84,23 @@ FROM columns, pg_attribute
 WHERE attrelid = tbl AND attnum = cols[col])";
     }
 
-    column_decoder geometry_decoder() override { return ogc_decoder(); }
+    column_decoder geometry_decoder() override { return st_as_binary(); }
 
-    column_encoder geometry_encoder(std::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(std::string_view type, int srid) override
     {
-        if (type_lcase == "geography")
+        if (type == "geography")
             return [](sql_builder& bld, variant_t v) {
                 bld << "ST_GeogFromWKB(" << param{v} << ")";
             };
         else
-            return ogc_encoder(srid);
+            return st_geom_from_wkb(srid);
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    std::string_view type_lcase) override
+                    std::string_view type) override
     {
-        if (type_lcase == "geography")
+        if (type == "geography")
             ogc_extent_sql(bld, col_nm);
         else
             bld << "SELECT COUNT(1), ST_AsBinary(ST_Extent("
@@ -112,11 +110,11 @@ WHERE attrelid = tbl AND attnum = cols[col])";
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
                        std::string_view col_nm,
-                       const geometry::box& extent) override
+                       const geometry::box& ext) override
     {
-        auto blob = geometry::as_binary(extent);
+        auto blob = geometry::as_binary(ext);
         bld << id(col_nm) << " && "
-            << encoder{*db::find(tbl.columns, col_nm), blob};
+            << encode(*db::find(tbl.columns, col_nm), blob);
     }
 
     void current_schema_sql(sql_builder& bld) override

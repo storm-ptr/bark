@@ -16,13 +16,37 @@ struct rowset {
     blob data;
 };
 
-/// @return tuples of @ref variant_t
-inline auto range(const rowset& that)
+/// Returns tuples of @ref variant_t
+inline auto select(const rowset& from)
 {
     auto res = std::vector<std::vector<variant_t>>{};
-    for (auto is = variant_istream{that.data}; !is.data.empty();)
-        for (auto& v : res.emplace_back(that.columns.size()))
-            is >> v;
+    for (auto is = variant_istream{from.data}; !is.data.empty();)
+        for (auto& var : res.emplace_back(from.columns.size()))
+            is >> var;
+    return res;
+}
+
+/// Returns tuples of @ref variant_t
+template <class Columns>
+auto select(const Columns& columns, const rowset& from)
+{
+    auto cols = as<std::vector<std::string>>(
+        columns, unicode::to_lower<range_value_t<Columns>>);
+
+    auto positions = as<std::vector<size_t>>(from.columns, [&](auto& lhs) {
+        auto it = std::find(cols.begin(), cols.end(), unicode::to_lower(lhs));
+        return std::distance(cols.begin(), it);
+    });
+
+    auto res = std::vector<std::vector<variant_t>>{};
+    for (auto is = variant_istream{from.data}; !is.data.empty();) {
+        auto& row = res.emplace_back(cols.size());
+        for (auto pos : positions)
+            if (pos < row.size())
+                is >> row[pos];
+            else
+                read(is);
+    }
     return res;
 }
 
@@ -71,7 +95,7 @@ inline std::ostream& operator<<(std::ostream& dest, const rowset& src)
 {
     using row_t = std::vector<variant_t>;
     auto columns = as<row_t>(src.columns);
-    auto rows = range(src);
+    auto rows = select(src);
     auto sizes = std::vector<size_t>(columns.size());
     detail::line{sizes, columns}.fit(dest);
     for (auto& row : rows)

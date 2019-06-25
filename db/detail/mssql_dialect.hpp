@@ -4,7 +4,6 @@
 #define BARK_DB_MSSQL_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/sql_builder_ops.hpp>
 #include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
@@ -33,15 +32,15 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(std::string_view type_lcase, int scale) override
+    column_type type(std::string_view type, int scale) override
     {
-        if (any_of({"geometry", "geography"}, equals(type_lcase)))
+        if (any_of({"geometry", "geography"}, equals(type)))
             return column_type::Geometry;
-        if (type_lcase == "bit")
+        if (type == "bit")
             return column_type::Integer;
-        if (type_lcase == "image")
+        if (type == "image")
             return column_type::Blob;
-        return iso_type(type_lcase, scale);
+        return iso_type(type, scale);
     }
 
     void projection_sql(sql_builder& bld,
@@ -76,21 +75,19 @@ public:
         };
     }
 
-    column_encoder geometry_encoder(std::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(std::string_view type, int srid) override
     {
-        return [type = std::string{type_lcase}, srid](sql_builder& bld,
-                                                      variant_t val) {
-            bld << type << "::STGeomFromWKB(" << param{val} << ", " << srid
+        return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
+            bld << type << "::STGeomFromWKB(" << param{v} << ", " << srid
                 << ")";
         };
     }
 
     void extent_sql(sql_builder& bld,
                     const qualified_name& col_nm,
-                    std::string_view type_lcase) override
+                    std::string_view type) override
     {
-        bld << "SELECT COUNT(1), " << type_lcase << "::EnvelopeAggregate("
+        bld << "SELECT COUNT(1), " << type << "::EnvelopeAggregate("
             << id(col_nm.back()) << ").STAsBinary() FROM " << qualifier(col_nm);
     }
 
@@ -101,7 +98,7 @@ public:
     {
         auto blob = geometry::as_binary(extent);
         bld << id(col_nm) << ".Filter("
-            << encoder{*db::find(tbl.columns, col_nm), blob} << ") = 1";
+            << encode(*db::find(tbl.columns, col_nm), blob) << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override

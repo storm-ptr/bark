@@ -3,6 +3,7 @@
 #ifndef BARK_DB_PROJECTION_GUIDE_HPP
 #define BARK_DB_PROJECTION_GUIDE_HPP
 
+#include <bark/db/detail/provider_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/proj/bimap.hpp>
 #include <bark/proj/epsg.hpp>
@@ -23,16 +24,15 @@ protected:
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().projections_sql(bld);
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows))
+        for (auto& row : select(rows))
             copy(row, res);
         return res.empty() ? proj::epsg() : res;
     }
 
-    int load_projection(const qualified_name& col_nm,
-                        std::string_view type_lcase)
+    int load_projection(const qualified_name& col_nm, std::string_view type)
     {
         auto bld = builder(as_mixin());
-        as_mixin().as_dialect().projection_sql(bld, col_nm, type_lcase);
+        as_mixin().as_dialect().projection_sql(bld, col_nm, type);
         return fetch_or_default<int>(as_mixin(), bld);
     }
 

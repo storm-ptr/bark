@@ -26,7 +26,7 @@ struct dialect {
     /// SRID
     virtual void projection_sql(sql_builder& bld,
                                 const qualified_name& col_nm,
-                                std::string_view type_lcase) = 0;
+                                std::string_view type) = 0;
 
     /// INDEX_SCHEMA, INDEX_NAME, IS_PRIMARY, COLUMN_NAME, IS_DESCENDING
     virtual void indexes_sql(sql_builder& bld,
@@ -35,7 +35,7 @@ struct dialect {
     /// COUNT, ((XMIN, YMIN, XMAX, YMAX) | EXTENT)
     virtual void extent_sql(sql_builder& bld,
                             const qualified_name& col_nm,
-                            std::string_view type_lcase) = 0;
+                            std::string_view type) = 0;
 
     /// SCHEMA_NAME
     virtual void current_schema_sql(sql_builder& bld) = 0;
@@ -56,13 +56,13 @@ struct dialect {
 
     virtual void page_clause(sql_builder& bld, size_t offset, size_t limit) = 0;
 
-    virtual column_type type(std::string_view type_lcase, int scale) = 0;
+    virtual column_type type(std::string_view type, int scale) = 0;
 
     virtual std::string type_name(column_type) = 0;
 
     virtual column_decoder geometry_decoder() = 0;
 
-    virtual column_encoder geometry_encoder(std::string_view type_lcase,
+    virtual column_encoder geometry_encoder(std::string_view type,
                                             int srid) = 0;
 };
 

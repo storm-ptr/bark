@@ -45,7 +45,7 @@ public:
     template <class ColumnNames, class Rows>
     void operator()(const ColumnNames& cols, const Rows& rows)
     {
-        exec(*cmd_, insert_sql(*lr_.provider, qualifier(lr_.name), cols, rows));
+        cmd_->exec(insert_sql(*lr_.provider, qualifier(lr_.name), cols, rows));
         affected_ += std::size(rows);
     }
 
@@ -122,19 +122,19 @@ void insertion_task::insert(const bark::qt::layer& from,
     auto tf = bark::proj::transformer{projection(from), projection(to)};
     auto insert = inserter{*this, to};
     while (true) {
-        auto rows = select(*from.provider,
-                           qualifier(from.name),
-                           cols | boost::adaptors::map_keys,
-                           insert.affected(),
-                           MaxRowNumber);
-        auto rng = range(rows);
-        for_each_slice(rng, limit, [&](auto&& slice) {
+        auto rowset = fetch_all(*from.provider,
+                                select_sql(*from.provider,
+                                           qualifier(from.name),
+                                           insert.affected(),
+                                           MaxRowNumber));
+        auto rows = select(cols | boost::adaptors::map_keys, rowset);
+        for_each_slice(rows, limit, [&](auto&& slice) {
             if (!tf.is_trivial())
                 bark::db::for_each_blob(slice, geom_pos, tf.inplace_forward());
             insert(cols | boost::adaptors::map_values, slice);
             insert.commit(/*force*/ false);
         });
-        if (rng.size() < MaxRowNumber)
+        if (rows.size() < MaxRowNumber)
             break;
     }
     insert.commit(/*force*/ true);

@@ -16,13 +16,14 @@
 namespace bark::db {
 
 enum class column_type { Invalid, Blob, Geometry, Integer, Real, Text };
+
 enum class index_type { Invalid, Primary, Secondary };
 
 /// Converts the well-known binary representation of the geometry
 using column_decoder = std::function<void(sql_builder&, std::string_view name)>;
 
 /// Creates a geometry instance from a well-known binary representation
-using column_encoder = std::function<void(sql_builder&, variant_t val)>;
+using column_encoder = std::function<void(sql_builder&, variant_t var)>;
 
 /// Spatial index to store values of @ref geometry::box
 using rtree =
@@ -36,13 +37,13 @@ struct column_def {
     std::string projection;  ///< PROJ.4 string for the spatial reference system
     rtree tiles;             ///< balanced data grid
 
-    column_decoder decoder = [](sql_builder& bld, std::string_view name) {
-        bld << id(name);
-    };
+    column_decoder decoder
 
-    column_encoder encoder = [](sql_builder& bld, variant_t val) {
-        bld << param{val};
-    };
+        = [](sql_builder& bld, std::string_view name) { bld << id(name); };
+
+    column_encoder encoder
+
+        = [](sql_builder& bld, variant_t var) { bld << param{var}; };
 };
 
 /// Describes index

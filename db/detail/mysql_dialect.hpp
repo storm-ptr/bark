@@ -4,7 +4,6 @@
 #define BARK_DB_MYSQL_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/sql_builder_ops.hpp>
 #include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
@@ -36,15 +35,15 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(std::string_view type_lcase, int scale) override
+    column_type type(std::string_view type, int scale) override
     {
-        if (is_ogc_type(type_lcase))
+        if (is_ogc_type(type))
             return column_type::Geometry;
-        if (any_of({"enum", "json"}, equals(type_lcase)))
+        if (any_of({"enum", "json"}, equals(type)))
             return column_type::Text;
-        if (type_lcase == "fixed")
+        if (type == "fixed")
             return scale ? column_type::Real : column_type::Integer;
-        return iso_type(type_lcase, scale);
+        return iso_type(type, scale);
     }
 
     void projection_sql(sql_builder& bld,
@@ -71,11 +70,11 @@ public:
             << " ORDER BY index_name, seq_in_index";
     }
 
-    column_decoder geometry_decoder() override { return ogc_decoder(); }
+    column_decoder geometry_decoder() override { return st_as_binary(); }
 
     column_encoder geometry_encoder(std::string_view, int srid) override
     {
-        return ogc_encoder(srid);
+        return st_geom_from_wkb(srid);
     }
 
     void extent_sql(sql_builder& bld,
@@ -88,11 +87,11 @@ public:
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
                        std::string_view col_nm,
-                       const geometry::box& extent) override
+                       const geometry::box& ext) override
     {
-        auto blob = geometry::as_binary(extent);
+        auto blob = geometry::as_binary(ext);
         bld << "MBRIntersects(" << id(col_nm) << ", "
-            << encoder{*db::find(tbl.columns, col_nm), blob} << ") = 1";
+            << encode(*db::find(tbl.columns, col_nm), blob) << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override

@@ -26,7 +26,7 @@ inline const bimap& epsg()
             << " AND auth_srid IS NOT NULL AND proj4text IS NOT NULL";
         exec(cmd, bld);
         auto rows = fetch_all(cmd);
-        for (auto& row : range(rows))
+        for (auto& row : select(rows))
             res.insert(boost::lexical_cast<int>(row[Srid]),
                        boost::lexical_cast<std::string>(row[Proj4]));
 

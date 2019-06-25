@@ -119,10 +119,8 @@ constexpr size_t variant_index()
         return variant_index<V, T, I + 1>();
 }
 
-/**
- * expected<T> is either a T or the exception preventing its creation.
- * Synchronous std::future<T> analogue.
- */
+/// Synchronous std::future<T> analogue.
+/// expected<T> is either a T or the exception preventing its creation.
 template <class T>
 class expected {
 public:
@@ -153,12 +151,8 @@ private:
     std::variant<std::exception_ptr, T> state_;
 };
 
-/**
- * It joins 'items' by adding user defined separator.
- * @code
- * std::cout << list{{"Hello", "World!"}, ", "};
- * @endcode
- */
+/// Joins 'items' by adding user defined separator.
+/// @code std::cout << list{{"Hello", "World!"}, ", "}; @endcode
 template <class Rng, class Separator, class Operation = identity>
 struct list {
     const Rng& rng;
@@ -216,6 +210,21 @@ struct same {
 
 template <class T>
 same(T)->same<T>;
+
+template <class Functor>
+struct streamable : Functor {
+    explicit streamable(Functor&& f) : Functor{std::move(f)} {}
+
+    template <class OStream>
+    friend OStream& operator<<(OStream& os, const streamable& that)
+    {
+        that(os);
+        return os;
+    }
+};
+
+template <class T>
+streamable(T)->streamable<T>;
 
 }  // namespace bark
 

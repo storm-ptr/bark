@@ -36,20 +36,17 @@ public:
         : provider_impl<provider>{
               [=] { return new command(conn_str); },
               [&]() -> dialect_holder {
-                  auto dbms_lcase =
-                      unicode::to_lower(command(conn_str).dbms_name());
-                  if (within(dbms_lcase)("db2"))
+                  auto dbms = unicode::to_lower(command(conn_str).dbms_name());
+                  if (within(dbms)("db2"))
                       return std::make_unique<db2_dialect>();
-                  else if (all_of({"microsoft", "sql", "server"},
-                                  within(dbms_lcase)))
+                  else if (all_of({"microsoft", "sql", "server"}, within(dbms)))
                       return std::make_unique<mssql_dialect>();
-                  else if (within(dbms_lcase)("mysql"))
+                  else if (within(dbms)("mysql"))
                       return std::make_unique<mysql_dialect>();
-                  else if (within(dbms_lcase)("postgres"))
+                  else if (within(dbms)("postgres"))
                       return std::make_unique<postgres_dialect>();
                   else
-                      throw std::runtime_error("unsupported DBMS: " +
-                                               dbms_lcase);
+                      throw std::runtime_error("unsupported DBMS: " + dbms);
               }()}
     {
     }

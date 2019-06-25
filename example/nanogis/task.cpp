@@ -168,20 +168,20 @@ void attributes_task::run_event()
     std::optional<db::rowset> res;
     for (const auto& tl : tile_coverage(lr_, ext, px)) {
         auto objects = spatial_objects(lr_, tl, px);
-        auto rng = range(objects);
+        auto rows = select(objects);
         if (res) {
             if (res->columns != objects.columns)
                 throw std::runtime_error("columns mismatch");
-            for (auto&& row : range(*res))
-                rng.push_back(std::move(row));
+            for (auto&& row : select(*res))
+                rows.push_back(std::move(row));
         }
-        std::sort(rng.begin(), rng.end());
+        std::sort(rows.begin(), rows.end());
 
         size_t counter = 0;
         db::variant_ostream os;
-        for (const auto& row : rng | uniqued | filtered(intersects)) {
-            for (const auto& cell : row)
-                os << cell;
+        for (const auto& row : rows | uniqued | filtered(intersects)) {
+            for (const auto& var : row)
+                os << var;
             if (++counter >= Limit)
                 break;
         }

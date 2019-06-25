@@ -14,20 +14,23 @@
 
 namespace bark::db {
 
-/// SQL dialect settings.
+/// SQL dialect settings
 struct sql_syntax {
-    /// The character string that is used as the starting and ending delimiter
-    /// of a quoted (delimited) identifier in SQL statements.
-    std::string identifier_quote = "\"";
+    /// An SQL identifier that does not comply with the rules
+    /// for the format of regular identifiers must always be delimited.
+    std::function<std::string(const std::string& id)>
+
+        delimited_identifier = [](const auto& id) { return '"' + id + '"'; };
 
     /// A parameter marker is a place holder in an SQL statement whose value is
     /// obtained during statement execution. Empty marker means embedding the
     /// parameters in the SQL text (with quotations if needed).
-    std::function<std::string(size_t param_order)> parameter_marker =
-        [](size_t) { return "?"; };
+    std::function<std::string(size_t order)>
+
+        parameter_marker = [](auto) { return "?"; };
 };
 
-/// SQL manipulator.
+/// SQL manipulator
 template <class T>
 struct param {
     const T& val;
@@ -70,9 +73,7 @@ public:
 
     sql_builder& operator<<(const qualified_name& name)
     {
-        sql_ << list{name, ".", [&](std::string_view id) {
-                         return delimited{id, syntax_.identifier_quote};
-                     }};
+        sql_ << list{name, ".", syntax_.delimited_identifier};
         return *this;
     }
 
@@ -105,16 +106,6 @@ private:
     std::ostringstream sql_;
     variant_ostream params_;
     size_t param_counter_ = 0;
-
-    struct delimited {
-        std::string_view id;
-        std::string_view quote;
-
-        friend std::ostream& operator<<(std::ostream& os, const delimited& that)
-        {
-            return os << that.quote << that.id << that.quote;
-        }
-    };
 
     void embed_param(const variant_t& var)
     {

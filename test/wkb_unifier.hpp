@@ -57,9 +57,4 @@ private:
     }
 };
 
-inline void unify(bark::db::rowset& rows, size_t col)
-{
-    bark::db::for_each_blob(range(rows), col, wkb_unifier{});
-}
-
 #endif  // BARK_TEST_WKB_UNIFIER_HPP

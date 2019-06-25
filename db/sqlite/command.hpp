@@ -28,7 +28,7 @@ public:
 
     sql_syntax syntax() override { return {}; }
 
-    command& exec(const sql_builder& bld) override
+    void exec(const sql_builder& bld) override
     {
         auto sql = bld.sql();
         auto params = bld.params();
@@ -50,7 +50,6 @@ public:
                 check(con_, bind_param(params[i], stmt_.get(), i));
             step();
         }
-        return *this;
     }
 
     std::vector<std::string> columns() override
@@ -92,17 +91,12 @@ public:
         return true;
     }
 
-    command& set_autocommit(bool autocommit) override
+    void set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
-        return *this;
     }
 
-    command& commit() override
-    {
-        transaction::commit();
-        return *this;
-    }
+    void commit() override { transaction::commit(); }
 
 private:
     connection_holder con_;

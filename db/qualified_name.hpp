@@ -48,7 +48,7 @@ inline qualified_name qualifier(qualified_name name)
 }
 
 template <class... Ts>
-auto id(std::string_view parent, Ts&&... children)
+qualified_name id(std::string_view parent, Ts&&... children)
 {
     qualified_name res;
     if (!parent.empty())
@@ -57,7 +57,7 @@ auto id(std::string_view parent, Ts&&... children)
     return res;
 }
 
-inline auto id(qualified_name parent, std::string_view child)
+inline qualified_name id(qualified_name parent, std::string_view child)
 {
     parent.emplace_back(child);
     return parent;

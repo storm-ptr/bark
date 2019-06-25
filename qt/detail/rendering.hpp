@@ -54,13 +54,13 @@ inline QVector<canvas> geometry_rendering(const layer& lr,
         return {};
 
     auto px = tf.backward(pixel(frm));
-    auto rows = spatial_objects(lr, tl, px);
-    auto rng = range(rows);
+    auto objects = spatial_objects(lr, tl, px);
+    auto rows = select(objects);
     if (!tf.is_trivial())
-        db::for_each_blob(rng, 0, tf.inplace_forward());
+        db::for_each_blob(rows, 0, tf.inplace_forward());
 
     auto map = make<canvas>(wnd);
-    db::for_each_blob(rng, 0, painter{map, lr});
+    db::for_each_blob(rows, 0, painter{map, lr});
     return {map};
 }
 
@@ -74,8 +74,8 @@ inline QVector<canvas> raster_rendering(const layer& lr,
     auto pj = projection(lr);
     auto tf = proj::transformer{pj, frm.projection};
     auto px = tf.backward(pixel(frm));
-    auto rows = spatial_objects(lr, tl, px);
-    for (auto& row : range(rows)) {
+    auto objects = spatial_objects(lr, tl, px);
+    for (auto& row : select(objects)) {
         auto wkb = std::get<blob_view>(row[0]);
         auto bbox = envelope(poly_from_wkb(wkb));
         auto wnd = frm | intersect(tf.forward(bbox));
@@ -98,7 +98,7 @@ inline QVector<canvas> raster_rendering(const layer& lr,
 inline QVector<canvas> rendering(const layer& lr,
                                  const geometry::box& tl,
                                  const frame& frm) try {
-    switch (type(*lr.provider, lr.name)) {
+    switch (lr.provider->dir().at(lr.name)) {
         case db::layer_type::Invalid:
             break;
         case db::layer_type::Geometry:

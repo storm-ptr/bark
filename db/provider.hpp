@@ -4,11 +4,12 @@
 #define BARK_DB_PROVIDER_HPP
 
 #include <bark/db/command.hpp>
+#include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/fwd.hpp>
-#include <bark/db/sql_builder.hpp>
-#include <bark/db/table_def.hpp>
 #include <bark/detail/lru_cache.hpp>
 #include <bark/geometry/geometry.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/combine.hpp>
 #include <map>
 
 namespace bark::db {
@@ -36,7 +37,7 @@ struct provider {
 
     /// Returns a balanced data grid.
 
-    /// @param layer is a spatial data set;
+    /// @param layer is a data set;
     /// @param extent is a spatial filter;
     /// @param pixel selects the level of the raster pyramid.
     virtual geometry::multi_box tile_coverage(const qualified_name& layer,
@@ -46,7 +47,7 @@ struct provider {
     /// Returns @ref rowset with spatial data set.
 
     /// Columns @code GEOMETRY[,IMAGE][,ATTRIBUTES...] @endcode
-    /// @param layer is a spatial data set;
+    /// @param layer is a data set;
     /// @param extent is a spatial filter;
     /// @param pixel selects the level of the raster pyramid.
     virtual rowset spatial_objects(const qualified_name& layer,
@@ -68,6 +69,90 @@ struct provider {
     /// Resets LRU cache
     virtual void refresh() = 0;
 };
+
+inline bool queryable(provider& pvd) try {
+    pvd.make_command();
+    return true;
+}
+catch (const std::exception&) {
+    return false;
+}
+
+inline sql_builder builder(provider& pvd)
+{
+    return builder(*pvd.make_command());
+}
+
+template <class Sql>
+void exec(provider& pvd, const Sql& sql)
+{
+    exec(*pvd.make_command(), sql);
+}
+
+template <class Sql>
+rowset fetch_all(provider& pvd, const Sql& sql)
+{
+    auto cmd = pvd.make_command();
+    exec(*cmd, sql);
+    return fetch_all(*cmd);
+}
+
+inline sql_builder select_sql(provider& pvd,
+                              const qualified_name& tbl_nm,
+                              size_t offset,
+                              size_t limit)
+{
+    auto res = builder(pvd);
+    auto tbl = pvd.table(tbl_nm);
+    auto pri = boost::range::find_if(tbl.indexes, same{index_type::Primary});
+    res << "SELECT " << list{tbl.columns, ", ", decode} << " FROM " << tbl_nm
+        << " ORDER BY "
+        << list{pri != tbl.indexes.end()
+                    ? pri->columns
+                    : names(tbl.columns | boost::adaptors::filtered(sortable)),
+                ", ",
+                id<>}
+        << " ";
+    pvd.page_clause(res, offset, limit);
+    return res;
+}
+
+template <class ColumnNames, class Rows>
+sql_builder insert_sql(provider& pvd,
+                       const qualified_name& tbl_nm,
+                       const ColumnNames& col_nms,
+                       const Rows& rows)
+{
+    auto tbl = pvd.table(tbl_nm);
+    auto cols = as<std::vector<column_def>>(col_nms, [&](const auto& col_nm) {
+        return *db::find(tbl.columns, col_nm);
+    });
+    auto encode = [&](const auto& row) {
+        return streamable([&](sql_builder& bld) {
+            bld << "("
+                << list{boost::combine(cols, row),
+                        ",",
+                        [](const auto& pair) {
+                            return db::encode(boost::get<0>(pair),
+                                              boost::get<1>(pair));
+                        }}
+                << ")";
+        });
+    };
+
+    auto res = builder(pvd);
+    res << "INSERT INTO " << tbl_nm << " (" << list{col_nms, ", ", id<>}
+        << ") VALUES\n"
+        << list{rows, ",\n", encode};
+    return res;
+};
+
+inline sql_builder drop_sql(provider& pvd, const qualified_name& tbl_nm)
+{
+    auto res = builder(pvd);
+    res << "DROP TABLE " << tbl_nm;
+    return res;
+}
 
 }  // namespace bark::db
 

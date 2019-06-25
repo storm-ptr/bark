@@ -5,8 +5,8 @@
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/pool.hpp>
+#include <bark/db/detail/provider_ops.hpp>
 #include <bark/db/detail/utility.hpp>
-#include <bark/db/provider.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <boost/lexical_cast.hpp>
 #include <exception>
@@ -88,7 +88,7 @@ protected:
         auto bld = builder(as_mixin());
         as_dialect().geometries_sql(bld);
         auto rows = fetch_all(as_mixin(), bld);
-        for (auto& row : range(rows))
+        for (auto& row : select(rows))
             res.insert({id(boost::lexical_cast<std::string>(row[Schema]),
                            boost::lexical_cast<std::string>(row[Table]),
                            boost::lexical_cast<std::string>(row[Column])),
@@ -119,9 +119,8 @@ protected:
         auto it = db::find(tbl.columns, col_nm);
         std::rotate(tbl.columns.begin(), it, std::next(it));
         auto bld = builder(*this);
-        bld << "SELECT "
-            << list{tbl.columns, ", ", [](auto& col) { return decoder{col}; }}
-            << " FROM " << tbl.name << " WHERE ";
+        bld << "SELECT " << list{tbl.columns, ", ", decode} << " FROM "
+            << tbl.name << " WHERE ";
         as_dialect().window_clause(bld, tbl, col_nm, ext);
         return fetch_all(*this, bld);
     }
@@ -133,12 +132,12 @@ protected:
         return fetch_or_default<std::string>(as_mixin(), bld);
     }
 
-    rtree load_tiles(const qualified_name& col_nm, std::string_view type_lcase)
+    rtree load_tiles(const qualified_name& col_nm, std::string_view type)
     {
         auto bld = builder(as_mixin());
-        as_dialect().extent_sql(bld, col_nm, type_lcase);
+        as_dialect().extent_sql(bld, col_nm, type);
         auto rows = fetch_all(as_mixin(), bld);
-        auto row = range(rows).front();
+        auto row = select(rows).front();
         auto count = boost::lexical_cast<size_t>(row[0]);
         auto ext = geometry::box{};
         if (count) {
@@ -156,14 +155,14 @@ protected:
 
     void prepare_geometry_column(const qualified_name& tbl_nm,
                                  column_def& col,
-                                 std::string_view type_lcase)
+                                 std::string_view type)
     {
         auto col_nm = id(tbl_nm, col.name);
-        auto srid = as_mixin().load_projection(col_nm, type_lcase);
+        auto srid = as_mixin().load_projection(col_nm, type);
         col.projection = as_mixin().find_proj(srid);
         col.decoder = as_dialect().geometry_decoder();
-        col.encoder = as_dialect().geometry_encoder(type_lcase, srid);
-        col.tiles = as_mixin().load_tiles(col_nm, type_lcase);
+        col.encoder = as_dialect().geometry_encoder(type, srid);
+        col.tiles = as_mixin().load_tiles(col_nm, type);
     }
 
 private:

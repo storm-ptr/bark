@@ -3,7 +3,7 @@
 #ifndef BARK_DB_GDAL_COMMAND_HPP
 #define BARK_DB_GDAL_COMMAND_HPP
 
-#include <bark/db/detail/command_ops.hpp>
+#include <bark/db/command.hpp>
 #include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/gdal/detail/bind_column.hpp>
@@ -26,12 +26,11 @@ public:
 
     sql_syntax syntax() override { return embeded_params({}); }
 
-    command& exec(const sql_builder& bld) override
+    void exec(const sql_builder& bld) override
     {
         if (!bld.params().empty())
             throw std::logic_error{"not implemented"};
         reset_lr(ds_.layer_by_sql(bld.sql()));
-        return *this;
     }
 
     std::vector<std::string> columns() override
@@ -68,19 +67,14 @@ public:
         return true;
     }
 
-    command& set_autocommit(bool autocommit) override
+    void set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
-        return *this;
     }
 
-    command& commit() override
-    {
-        transaction::commit();
-        return *this;
-    }
+    void commit() override { transaction::commit(); }
 
-    command& open(const qualified_name& layer, const geometry::box& bbox)
+    void open(const qualified_name& layer, const geometry::box& bbox)
     {
         reset_lr(ds_.layer_by_name(qualifier(layer)));
         OGR_L_SetSpatialFilterRect(lr_,
@@ -88,7 +82,6 @@ public:
                                    geometry::bottom(bbox),
                                    geometry::right(bbox),
                                    geometry::top(bbox));
-        return *this;
     }
 
 private:

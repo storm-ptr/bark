@@ -19,7 +19,7 @@ struct command {
     virtual sql_syntax syntax() = 0;
 
     /// Executes the SQL in @ref sql_builder
-    virtual command& exec(const sql_builder&) = 0;
+    virtual void exec(const sql_builder&) = 0;
 
     /// Returns the field information for the current query
     virtual std::vector<std::string> columns() = 0;
@@ -28,10 +28,10 @@ struct command {
     virtual bool fetch(variant_ostream&) = 0;
 
     /// By default, each statement is automatically committed
-    virtual command& set_autocommit(bool) = 0;
+    virtual void set_autocommit(bool) = 0;
 
     /// Commits a transaction to the database
-    virtual command& commit() = 0;
+    virtual void commit() = 0;
 };
 
 inline sql_builder builder(command& cmd)
@@ -39,15 +39,15 @@ inline sql_builder builder(command& cmd)
     return sql_builder{cmd.syntax()};
 }
 
-inline command& exec(command& cmd, const sql_builder& bld)
+inline void exec(command& cmd, const sql_builder& bld)
 {
-    return cmd.exec(bld);
+    cmd.exec(bld);
 }
 
-template <class T>
-command& exec(command& cmd, const T& sql)
+template <class Sql>
+void exec(command& cmd, const Sql& sql)
 {
-    return cmd.exec(builder(cmd) << sql);
+    cmd.exec(builder(cmd) << sql);
 }
 
 inline rowset fetch_all(command& cmd)

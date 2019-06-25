@@ -39,13 +39,13 @@ public:
     sql_syntax syntax() override
     {
         sql_syntax res{};
-        res.parameter_marker = [](size_t param_order) {
-            return "$" + std::to_string(param_order + 1);
+        res.parameter_marker = [](auto order) {
+            return '$' + std::to_string(order + 1);
         };
         return res;
     }
 
-    command& exec(const sql_builder& bld) override
+    void exec(const sql_builder& bld) override
     {
         reset_res(nullptr);
         auto sql = bld.sql();
@@ -80,7 +80,6 @@ public:
         }
 
         check(con_, r == PGRES_COMMAND_OK || r == PGRES_TUPLES_OK);
-        return *this;
     }
 
     std::vector<std::string> columns() override
@@ -113,17 +112,12 @@ public:
         return true;
     }
 
-    command& set_autocommit(bool autocommit) override
+    void set_autocommit(bool autocommit) override
     {
         transaction::set_autocommit(autocommit);
-        return *this;
     }
 
-    command& commit() override
-    {
-        transaction::commit();
-        return *this;
-    }
+    void commit() override { transaction::commit(); }
 
 private:
     connection_holder con_;

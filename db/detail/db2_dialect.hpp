@@ -4,7 +4,6 @@
 #define BARK_DB_DB2_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/sql_builder_ops.hpp>
 #include <bark/db/detail/table_def_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
@@ -30,7 +29,7 @@ public:
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
         auto& scm = tbl_nm.at(-2);
-        bld << "SELECT colname, (CASE typeschema WHEN " << param{"SYSIBM"}
+        bld << "SELECT colname, LOWER(CASE typeschema WHEN " << param{"SYSIBM"}
             << " THEN typename WHEN " << param{"DB2GSE"}
             << " THEN typename ELSE RTRIM(typeschema) || " << param{"."}
             << " || typename END), scale FROM syscat.columns WHERE tabschema = "
@@ -38,13 +37,13 @@ public:
             << " ORDER BY colno";
     }
 
-    column_type type(std::string_view type_lcase, int scale) override
+    column_type type(std::string_view type, int scale) override
     {
-        if (is_ogc_type(type_lcase))
+        if (is_ogc_type(type))
             return column_type::Geometry;
-        if (any_of({"graphic", "vargraphic"}, equals(type_lcase)))
+        if (any_of({"graphic", "vargraphic"}, equals(type)))
             return column_type::Text;
-        return iso_type(type_lcase, scale);
+        return iso_type(type, scale);
     }
 
     void projection_sql(sql_builder& bld,
@@ -78,11 +77,9 @@ public:
         };
     }
 
-    column_encoder geometry_encoder(std::string_view type_lcase,
-                                    int srid) override
+    column_encoder geometry_encoder(std::string_view type, int srid) override
     {
-        return [type = std::string{type_lcase}, srid](sql_builder& bld,
-                                                      variant_t v) {
+        return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
             bld << "db2gse." << type << "(CAST(" << param{v}
                 << " AS blob(100M)), " << srid << ")";
         };
@@ -102,11 +99,11 @@ public:
     void window_clause(sql_builder& bld,
                        const table_def& tbl,
                        std::string_view col_nm,
-                       const geometry::box& extent) override
+                       const geometry::box& ext) override
     {
-        auto blob = geometry::as_binary(extent);
+        auto blob = geometry::as_binary(ext);
         bld << "db2gse.EnvelopesIntersect(" << id(col_nm) << ", "
-            << encoder{*db::find(tbl.columns, col_nm), blob} << ") = 1";
+            << encode(*db::find(tbl.columns, col_nm), blob) << ") = 1";
     }
 
     void current_schema_sql(sql_builder& bld) override
