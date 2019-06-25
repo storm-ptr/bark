@@ -30,8 +30,8 @@ inline auto select(const rowset& from)
 template <class Columns>
 auto select(const Columns& columns, const rowset& from)
 {
-    auto cols = as<std::vector<std::string>>(
-        columns, unicode::to_lower<range_value_t<Columns>>);
+    auto cols =
+        as<std::vector<std::string>>(columns, unicode::to_lower<std::string>);
 
     auto positions = as<std::vector<size_t>>(from.columns, [&](auto& lhs) {
         auto it = std::find(cols.begin(), cols.end(), unicode::to_lower(lhs));
