@@ -30,20 +30,20 @@ inline auto select(const rowset& from)
 template <class Columns>
 auto select(const Columns& columns, const rowset& from)
 {
-    auto cols =
-        as<std::vector<std::string>>(columns, unicode::to_lower<std::string>);
+    auto cols = as<std::vector<std::string>>(
+        columns, [](const auto& col) { return unicode::to_lower(col); });
 
-    auto positions = as<std::vector<size_t>>(from.columns, [&](auto& lhs) {
-        auto it = std::find(cols.begin(), cols.end(), unicode::to_lower(lhs));
+    auto idxs = as<std::vector<size_t>>(from.columns, [&](const auto& col) {
+        auto it = std::find(cols.begin(), cols.end(), unicode::to_lower(col));
         return std::distance(cols.begin(), it);
     });
 
     auto res = std::vector<std::vector<variant_t>>{};
     for (auto is = variant_istream{from.data}; !is.data.empty();) {
         auto& row = res.emplace_back(cols.size());
-        for (auto pos : positions)
-            if (pos < row.size())
-                is >> row[pos];
+        for (size_t idx : idxs)
+            if (idx < row.size())
+                is >> row[idx];
             else
                 read(is);
     }
