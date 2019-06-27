@@ -22,17 +22,15 @@ Submodules:
 
 [download](https://github.com/storm-ptr/bark/releases/latest)
 
-#### windows
+<table><tr><th>windows</th><th>ubuntu 16.04</th><th>ubuntu 18.04</th></tr><tr><td rowspan="2">
+  extract and run
 
-  * extract and run
   ```
     ./nanogis/vc_redist.x64.exe
     ./nanogis/nanogis.exe
   ```
+</td><td>
 
-#### ubuntu
-
-  * 16.04
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -40,18 +38,21 @@ Submodules:
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.1604.deb
   ```
-  * 18.04
+</td><td>
+
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
     sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.1804.deb
   ```
-  * common
+</td></tr><tr><td colspan="2">
+
   ```
     sudo apt-get install -f
     nanogis
   ```
+</td></tr></table>
 
 ## How to set up the development environment
 
@@ -99,7 +100,8 @@ Submodules:
 
 #### ubuntu
 
-  * 16.04
+<table><tr><th>16.04</th><th>18.04</th></tr><tr><td>
+
   ```
 	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
 	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -107,13 +109,15 @@ Submodules:
 	sudo apt-get update
 	sudo apt-get -y install g++-8
   ```
-  * 18.04
+</td><td>
+
   ```
 	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
 	sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
 	sudo apt-get update
   ```
-  * common
+</td></tr><tr><td colspan="2">
+
   ```
 	sudo apt-get -y install git
 	sudo apt-get -y install libboost-dev
@@ -124,5 +128,6 @@ Submodules:
     wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```
+</td></tr></table>
 
 andrew.naplavkov@gmail.com
