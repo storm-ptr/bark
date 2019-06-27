@@ -22,14 +22,16 @@ Submodules:
 
 [download](https://github.com/storm-ptr/bark/releases/latest)
 
-<table><tr><th>windows</th><th>ubuntu 16.04</th><th>ubuntu 18.04</th></tr><tr><td rowspan="2">
+#### windows
   extract and run
 
   ```
     ./nanogis/vc_redist.x64.exe
     ./nanogis/nanogis.exe
   ```
-</td><td>
+
+#### ubuntu
+<table><tr><th>16.04</th><th>18.04</th></tr><tr><td>
 
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
