@@ -5,6 +5,7 @@
 
 #include <bark/db/sqlite/command.hpp>
 #include <bark/proj/bimap.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace bark::proj {
@@ -41,6 +42,13 @@ inline const bimap& epsg()
         return res;
     }();
     return singleton;
+}
+
+inline std::string abbreviation(const std::string& pj) try {
+    return "EPSG:" + std::to_string(epsg().find_srid(pj));
+}
+catch (const std::out_of_range&) {
+    return boost::trim_copy(pj);
 }
 
 }  // namespace bark::proj

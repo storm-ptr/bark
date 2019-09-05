@@ -9,6 +9,7 @@
 
 namespace bark::proj {
 
+/// WKB visitor
 class stream {
 public:
     stream(projPJ from, projPJ to) : from_(from), to_(to) {}

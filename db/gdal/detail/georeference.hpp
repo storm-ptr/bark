@@ -8,14 +8,12 @@
 
 namespace bark::db::gdal {
 
-/**
- * coefficients for transforming between pixel/line raster space, and projection
- * coordinates (X,Y) space
- * @see http://www.gdal.org/gdal_tutorial.html
- */
-class frame {
+/// Coefficients for transforming between pixel/line raster space,
+/// and projection coordinates (X,Y) space.
+/// @see http://www.gdal.org/gdal_tutorial.html
+class georeference {
 public:
-    explicit frame(GDALDatasetH dataset)
+    explicit georeference(GDALDatasetH dataset)
         : pixels_{GDALGetRasterXSize(dataset)}
         , lines_{GDALGetRasterYSize(dataset)}
     {

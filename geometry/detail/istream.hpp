@@ -11,6 +11,7 @@
 
 namespace bark::geometry {
 
+/// WKB visitor
 class istream {
     wkb::istream data_;
     linestring cached_path_;

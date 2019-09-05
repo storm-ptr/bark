@@ -13,7 +13,7 @@
 #include <QPixmap>
 #include <QSplitter>
 #include <QStatusBar>
-#include <bark/proj/abbreviation.hpp>
+#include <bark/proj/epsg.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
 #define META_TYPE(T) qRegisterMetaType<T>(BOOST_PP_STRINGIZE(T))
@@ -158,7 +158,8 @@ void main_window::idle_task_slot(QWidget* wgt)
 
 void main_window::attributes_slot(bark::qt::layer lr)
 {
-    auto frm = static_cast<map_widget*>(tab_->widget(map_tab_))->get_frame();
-    auto tsk = std::make_shared<attributes_task>(std::move(lr), std::move(frm));
+    auto ref =
+        static_cast<map_widget*>(tab_->widget(map_tab_))->get_georeference();
+    auto tsk = std::make_shared<attributes_task>(std::move(lr), std::move(ref));
     open_task_slot(tsk);
 }

@@ -12,7 +12,7 @@
 #include <QVector>
 #include <QWidget>
 #include <bark/qt/common.hpp>
-#include <bark/qt/detail/canvas.hpp>
+#include <bark/qt/detail/geoimage.hpp>
 #include <future>
 #include <memory>
 #include <string>
@@ -27,10 +27,10 @@ public:
     explicit map_widget(QWidget* parent);
 
     /// Returns drawing space
-    const frame& get_frame() const { return frm_; }
+    const georeference& get_georeference() const { return ref_; }
 
     /// Zooms to fit drawing space
-    void fit(frame);
+    void fit(georeference);
 
     /// Zooms to fit data set
     void fit(layer);
@@ -68,10 +68,10 @@ protected:
     void wheelEvent(QWheelEvent*) override;
 
 private:
-    frame frm_;
-    QFuture<frame> future_frm_;
-    canvas map_;
-    std::future<canvas> future_map_;
+    georeference ref_;
+    QFuture<georeference> future_ref_;
+    geoimage map_;
+    std::future<geoimage> future_map_;
     QVector<layer> layers_;
     std::weak_ptr<rendering_task> render_;
     QPointF press_center_;
@@ -82,10 +82,10 @@ private:
     QPointF lon_lat(QMouseEvent*) const;
 
     template <class Functor>
-    void set_frame(Functor);
+    void set_georeference(Functor);
 
     template <class Functor>
-    void set_future_frame(Functor&&);
+    void set_future_georeference(Functor&&);
 };
 
 }  // namespace bark::qt

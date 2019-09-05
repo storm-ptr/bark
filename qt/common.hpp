@@ -22,7 +22,7 @@ struct link {
     bool queryable = false;
 };
 
-/// Describes how to display spatial data set
+/// Describes spatial data set
 struct layer_def {
     db::qualified_name name;
     Qt::CheckState state = Qt::Unchecked;
@@ -30,7 +30,7 @@ struct layer_def {
     QBrush brush;
 };
 
-/// Map layer is used to display and work with a data set
+/// Spatial data set
 struct layer : link, layer_def {
     layer() = default;
 
@@ -40,12 +40,12 @@ struct layer : link, layer_def {
     }
 };
 
-/// A two-dimensional space that can be drawn on.
+/// Associates a raster image with spatial locations.
 
 /// Its origin is located at the top-left corner.
 /// X increases to the right and Y increases downwards.
 /// The unit is one pixel.
-struct frame {
+struct georeference {
     QSize size;
     QPointF center;
     qreal scale = 1.;

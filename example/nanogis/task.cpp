@@ -136,8 +136,8 @@ void sql_task::run_event()
     ::push_output(*this, rows);
 }
 
-attributes_task::attributes_task(bark::qt::layer lr, bark::qt::frame frm)
-    : lr_{std::move(lr)}, frm_{std::move(frm)}
+attributes_task::attributes_task(bark::qt::layer lr, bark::qt::georeference ref)
+    : lr_{std::move(lr)}, ref_{std::move(ref)}
 {
 }
 
@@ -160,9 +160,9 @@ void attributes_task::run_event()
     push_output(lr_.uri.toDisplayString(QUrl::DecodeReserved));
     ::push_output(*this, lr_.name);
 
-    auto tf = proj::transformer{frm_.projection, projection(lr_)};
-    auto ext = tf.forward(extent(frm_));
-    auto px = tf.forward(pixel(frm_));
+    auto tf = proj::transformer{ref_.projection, projection(lr_)};
+    auto ext = tf.forward(extent(ref_));
+    auto px = tf.forward(pixel(ref_));
     auto intersects = make_intersects(ext);
 
     std::optional<db::rowset> res;

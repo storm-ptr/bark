@@ -94,14 +94,14 @@ private:
 
 class attributes_task : public task {
 public:
-    attributes_task(bark::qt::layer, bark::qt::frame);
+    attributes_task(bark::qt::layer, bark::qt::georeference);
 
 protected:
     void run_event() override;
 
 private:
     bark::qt::layer lr_;
-    bark::qt::frame frm_;
+    bark::qt::georeference ref_;
 };
 
 class metadata_task : public task {

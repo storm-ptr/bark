@@ -7,65 +7,65 @@
 #include <bark/detail/grid.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 #include <bark/proj/transformer.hpp>
-#include <bark/qt/detail/canvas.hpp>
-#include <bark/qt/detail/frame_ops.hpp>
+#include <bark/qt/detail/geoimage.hpp>
+#include <bark/qt/detail/georeference_ops.hpp>
 #include <stdexcept>
 
 namespace bark::qt {
 
-inline void check(const canvas& map)
+inline void check(const geoimage& map)
 {
-    check(map.frm);
-    if (map.frm.size != QSize{map.img.width(), map.img.height()})
+    check(map.ref);
+    if (map.ref.size != QSize{map.img.width(), map.img.height()})
         throw std::logic_error("size mismatch");
 }
 
 template <class T>
-T make(const frame&);
+T make(const georeference&);
 
 template <>
-inline QImage make<QImage>(const frame& frm)
+inline QImage make<QImage>(const georeference& ref)
 {
-    QImage res{frm.size, QImage::Format_ARGB32_Premultiplied};
+    QImage res{ref.size, QImage::Format_ARGB32_Premultiplied};
     res.fill(Qt::transparent);
     return res;
 }
 
 template <>
-inline canvas make<canvas>(const frame& frm)
+inline geoimage make<geoimage>(const georeference& ref)
 {
-    return {frm, make<QImage>(frm)};
+    return {ref, make<QImage>(ref)};
 }
 
 template <class Functor>
-canvas operator|(const canvas& map, Functor f)
+geoimage operator|(const geoimage& map, Functor f)
 {
     return f(map);
 }
 
-inline auto copy(const frame& frm)
+inline auto copy(const georeference& ref)
 {
-    return [=](const canvas& map) {
-        auto res = make<canvas>(frm);
+    return [=](const geoimage& map) {
+        auto res = make<geoimage>(ref);
         QPainter painter{&res.img};
-        auto rect = forward(res.frm, extent(map.frm)).toAlignedRect();
+        auto rect = forward(res.ref, extent(map.ref)).toAlignedRect();
         painter.drawImage(rect, map.img);
         return res;
     };
 }
 
-inline auto transform(const frame& frm)
+inline auto transform(const georeference& ref)
 {
-    return [=](const canvas& map) {
-        auto res = make<canvas>(frm);
+    return [=](const geoimage& map) {
+        auto res = make<geoimage>(ref);
 
-        grid gr(boost::geometry::return_buffer<geometry::box>(extent(frm),
-                                                              -frm.scale / 2),
-                frm.size.height(),
-                frm.size.width());
-        auto tf = proj::transformer{map.frm.projection, frm.projection};
+        auto gr = grid(boost::geometry::return_buffer<geometry::box>(
+                           extent(ref), -ref.scale / 2),
+                       ref.size.height(),
+                       ref.size.width());
+        auto tf = proj::transformer{map.ref.projection, ref.projection};
         tf.inplace_backward(gr.begin(), gr.end());
-        auto ext = extent(map.frm);
+        auto ext = extent(map.ref);
         auto left = geometry::left(ext);
         auto top = geometry::top(ext);
         auto ratio_x = map.img.width() / geometry::width(ext);

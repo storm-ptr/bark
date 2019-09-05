@@ -6,6 +6,7 @@
 #include <bark/detail/wkb.hpp>
 #include <boost/none.hpp>
 
+/// WKB visitor
 class wkb_unifier {
 public:
     void operator()(bark::blob_view data)

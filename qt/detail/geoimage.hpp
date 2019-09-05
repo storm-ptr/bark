@@ -8,8 +8,8 @@
 
 namespace bark::qt {
 
-struct canvas {
-    frame frm;
+struct geoimage {
+    georeference ref;
     QImage img;
 };
 

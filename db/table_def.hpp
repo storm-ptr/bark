@@ -6,7 +6,7 @@
 #include <bark/db/sql_builder.hpp>
 #include <bark/geometry/as_text.hpp>
 #include <bark/geometry/geometry.hpp>
-#include <bark/proj/abbreviation.hpp>
+#include <bark/proj/epsg.hpp>
 #include <boost/geometry/index/rtree.hpp>
 #include <functional>
 #include <ostream>

@@ -14,16 +14,17 @@
 
 namespace bark::qt {
 
+/// WKB visitor
 class painter {
-    const frame& frm_;
+    const georeference& ref_;
     QPainter painter_;
     QVector<QPointF> cached_path_;
 
     using path = std::reference_wrapper<decltype(cached_path_)>;
 
 public:
-    painter(canvas& map, const layer_def& lr)
-        : frm_(map.frm), painter_(&map.img)
+    painter(geoimage& map, const layer_def& lr)
+        : ref_(map.ref), painter_(&map.img)
     {
         check(map);
         painter_.setCompositionMode(QPainter::CompositionMode_Darken);
@@ -40,7 +41,7 @@ public:
 
     QPointF operator()(double x, double y)
     {
-        return forward(frm_, geometry::point{x, y});
+        return forward(ref_, geometry::point{x, y});
     }
 
     path operator()(uint32_t count, wkb::path)

@@ -24,16 +24,16 @@ inline bool tiny(const geometry::box& tile, const geometry::box& pixel)
 /// Asynchronous painting class. The final image is returned in the destructor.
 class rendering_task : public std::enable_shared_from_this<rendering_task> {
 public:
-    explicit rendering_task(const frame& frm) : frm_{frm} {}
+    explicit rendering_task(const georeference& ref) : ref_{ref} {}
 
-    ~rendering_task() { promise_.set_value({frm_, img_}); }
+    ~rendering_task() { promise_.set_value({ref_, img_}); }
 
-    std::future<canvas> get_future() { return promise_.get_future(); }
+    std::future<geoimage> get_future() { return promise_.get_future(); }
 
-    canvas get_recent()
+    geoimage get_recent()
     {
         std::lock_guard lock{guard_};
-        return {frm_, img_};
+        return {ref_, img_};
     }
 
     void start(QVector<layer> lrs)
@@ -43,15 +43,15 @@ public:
             start_thread([self = shared_from_this(), lr = std::move(lr)] {
                 self->check();
                 auto pj = projection(lr);
-                auto tf = proj::transformer{pj, self->frm_.projection};
-                auto ext = tf.backward(extent(self->frm_));
-                auto px = tf.backward(pixel(self->frm_));
+                auto tf = proj::transformer{pj, self->ref_.projection};
+                auto ext = tf.backward(extent(self->ref_));
+                auto px = tf.backward(pixel(self->ref_));
                 auto tls = tile_coverage(lr, ext, px);
                 self->check();
                 if (!tls.empty() && tiny(tls.front(), px)) {
                     auto mock_lr = lr;
                     mock_lr.brush.setStyle(Qt::NoBrush);
-                    auto maps = mock_rendering(mock_lr, tls, self->frm_);
+                    auto maps = mock_rendering(mock_lr, tls, self->ref_);
                     self->check();
                     self->compose(maps);
                 }
@@ -59,7 +59,7 @@ public:
                     for (size_t i = 0; i < tls.size(); ++i) {
                         auto task = [self, lr, tl = tls[i]] {
                             self->check();
-                            auto maps = rendering(lr, tl, self->frm_);
+                            auto maps = rendering(lr, tl, self->ref_);
                             self->check();
                             self->compose(maps);
                         };
@@ -77,8 +77,8 @@ public:
     }
 
 private:
-    const frame frm_;
-    std::promise<canvas> promise_;
+    const georeference ref_;
+    std::promise<geoimage> promise_;
 
     std::mutex guard_;
     bool is_canceled_ = false;
@@ -91,17 +91,17 @@ private:
             throw cancel_exception{};
     }
 
-    void compose(const QVector<canvas>& maps)
+    void compose(const QVector<geoimage>& maps)
     {
         for (auto& map : maps) {
             if (map.img.isNull())
                 continue;
             std::lock_guard lock{guard_};
             if (img_.isNull())
-                img_ = make<QImage>(frm_);
+                img_ = make<QImage>(ref_);
             QPainter painter{&img_};
             painter.setCompositionMode(QPainter::CompositionMode_Darken);
-            painter.drawImage(offset(map.frm, frm_), map.img);
+            painter.drawImage(offset(map.ref, ref_), map.img);
         }
     }
 };

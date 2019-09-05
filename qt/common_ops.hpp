@@ -6,7 +6,7 @@
 #include <bark/db/provider.hpp>
 #include <bark/qt/common.hpp>
 #include <bark/qt/detail/adapt.hpp>
-#include <bark/qt/detail/frame_proj.hpp>
+#include <bark/qt/detail/georeference_proj.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 
 namespace bark::qt {
@@ -56,15 +56,15 @@ inline auto spatial_objects(const layer& lr,
     return lr.provider->spatial_objects(lr.name, ext, px);
 }
 
-inline geometry::box pixel(const frame& frm)
+inline geometry::box pixel(const georeference& ref)
 {
-    auto pos = adapt(frm.center);
-    return {pos, {pos.x() + frm.scale, pos.y() + frm.scale}};
+    auto pos = adapt(ref.center);
+    return {pos, {pos.x() + ref.scale, pos.y() + ref.scale}};
 }
 
-inline geometry::box extent(const frame& frm)
+inline geometry::box extent(const georeference& ref)
 {
-    return backward(frm, QRectF{{}, frm.size});
+    return backward(ref, QRectF{{}, ref.size});
 }
 
 }  // namespace bark::qt

@@ -8,7 +8,7 @@
 #include <bark/db/detail/utility.hpp>
 #include <bark/db/gdal/command.hpp>
 #include <bark/db/gdal/detail/dataset.hpp>
-#include <bark/db/gdal/detail/frame.hpp>
+#include <bark/db/gdal/detail/georeference.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/envelope.hpp>
 #include <bark/geometry/geometry_ops.hpp>
@@ -25,7 +25,7 @@ public:
     explicit provider(std::string_view file) : file_{file}
     {
         if (is_raster())
-            frame_ = frame{dataset{file_}};
+            ref_ = georeference{dataset{file_}};
     }
 
     std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
@@ -39,7 +39,7 @@ public:
     geometry::box extent(const qualified_name& lr_nm) override
     {
         if (is_raster())
-            return frame_->extent();
+            return ref_->extent();
         auto tls = db::column(*this, lr_nm).tiles;
         return tls.empty() ? geometry::box{} : geometry::envelope(bounds(tls));
     }
@@ -47,7 +47,7 @@ public:
     geometry::box undistorted_pixel(const qualified_name&,
                                     const geometry::box& px) override
     {
-        return is_raster() ? geometry::shift(frame_->pixel(), px) : px;
+        return is_raster() ? geometry::shift(ref_->pixel(), px) : px;
     }
 
     geometry::multi_box tile_coverage(const qualified_name& lr_nm,
@@ -91,7 +91,7 @@ public:
 
 private:
     const std::string file_;
-    std::optional<frame> frame_;
+    std::optional<georeference> ref_;
 
     std::map<qualified_name, layer_type> load_dir()
     {

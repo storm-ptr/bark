@@ -28,8 +28,7 @@ inline bool operator==(const rowset& lhs, const rowset& rhs)
 inline bool operator==(const column_def& lhs, const column_def& rhs)
 {
     return unicode::case_insensitive_equal_to{}(lhs.name, rhs.name) &&
-           lhs.type == rhs.type &&
-           proj::normalize(lhs.projection) == proj::normalize(rhs.projection);
+           lhs.type == rhs.type && lhs.projection == rhs.projection;
 }
 
 inline bool operator==(const index_def& lhs, const index_def& rhs)
