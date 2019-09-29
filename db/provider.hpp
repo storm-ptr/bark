@@ -70,7 +70,8 @@ struct provider {
     virtual void refresh() = 0;
 };
 
-inline bool queryable(provider& pvd) try {
+inline bool queryable(provider& pvd)
+try {
     pvd.make_command();
     return true;
 }

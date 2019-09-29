@@ -44,7 +44,8 @@ inline const bimap& epsg()
     return singleton;
 }
 
-inline std::string abbreviation(const std::string& pj) try {
+inline std::string abbreviation(const std::string& pj)
+try {
     return "EPSG:" + std::to_string(epsg().find_srid(pj));
 }
 catch (const std::out_of_range&) {

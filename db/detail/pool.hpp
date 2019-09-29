@@ -39,7 +39,8 @@ private:
     std::function<command*()> alloc_;
     std::queue<command_holder> commands_;
 
-    void push(command* cmd) try {
+    void push(command* cmd)
+    try {
         static const auto Limit =
             std::max<size_t>(2, std::thread::hardware_concurrency());
         if (!cmd)

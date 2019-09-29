@@ -21,15 +21,14 @@ namespace bark::qt {
 
 class rendering_task;
 
-/// The cartography interface on the screen (panning, zooming)
+/// A cartography interface on the screen (panning, zooming)
 class map_widget : public QWidget {
 public:
     explicit map_widget(QWidget* parent);
 
-    /// Returns drawing space
     const georeference& get_georeference() const { return ref_; }
 
-    /// Zooms to fit drawing space
+    /// Zooms to fit geographic referencing
     void fit(georeference);
 
     /// Zooms to fit data set
@@ -42,16 +41,16 @@ public:
     void undistort(layer);
 
 protected:
-    /// Occurs when the map starts to draw
+    /// Called when the map starts to draw
     virtual void active_event() {}
 
-    /// Occurs when the map finishes to draw
+    /// Called when the map finishes to draw
     virtual void idle_event() {}
 
-    /// Occurs when the mouse cursor is moved
+    /// Called when the mouse cursor is moved
     virtual void coordinates_event(QPointF /*lon_lat*/) {}
 
-    /// Occurs when the spatial reference system is changed
+    /// Called when the spatial reference system is changed
     virtual void projection_event(std::string /*pj*/) {}
 
     // override

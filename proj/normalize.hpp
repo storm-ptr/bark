@@ -10,7 +10,8 @@
 
 namespace bark::proj {
 
-inline std::string normalize(const std::string& pj) try {
+inline std::string normalize(const std::string& pj)
+try {
     return pj.empty() ? std::string{}
                       : boost::trim_copy(projection{pj}.get_def());
 }

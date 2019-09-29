@@ -19,7 +19,7 @@
 
 namespace bark::qt {
 
-/// Displays a hierarchical collection of data sets
+/// A hierarchical collection of data sets
 class tree_model : public QAbstractItemModel {
 public:
     explicit tree_model(QObject* parent);

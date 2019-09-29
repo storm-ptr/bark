@@ -39,7 +39,7 @@ for:
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
     - sh: source /opt/qt512/bin/qt512-env.sh
-    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.7.1/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
+    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
 #https://help.appveyor.com/discussions/problems/20764-postgres-peer-authentication-failed
   init:
@@ -103,9 +103,9 @@ for:
     - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
     - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-2.5.0x64.zip > nul
     - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
-    - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
+    - call C:\Qt\5.13\msvc2017_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-    - ps: Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
+    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
     - 'SET INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
     - 'SET LIB=%OSGEO4W_ROOT%\lib;%LIB%'
 

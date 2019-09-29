@@ -98,7 +98,8 @@ inline QVector<geoimage> raster_rendering(const layer& lr,
 
 inline QVector<geoimage> rendering(const layer& lr,
                                    const geometry::box& tl,
-                                   const georeference& ref) try {
+                                   const georeference& ref)
+try {
     switch (lr.provider->dir().at(lr.name)) {
         case db::layer_type::Invalid:
             break;

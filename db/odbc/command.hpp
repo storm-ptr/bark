@@ -138,7 +138,8 @@ private:
 
     template <class VariantViews>
     [[nodiscard]] std::vector<binding_holder> bind_params(
-        const VariantViews& params) {
+        const VariantViews& params)
+    {
         std::vector<binding_holder> res;
         SQLSMALLINT num_params = 0;
         SQLNumParams(stmt_.get(), &num_params);

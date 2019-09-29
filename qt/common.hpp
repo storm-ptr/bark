@@ -40,7 +40,7 @@ struct layer : link, layer_def {
     }
 };
 
-/// Associates a raster image with spatial locations.
+/// Associates a raster image with locations in physical space.
 
 /// Its origin is located at the top-left corner.
 /// X increases to the right and Y increases downwards.

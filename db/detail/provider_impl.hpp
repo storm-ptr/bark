@@ -82,7 +82,8 @@ public:
 protected:
     dialect& as_dialect() { return *dialect_.get(); }
 
-    std::map<qualified_name, layer_type> load_dir() try {
+    std::map<qualified_name, layer_type> load_dir()
+    try {
         enum columns { Schema, Table, Column };
         auto res = std::map<qualified_name, layer_type>{};
         auto bld = builder(as_mixin());

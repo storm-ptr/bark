@@ -41,7 +41,8 @@ void start_thread(Functor&& f, int priority = PriorityNormal)
     QThreadPool::globalInstance()->start(ptr, priority);
 }
 
-inline void runnable::run() try {
+inline void runnable::run()
+try {
     task_();
 }
 catch (const db::busy_exception&) {

@@ -13,7 +13,8 @@
 
 task::task() : state_(status::Waiting), output_(&str_) {}
 
-void task::run() try {
+void task::run()
+try {
     {
         std::lock_guard lock{guard_};
         switch (state_) {

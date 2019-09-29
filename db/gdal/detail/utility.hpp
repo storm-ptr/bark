@@ -89,7 +89,8 @@ inline void check(bool condition)
         throw std::runtime_error(error());
 }
 
-inline std::string projection(OGRSpatialReferenceH srs) try {
+inline std::string projection(OGRSpatialReferenceH srs)
+try {
     check(!!srs);
     char* txt = nullptr;
     auto r = OSRExportToProj4(srs, &txt);

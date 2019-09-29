@@ -26,7 +26,8 @@ inline map_widget::map_widget(QWidget* parent)
 }
 
 template <class Functor>
-void map_widget::set_georeference(Functor f) try {
+void map_widget::set_georeference(Functor f)
+try {
     future_ref_ = {};
     if (!future_map_.valid())
         idle_event();
@@ -85,7 +86,8 @@ inline void map_widget::undistort(layer lr)
         [ref = ref_, lr = std::move(lr)] { return ref | qt::undistort(lr); });
 }
 
-inline QPointF map_widget::lon_lat(QMouseEvent* event) const try {
+inline QPointF map_widget::lon_lat(QMouseEvent* event) const
+try {
     proj::transformer tf(ref_.projection, proj::epsg().find_proj(4326));
     auto ll = tf.forward(backward(ref_, event->pos()));
     if (ll.x() < -180 || ll.x() > 180 || ll.y() < -90 || ll.y() > 90)
