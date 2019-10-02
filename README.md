@@ -33,7 +33,7 @@ Submodules:
     nanogis
   ```
 
-#### windows
+#### windows 10
   extract
 
   ```
@@ -59,44 +59,41 @@ Submodules:
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```
 
-#### windows
-
-  * OSGeo4W<br>
-  PowerShell
+#### windows 10
+* OSGeo4W (PowerShell)
   ```
     mkdir C:\OSGeo4W64
     Invoke-WebRequest -Uri http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\OSGeo4W64\osgeo4w-setup-x86_64.exe
     C:\OSGeo4W64\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R C:\OSGeo4W64
   ```
-  environment variables<br>
-  GDAL_DATA
+  <table><tr><th>environment variables</th><th>values</th></tr><tr><td>GDAL_DATA</td><td>
   ```
     C:\OSGeo4W64\share\gdal
   ```
-  INCLUDE
+  </td></tr><tr><td>INCLUDE</td><td>
   ```
     C:\OSGeo4W64\include
     C:\OSGeo4W64\include\libpq
     C:\OSGeo4W64\include\mysql
   ```
-  LIB
+  </td></tr><tr><td>LIB</td><td>
   ```
     C:\OSGeo4W64\lib
   ```
-  PATH
+  </td></tr><tr><td>PATH</td><td>
   ```
     C:\OSGeo4W64\bin
   ```
-  * copy [boost](https://www.boost.org/users/download/) library to ```C:\OSGeo4W64\include\boost```
-  * Catch2 library<br>
-  PowerShell
+  </td></tr></table>
+* copy [boost](https://www.boost.org/users/download/) headers to ```C:\OSGeo4W64\include\boost```
+* Catch2 library (PowerShell)
   ```
     Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
   ```
-  * install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
-  * install [Qt](https://www.qt.io/download) libraries and creator (Open Source)
-  * install [git](https://git-scm.com/downloads)
-  * Bark library
+* install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
+* install [Qt](https://www.qt.io/download) libraries and creator (Open Source)
+* install [git](https://git-scm.com/downloads)
+* Bark library
   ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
   ```
