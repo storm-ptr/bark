@@ -22,41 +22,42 @@ Submodules:
 
 [download](https://github.com/storm-ptr/bark/releases/latest)
 
-#### windows
-  extract and run
-
-  ```
-    ./nanogis/vc_redist.x64.exe
-    ./nanogis/nanogis.exe
-  ```
-
-#### ubuntu
-<table><tr><th>16.04</th><th>18.04</th></tr><tr><td>
-
-  ```
-    sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    sudo add-apt-repository ppa:ubuntugis/ppa
-    sudo apt-get update
-    sudo dpkg -i ./nanogis.ubuntu.1604.deb
-  ```
-</td><td>
+#### ubuntu 18.04
 
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
     sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.1804.deb
-  ```
-</td></tr><tr><td colspan="2">
-
-  ```
     sudo apt-get install -f
     nanogis
   ```
-</td></tr></table>
+
+#### windows
+  extract
+
+  ```
+    ./nanogis/vc_redist.x64.exe
+    ./nanogis/nanogis.exe
+  ```
 
 ## How to set up the development environment
+
+#### ubuntu 18.04
+
+  ```
+	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+	sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+	sudo apt-get update
+	sudo apt-get -y install git
+	sudo apt-get -y install libboost-dev
+	sudo apt-get -y install libgdal-dev
+	sudo apt-get -y install libgl1-mesa-dev
+	sudo apt-get -y install qt512-meta-minimal
+	sudo apt-get -y install qt512imageformats
+    wget https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
+    git clone --depth=1 https://github.com/storm-ptr/bark.git
+  ```
 
 #### windows
 
@@ -90,7 +91,7 @@ Submodules:
   * Catch2 library<br>
   PowerShell
   ```
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
+    Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
   ```
   * install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
   * install [Qt](https://www.qt.io/download) libraries and creator (Open Source)
@@ -99,37 +100,5 @@ Submodules:
   ```
     git clone --depth=1 https://github.com/storm-ptr/bark.git C:\OSGeo4W64\include\bark
   ```
-
-#### ubuntu
-
-<table><tr><th>16.04</th><th>18.04</th></tr><tr><td>
-
-  ```
-	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial
-	sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-	sudo add-apt-repository ppa:ubuntugis/ppa
-	sudo apt-get update
-	sudo apt-get -y install g++-8
-  ```
-</td><td>
-
-  ```
-	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-	sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-	sudo apt-get update
-  ```
-</td></tr><tr><td colspan="2">
-
-  ```
-	sudo apt-get -y install git
-	sudo apt-get -y install libboost-dev
-	sudo apt-get -y install libgdal-dev
-	sudo apt-get -y install libgl1-mesa-dev
-	sudo apt-get -y install qt512-meta-minimal
-	sudo apt-get -y install qt512imageformats
-    wget https://raw.githubusercontent.com/catchorg/Catch2/v2.0.1/single_include/catch.hpp
-    git clone --depth=1 https://github.com/storm-ptr/bark.git
-  ```
-</td></tr></table>
 
 andrew.naplavkov@gmail.com

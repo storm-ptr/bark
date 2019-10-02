@@ -1,8 +1,0 @@
-Package: nanogis
-Version: 1.0.0
-Section: base
-Priority: optional
-Architecture: amd64
-Depends: g++-8, libgdal20, qt512base
-Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>
-Description: nanogis
