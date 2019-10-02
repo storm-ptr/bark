@@ -11,9 +11,11 @@ matrix:
     addons:
       apt:
         sources:
+        - ubuntu-toolchain-r-test
         - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
         - sourceline: ppa:ubuntugis/ubuntugis-unstable
         packages:
+        - g++-8
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev
