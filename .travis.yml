@@ -4,6 +4,8 @@ sudo: true
 dist: bionic
 git:
   depth: 1
+services:
+  - mysql
 matrix:
   include:
   - os: linux
