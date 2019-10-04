@@ -9,7 +9,7 @@ matrix:
   - os: linux
     env: COMPILER=g++-8
     addons:
-      postgresql: 9.6
+      postgresql: "10"
       apt:
         sources:
         - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
@@ -19,12 +19,12 @@ matrix:
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev
-        - postgresql-9.6-postgis-2.3
+        - postgresql-10-postgis-2.4
         - qt512-meta-minimal
         - qt512imageformats
         - doxygen
     before_script:
-        - psql -U postgres -c "create extension postgis"
+      - psql -U postgres -c "create extension postgis"
 install:
 - source /opt/qt512/bin/qt512-env.sh
 script:
