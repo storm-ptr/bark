@@ -32,7 +32,7 @@ install:
 script:
 - wget -P $TRAVIS_BUILD_DIR/.. https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
-- make -f ./makefile.ubuntu test CXX=$COMPILER CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_POSTGRES_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=
+- make -f ./makefile.ubuntu test CXX=$COMPILER CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_POSTGRES_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=
 - cd $TRAVIS_BUILD_DIR/example/nanogis
 - qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
 - make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
