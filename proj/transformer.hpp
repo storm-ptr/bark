@@ -10,7 +10,7 @@
 
 namespace bark::proj {
 
-/// For performing conversions between cartographic projections.
+/// Performs conversions between cartographic projections.
 
 /// PROJ.4 library wrapper.
 /// @see https://en.wikipedia.org/wiki/PROJ
