@@ -14,10 +14,8 @@
 
 namespace bark {
 
-/**
- * thread-safe "Least Recently Used" cache replacement data structure
- * @see https://en.wikipedia.org/wiki/Cache_algorithms#LRU
- */
+/// thread-safe "Least Recently Used" cache replacement data structure
+/// @see https://en.wikipedia.org/wiki/Cache_algorithms#LRU
 class lru_cache {
 public:
     using scope_type = uint64_t;

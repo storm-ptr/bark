@@ -3,6 +3,7 @@ SOURCES = *.cpp
 HEADERS = *.h
 RESOURCES = resource.qrc
 CONFIG += c++17
+DEFINES += "ACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
 
 windows:INCLUDEPATH += ../../..
 

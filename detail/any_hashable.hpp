@@ -9,10 +9,8 @@
 
 namespace bark {
 
-/**
- * Polymorphic wrapper of hashable value. std::any analogue.
- * @see https://en.wikibooks.org/wiki/More_C++_Idioms/Type_Erasure
- */
+/// Polymorphic wrapper of hashable value. std::any analogue.
+/// @see https://en.wikibooks.org/wiki/More_C++_Idioms/Type_Erasure
 class any_hashable {
 public:
     any_hashable() = delete;

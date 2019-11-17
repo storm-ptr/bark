@@ -12,12 +12,10 @@
 
 namespace bark {
 
-/**
- * The synchronization primitive offering exclusive ownership of the value of
- * the object (value semantics)
- * @see http://www.cplusplus.com/reference/concept/TimedLockable/
- * @see http://codeofthedamned.com/index.php/value-semantics
- */
+/// The synchronization primitive offering exclusive ownership of the value of
+/// the object (value semantics)
+/// @see http://www.cplusplus.com/reference/concept/TimedLockable/
+/// @see http://codeofthedamned.com/index.php/value-semantics
 template <class T>
 class lockable {
 public:

@@ -10,11 +10,9 @@
 
 namespace bark {
 
-/**
- * Associative container that maintains insertion order. Complexity of any
- * operation is O(1). Iterators that removed by erase() are invalidated. All
- * other iterators keep their validity.
- */
+/// Associative container that maintains insertion order. Complexity of any
+/// operation is O(1). Iterators that removed by erase() are invalidated. All
+/// other iterators keep their validity.
 template <class Key, class T>
 class linked_hash_map : boost::noncopyable {
 public:

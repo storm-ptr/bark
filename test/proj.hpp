@@ -13,10 +13,8 @@ TEST_CASE("proj")
     using namespace bark::geometry;
     using namespace bark::proj;
 
-    /**
-     * @see http://spatialreference.org/ref/epsg/4326/proj4/
-     * @see http://spatialreference.org/ref/epsg/3395/proj4/
-     */
+    /// @see http://spatialreference.org/ref/epsg/4326/proj4/
+    /// @see http://spatialreference.org/ref/epsg/3395/proj4/
     transformer latlong_to_mercator{
         "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ",
         "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 "

@@ -59,10 +59,8 @@ size_t size(const Str& str)
     return std::distance(decoder{view.begin()}, decoder{view.end()});
 }
 
-/**
- * @return lowercase version or unmodified if no lowercase version is listed in
- * the current locale
- */
+/// @return lowercase version or unmodified if no lowercase version is listed in
+/// the current locale
 template <class Str>
 auto to_lower(const Str& str)
 {
@@ -71,10 +69,8 @@ auto to_lower(const Str& str)
     return unicode::to_string<range_value_t<Str>>(wstr);
 }
 
-/**
- * @return uppercase version or unmodified if no uppercase version is listed in
- * the current locale
- */
+/// @return uppercase version or unmodified if no uppercase version is listed in
+/// the current locale
 template <class Str>
 auto to_upper(const Str& str)
 {

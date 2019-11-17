@@ -18,7 +18,7 @@ enum class layer_type { Invalid, Geometry, Raster };
 
 using busy_exception = lru_cache::busy_exception;
 
-/// Thread-safe interface for spatial data source
+/// Thread-safe, caching interface for spatial data source
 struct provider {
     virtual ~provider() = default;
 

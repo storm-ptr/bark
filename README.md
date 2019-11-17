@@ -67,6 +67,7 @@ Submodules:
     C:\OSGeo4W64\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R C:\OSGeo4W64
   ```
 * set environment variable ```GDAL_DATA``` to ```C:\OSGeo4W64\share\gdal```
+* set environment variable ```PROJ_LIB``` to ```C:\OSGeo4W64\share\proj```
 * set environment variable ```INCLUDE``` to ```C:\OSGeo4W64\include;C:\OSGeo4W64\include\libpq;C:\OSGeo4W64\include\mysql```
 * set environment variable ```LIB``` to ```C:\OSGeo4W64\lib```
 * set environment variable ```PATH``` to ```C:\OSGeo4W64\bin```
