@@ -42,8 +42,8 @@ for:
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
 #https://help.appveyor.com/discussions/problems/20764-postgres-peer-authentication-failed
-  init:
-    - sh: sudo sed -i -E -e 's/(local\s+all\s+postgres\s+)peer/\1trust/' /etc/postgresql/12/main/pg_hba.conf
+#  init:
+#    - sh: sudo sed -i -E -e 's/(local\s+all\s+postgres\s+)peer/\1trust/' /etc/postgresql/11/main/pg_hba.conf
   
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
