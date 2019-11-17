@@ -43,7 +43,7 @@ for:
 
 #https://help.appveyor.com/discussions/problems/20764-postgres-peer-authentication-failed
   init:
-    - sh: sudo sed -i -E -e 's/(local\s+all\s+postgres\s+)peer/\1trust/' /etc/postgresql/11/main/pg_hba.conf
+    - sh: sudo sed -i -E -e 's/(local\s+all\s+postgres\s+)peer/\1trust/' /etc/postgresql/12/main/pg_hba.conf
   
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
