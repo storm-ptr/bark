@@ -22,7 +22,7 @@ for:
     - postgresql
 
   environment:
-    COMPILER: g++-9
+    COMPILER: g++-8
     DEB_NAME: "nanogis.ubuntu.1804"
 
   install:
