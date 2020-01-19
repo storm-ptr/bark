@@ -19,7 +19,7 @@ public:
     bool empty() const { return jobs_.empty(); }
     size_t size() const { return jobs_.size(); }
 
-    curl()
+    explicit curl(std::string useragent) : useragent_{std::move(useragent)}
     {
         static std::once_flag flag;
         std::call_once(flag, curl_global_init, CURL_GLOBAL_ALL);
@@ -35,6 +35,7 @@ public:
         auto holder = easy_holder{easy};
         check(!!holder);
         auto buf = std::make_unique<blob>();
+        check(curl_easy_setopt(easy, CURLOPT_USERAGENT, useragent_.c_str()));
         check(curl_easy_setopt(easy, CURLOPT_URL, url.c_str()));
         check(curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, &callback));
         check(curl_easy_setopt(easy, CURLOPT_WRITEDATA, buf.get()));
@@ -85,6 +86,7 @@ private:
     using easy_holder = std::unique_ptr<CURL, easy_deleter>;
     using job_context = std::pair<easy_holder, value_type>;
 
+    std::string useragent_;
     multi_holder multi_;
     std::unordered_map<CURL*, job_context> jobs_;
 

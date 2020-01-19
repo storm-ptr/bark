@@ -65,6 +65,7 @@ tree_view::tree_view(QWidget* parent) : QTreeView(parent), model_(nullptr)
     separator1_act_->setSeparator(true);
     separator2_act_ = new QAction("", this);
     separator2_act_->setSeparator(true);
+    create_slot();
 }
 
 void tree_view::menu_slot(QPoint point)
@@ -116,6 +117,7 @@ void tree_view::menu_slot(QPoint point)
 void tree_view::create_slot()
 {
     model_.reset();
+    model_.link_by_uri(QString::fromStdString("slippy://nanogis@"));
 }
 
 void tree_view::refresh_slot()

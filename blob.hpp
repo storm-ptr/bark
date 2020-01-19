@@ -6,6 +6,7 @@
 #include <bark/detail/utility.hpp>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 
 namespace bark {
 

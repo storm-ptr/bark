@@ -81,7 +81,7 @@ inline link make_link(const QUrl& uri)
     else if (scm == "postgresql")
         return make_server_link<db::postgres::provider, 5432>(uri);
     else if (scm == "slippy")
-        return make_link<db::slippy::provider>(uri);
+        return make_link<db::slippy::provider>(uri, adapt(uri.userName()));
     else if (scm == "sqlite")
         return make_file_link<db::sqlite::provider>(uri);
     throw std::runtime_error("invalid URI: " + adapt(uri.toString()));

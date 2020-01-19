@@ -39,7 +39,6 @@ inline void tree_model::reset()
     future_branches_.clear();
     if (!root_->children.empty())
         removeRows(0, (int)root_->children.size());
-    link_by_uri(QString::fromStdString("slippy://"));
 }
 
 inline void tree_model::timerEvent(QTimerEvent* event)

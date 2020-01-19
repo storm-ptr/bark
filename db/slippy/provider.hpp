@@ -17,6 +17,10 @@ class provider : private cacher<provider>, public db::provider {
 public:
     friend cacher<provider>;
 
+    explicit provider(std::string useragent) : useragent_{std::move(useragent)}
+    {
+    }
+
     std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
 
     std::string projection(const qualified_name&) override
@@ -76,6 +80,7 @@ public:
     void refresh() override { reset_cache(); }
 
 private:
+    std::string useragent_;
     layers layers_;
 
     std::map<qualified_name, layer_type> load_dir() { return layers_.dir(); }
@@ -101,7 +106,7 @@ private:
         auto z = match(tf.backward(px), lr->zmax()).z;
         auto tls = slippy::tile_coverage(tf.backward(ext), z);
 
-        bark::curl<tile> jobs;
+        bark::curl<tile> jobs{useragent_};
         for (auto& tl : tls)
             jobs.push(tl, lr->url(tl));
 
