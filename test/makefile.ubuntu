@@ -1,4 +1,4 @@
-CXXFLAGS:=-Wall -std=c++17 -O2 -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+CXXFLAGS:=-Wall -std=c++17 -O2 -D ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 EXECUTABLE=run_me
 INCLUDEPATH=../.. /usr/include/gdal /usr/include/mysql /usr/include/postgresql
 INCFLAGS=$(foreach x, $(INCLUDEPATH), -I$x)
