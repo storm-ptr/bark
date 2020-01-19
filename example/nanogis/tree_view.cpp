@@ -175,7 +175,8 @@ void tree_view::attach_uri_slot()
         "URI:",
         {"mysql://root:E207cGYM@192.168.170.128/mysql",
          "odbc://sa:E207cGYM@192.168.170.128/master?DRIVER=SQL Server;",
-         "postgresql://postgres:E207cGYM@192.168.170.128/postgres"},
+         "postgresql://postgres:E207cGYM@192.168.170.128/postgres",
+         "slippy://nanogis@"},
         0,
         true,
         &ok);

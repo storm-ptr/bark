@@ -41,8 +41,8 @@ for:
 
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
-    - sh: qmake QMAKE_CXX=$COMPILER QMAKE_CC=$COMPILER QMAKE_LINK=$COMPILER QMAKE_CXXFLAGS+=-std=c++17
-    - sh: make CXX=$COMPILER CC=$COMPILER LINK=$COMPILER CXXFLAGS+=-fPIC CFLAGS+=-fPIC CXXFLAGS+=-std=c++17
+    - sh: qmake QMAKE_CXX=$COMPILER QMAKE_LINK=$COMPILER
+    - sh: make CXX=$COMPILER LINK=$COMPILER
     - sh: cd $APPVEYOR_BUILD_FOLDER
     - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME
     - sh: mkdir $APPVEYOR_BUILD_FOLDER/$DEB_NAME/usr
@@ -59,7 +59,7 @@ for:
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
-    - sh: make -f ./makefile.ubuntu test CXX=$COMPILER CXXFLAGS+=-std=c++17 CXXFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_ODBC_MSSQL_SERVER=localhost CXXFLAGS+=-DBARK_TEST_POSTGRES_SERVER=localhost CXXFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
+    - sh: make -f ./makefile.ubuntu test CXX=$COMPILER CPPFLAGS+=-DBARK_TEST_MYSQL_SERVER=localhost CPPFLAGS+=-DBARK_TEST_ODBC_MSSQL_SERVER=localhost CPPFLAGS+=-DBARK_TEST_POSTGRES_SERVER=localhost CPPFLAGS+=-DBARK_TEST_DATABASE_PWD=Password12!
 
   artifacts:
     - path: $(DEB_NAME).deb
