@@ -162,6 +162,8 @@ inline bool toggle(tree* ptr)
             case Qt::Checked:
                 def.state = Qt::Unchecked;
                 return true;
+            case Qt::PartiallyChecked:
+                break;
         }
     return false;
 }

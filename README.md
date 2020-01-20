@@ -46,15 +46,17 @@ Submodules:
 #### ubuntu 18.04
 
   ```
-	sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-	sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-	sudo apt-get update
-	sudo apt-get -y install git
-	sudo apt-get -y install libboost-dev
-	sudo apt-get -y install libgdal-dev
-	sudo apt-get -y install libgl1-mesa-dev
-	sudo apt-get -y install qt512-meta-minimal
-	sudo apt-get -y install qt512imageformats
+    sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+    sudo apt-get update
+    sudo apt-get -y install g++-8
+    sudo apt-get -y install git
+    sudo apt-get -y install libboost-dev
+    sudo apt-get -y install libgdal-dev
+    sudo apt-get -y install libgl1-mesa-dev
+    sudo apt-get -y install qt512-meta-minimal
+    sudo apt-get -y install qt512imageformats
+    source /opt/qt512/bin/qt512-env.sh
     wget https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```

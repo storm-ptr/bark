@@ -3,7 +3,7 @@ SOURCES = *.cpp
 HEADERS = *.h
 RESOURCES = resource.qrc
 CONFIG += c++17
-unix:QMAKE_CXXFLAGS += -std=c++17 -fPIC
+unix:QMAKE_CXXFLAGS += -std=c++17 -fPIC -Wno-missing-field-initializers
 DEFINES += ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 
 windows:INCLUDEPATH += ../../..
