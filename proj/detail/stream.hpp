@@ -4,7 +4,7 @@
 #define BARK_PROJ_STREAM_HPP
 
 #include <bark/detail/wkb.hpp>
-#include <bark/proj/detail/transform.hpp>
+#include <bark/proj/detail/transformation.hpp>
 #include <boost/none.hpp>
 
 namespace bark::proj {
@@ -12,7 +12,7 @@ namespace bark::proj {
 /// WKB visitor
 class stream {
 public:
-    stream(projPJ from, projPJ to) : from_(from), to_(to) {}
+    stream(const transformation& tf, PJ_DIRECTION dir) : tf_(tf), dir_(dir) {}
 
     void operator()(blob_view wkb)
     {
@@ -54,8 +54,8 @@ public:
     }
 
 private:
-    const projPJ from_;
-    const projPJ to_;
+    const transformation& tf_;
+    PJ_DIRECTION dir_;
     blob_view wkb_;
     double* begin_ = nullptr;
 
@@ -82,7 +82,7 @@ private:
     {
         if (begin_ == end())
             return;
-        transform(from_, to_, begin_, end());
+        tf_.trans_generic(dir_, begin_, end());
         begin_ = end();
     }
 };
