@@ -27,21 +27,21 @@ public:
 
     void trans_generic(PJ_DIRECTION dir, double* first, double* last) const
     {
-        auto count = std::distance(first, last) / 2;
-        auto res = proj_trans_generic(for_gis_.get(),
-                                      dir,
-                                      first,
-                                      2 * sizeof(double),
-                                      count,
-                                      first + 1,
-                                      2 * sizeof(double),
-                                      count,
-                                      nullptr,
-                                      0,
-                                      0,
-                                      nullptr,
-                                      0,
-                                      0);
+        size_t count = (size_t)std::distance(first, last) / 2;
+        size_t res = proj_trans_generic(for_gis_.get(),
+                                        dir,
+                                        first,
+                                        2 * sizeof(double),
+                                        count,
+                                        first + 1,
+                                        2 * sizeof(double),
+                                        count,
+                                        nullptr,
+                                        0,
+                                        0,
+                                        nullptr,
+                                        0,
+                                        0);
         if (count != res)
             throw_error();
     }
