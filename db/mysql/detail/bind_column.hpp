@@ -4,7 +4,6 @@
 #define BARK_DB_MYSQL_BIND_COLUMN_HPP
 
 #include <bark/db/mysql/detail/utility.hpp>
-#include <cstring>
 #include <stdexcept>
 
 namespace bark::db::mysql {
@@ -25,7 +24,6 @@ class column_val : public column {
 public:
     explicit column_val(MYSQL_BIND& bnd)
     {
-        memset(&bnd, 0, sizeof(MYSQL_BIND));
         bnd.is_null = &is_null_;
         bnd.buffer_type = code_of<T>();
         bnd.buffer = (void*)&val_;
@@ -53,7 +51,6 @@ class column_arr : public column {
 public:
     explicit column_arr(MYSQL_BIND& bnd) : bnd_(bnd)
     {
-        memset(&bnd_, 0, sizeof(MYSQL_BIND));
         bnd_.is_null = &is_null_;
         bnd_.buffer_type = code_of<T>();
         bnd_.length = &len_;

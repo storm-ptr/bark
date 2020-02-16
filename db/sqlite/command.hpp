@@ -5,7 +5,7 @@
 
 #include <bark/db/command.hpp>
 #include <bark/db/detail/transaction.hpp>
-#include <bark/db/sqlite/detail/bind_param.hpp>
+#include <bark/db/sqlite/detail/utility.hpp>
 #include <boost/algorithm/string.hpp>
 #include <stdexcept>
 
@@ -46,8 +46,21 @@ public:
             check(con_, sqlite3_exec(con_.get(), sql.c_str(), 0, 0, 0));
         }
         else {
-            for (int i = 0; i < (int)params.size(); ++i)
-                check(con_, bind_param(params[i], stmt_.get(), i));
+            for (int i = 1; i <= (int)params.size(); ++i) {
+                auto viz = overloaded{
+                    [=](std::monostate) { return sqlite3_bind_null(stmt, i); },
+                    [=](int64_t v) { return sqlite3_bind_int64(stmt, i, v); },
+                    [=](double v) { return sqlite3_bind_double(stmt, i, v); },
+                    [=](std::string_view v) {
+                        return sqlite3_bind_text(
+                            stmt, i, v.data(), int(v.size()), SQLITE_TRANSIENT);
+                    },
+                    [=](blob_view v) {
+                        return sqlite3_bind_blob(
+                            stmt, i, v.data(), int(v.size()), SQLITE_TRANSIENT);
+                    }};
+                check(con_, std::visit(std::move(viz), params[i - 1]));
+            }
             step();
         }
     }

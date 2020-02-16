@@ -6,7 +6,7 @@
 #include <bark/db/command.hpp>
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/mysql/detail/bind_column.hpp>
-#include <bark/db/mysql/detail/bind_param.hpp>
+#include <cstring>
 #include <stdexcept>
 
 namespace bark::db::mysql {
@@ -68,8 +68,26 @@ public:
         else {
             check(stmt_, r);
             std::vector<MYSQL_BIND> binds(params.size());
-            for (size_t i = 0; i < params.size(); ++i)
-                bind_param(params[i], binds[i]);
+            for (size_t i = 0; i < params.size(); ++i) {
+                auto viz = overloaded{
+                    [&](std::monostate) {
+                        binds[i].buffer_type = MYSQL_TYPE_NULL;
+                    },
+                    [&](const int64_t& v) {
+                        binds[i].buffer_type = code_of<int64_t>();
+                        binds[i].buffer = (char*)&v;
+                    },
+                    [&](const double& v) {
+                        binds[i].buffer_type = code_of<double>();
+                        binds[i].buffer = (char*)&v;
+                    },
+                    [&](auto v) {
+                        binds[i].buffer_type = code_of<decltype(v)>();
+                        binds[i].buffer = (char*)v.data();
+                        binds[i].buffer_length = (unsigned long)v.size();
+                    }};
+                std::visit(std::move(viz), params[i]);
+            }
             if (!binds.empty())
                 check(stmt_, mysql_stmt_bind_param(stmt_.get(), binds.data()));
             check(stmt_, mysql_stmt_execute(stmt_.get()));
@@ -81,12 +99,13 @@ public:
         reset_cols();
         result_holder res{stmt_ ? mysql_stmt_result_metadata(stmt_.get())
                                 : nullptr};
-        auto cols = res ? mysql_num_fields(res.get()) : 0;
+        unsigned cols = res ? mysql_num_fields(res.get()) : 0;
 
         std::vector<std::string> names(cols);
         binds_.resize(cols);
+        memset(binds_.data(), 0, binds_.size() * sizeof(MYSQL_BIND));
         cols_.resize(cols);
-        for (decltype(cols) i = 0; i < cols; ++i) {
+        for (unsigned i = 0; i < cols; ++i) {
             auto fld = mysql_fetch_field_direct(res.get(), i);
             names[i] = fld->name;
             cols_[i] = bind_column(fld->type, binds_[i]);
