@@ -39,7 +39,7 @@ struct param {
 template <class T>
 param(T)->param<T>;
 
-/// Provides a convenient interface to creating and running database queries.
+/// Convenient interface for preparing database queries.
 
 /// @code
 /// sql_builder bld = builder(cmd);
@@ -107,14 +107,14 @@ private:
     variant_ostream params_;
     size_t param_counter_ = 0;
 
-    void embed_param(const variant_t& var)
+    void embed_param(const variant_t& val)
     {
         std::visit(
             overloaded{[&](std::monostate) { sql_ << "NULL"; },
-                       [&](auto val) { sql_ << val; },
-                       [&](std::string_view val) { sql_ << "'" << val << "'"; },
-                       [&](blob_view val) { sql_ << "X'" << hex{val} << "'"; }},
-            var);
+                       [&](auto v) { sql_ << v; },
+                       [&](std::string_view v) { sql_ << "'" << v << "'"; },
+                       [&](blob_view v) { sql_ << "X'" << hex{v} << "'"; }},
+            val);
     }
 
     template <class T>
