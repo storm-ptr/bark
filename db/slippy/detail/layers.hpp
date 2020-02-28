@@ -8,6 +8,7 @@
 #include <bark/db/slippy/detail/bing.hpp>
 #include <bark/db/slippy/detail/cartodb.hpp>
 #include <bark/db/slippy/detail/double_gis.hpp>
+#include <bark/db/slippy/detail/google.hpp>
 #include <bark/db/slippy/detail/osm.hpp>
 #include <bark/db/slippy/detail/sputnik.hpp>
 #include <boost/fusion/algorithm.hpp>
@@ -48,6 +49,9 @@ private:
                         bing_maps,
                         cartodb,
                         double_gis,
+                        google_hybrid,
+                        google_map,
+                        google_satellite,
                         osm,
                         sputnik>
         layers_;
