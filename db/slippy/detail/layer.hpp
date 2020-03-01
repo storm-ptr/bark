@@ -17,8 +17,8 @@ constexpr int TileEpsg = 4326;
 struct layer {
     virtual ~layer() = default;
     virtual qualified_name name() = 0;
-    virtual int zmax() = 0;
     virtual std::string url(const tile&) = 0;
+    virtual int zmax() { return 19; };
 };
 
 inline std::string projection()

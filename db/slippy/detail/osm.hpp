@@ -8,16 +8,12 @@
 
 namespace bark::db::slippy {
 
-class osm : public layer {
-    random_index subdomain_{3};
-
-public:
+struct osm : layer {
     qualified_name name() override { return id("osm"); }
-
-    int zmax() override { return 19; }
 
     std::string url(const tile& tl) override
     {
+        static random_index subdomain_{3};
         std::ostringstream os;
         os << "http://" << char('a' + subdomain_())
            << ".tile.openstreetmap.org/" << tl.z << "/" << tl.x << "/" << tl.y

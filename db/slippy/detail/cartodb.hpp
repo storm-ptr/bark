@@ -11,8 +11,6 @@ namespace bark::db::slippy {
 struct cartodb : layer {
     qualified_name name() override { return id("cartodb"); }
 
-    int zmax() override { return 19; }
-
     std::string url(const tile& tl) override
     {
         std::ostringstream os;

@@ -44,7 +44,7 @@ public:
 
 private:
     boost::fusion::list<arcgis_imagery,
-                        arcgis_topo,
+                        arcgis_topo_map,
                         bing_aerials,
                         bing_maps,
                         cartodb,

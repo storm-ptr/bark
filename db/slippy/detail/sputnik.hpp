@@ -8,11 +8,8 @@
 
 namespace bark::db::slippy {
 
-class sputnik : public layer {
-public:
+struct sputnik : layer {
     qualified_name name() override { return id("sputnik"); }
-
-    int zmax() override { return 19; }
 
     std::string url(const tile& tl) override
     {

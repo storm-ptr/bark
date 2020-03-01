@@ -8,35 +8,31 @@
 
 namespace bark::db::slippy {
 
-class arcgis_imagery : public layer {
-public:
+inline std::string arcgis_url(std::string_view lyr, const tile& tl)
+{
+    std::ostringstream os;
+    os << "http://services.arcgisonline.com/ArcGIS/rest/services/World_" << lyr
+       << "/MapServer/tile/" << tl.z << "/" << tl.y << "/" << tl.x << ".png";
+    return os.str();
+}
+
+struct arcgis_imagery : layer {
     qualified_name name() override { return id("arcgis", "imagery"); }
 
-    int zmax() override { return 17; }
-
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://services.arcgisonline.com/ArcGIS/rest/services/"
-              "World_Imagery/MapServer/tile/"
-           << tl.z << "/" << tl.y << "/" << tl.x << ".png";
-        return os.str();
+        return arcgis_url("Imagery", tl);
     }
+
+    int zmax() override { return 17; }
 };
 
-class arcgis_topo : public layer {
-public:
-    qualified_name name() override { return id("arcgis", "topo"); }
-
-    int zmax() override { return 19; }
+struct arcgis_topo_map : layer {
+    qualified_name name() override { return id("arcgis", "topo_map"); }
 
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://services.arcgisonline.com/ArcGIS/rest/services/"
-              "World_Topo_Map/MapServer/tile/"
-           << tl.z << "/" << tl.y << "/" << tl.x << ".png";
-        return os.str();
+        return arcgis_url("Topo_Map", tl);
     }
 };
 

@@ -9,10 +9,10 @@
 namespace bark::db::slippy {
 
 /// @see https://msdn.microsoft.com/en-us/library/bb259689.aspx
-struct quad_key {
+struct bing_quad_key {
     const tile& tl;
 
-    friend std::ostream& operator<<(std::ostream& os, const quad_key& that)
+    friend std::ostream& operator<<(std::ostream& os, const bing_quad_key& that)
     {
         for (auto i = that.tl.z; i > 0; i--) {
             char digit = '0';
@@ -33,12 +33,10 @@ struct quad_key {
 struct bing_maps : layer {
     qualified_name name() override { return id("bing", "maps"); }
 
-    int zmax() override { return 19; }
-
     std::string url(const tile& tl) override
     {
         std::ostringstream os;
-        os << "http://tiles.virtualearth.net/tiles/r" << quad_key{tl}
+        os << "http://tiles.virtualearth.net/tiles/r" << bing_quad_key{tl}
            << ".png?g=1&shading=hill&n=z";
         return os.str();
     }
@@ -47,12 +45,10 @@ struct bing_maps : layer {
 struct bing_aerials : layer {
     qualified_name name() override { return id("bing", "aerials"); }
 
-    int zmax() override { return 19; }
-
     std::string url(const tile& tl) override
     {
         std::ostringstream os;
-        os << "http://tiles.virtualearth.net/tiles/a" << quad_key{tl}
+        os << "http://tiles.virtualearth.net/tiles/a" << bing_quad_key{tl}
            << ".jpeg?g=1";
         return os.str();
     }
