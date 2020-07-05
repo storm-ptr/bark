@@ -18,7 +18,7 @@ Submodules:
 
 ## How to run example/nanogis
 
-![](https://user-images.githubusercontent.com/3381451/86533104-57e39480-bed7-11ea-898f-aab1e90bdfe1.png)
+![](https://user-images.githubusercontent.com/3381451/86533362-4bf8d200-bed9-11ea-85d5-fa3b00b674cc.png)
 
 [download](https://github.com/storm-ptr/bark/releases/latest)
 
@@ -26,7 +26,7 @@ Submodules:
 
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-    sudo add-apt-repository ppa:ubuntugis/ppa
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.1804.deb
     sudo apt-get install -f
@@ -47,7 +47,7 @@ Submodules:
 
   ```
     sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic
-    sudo add-apt-repository ppa:ubuntugis/ppa
+    sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo apt-get -y install g++-8
     sudo apt-get -y install git

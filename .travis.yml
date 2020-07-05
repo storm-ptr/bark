@@ -15,13 +15,13 @@ matrix:
       apt:
         sources:
         - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
-        - sourceline: ppa:ubuntugis/ppa
+        - sourceline: ppa:ubuntugis/ubuntugis-unstable
         packages:
+        - postgresql-10-postgis-3
         - g++-8
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev
-        - postgresql-10-postgis-2.4
         - qt512-meta-minimal
         - qt512imageformats
         - doxygen
@@ -30,7 +30,7 @@ matrix:
 install:
 - source /opt/qt512/bin/qt512-env.sh
 script:
-- wget -P $TRAVIS_BUILD_DIR/.. https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
+- wget -P $TRAVIS_BUILD_DIR/.. https://github.com/catchorg/Catch2/releases/download/v2.12.3/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
 - export CXXFLAGS="-DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_POSTGRES_SERVER=localhost -DBARK_TEST_DATABASE_PWD="
 - make -f ./makefile.ubuntu test CXX=$COMPILER
