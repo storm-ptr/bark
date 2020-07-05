@@ -17,11 +17,11 @@ matrix:
         - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
         - sourceline: ppa:ubuntugis/ubuntugis-unstable
         packages:
-        - postgresql-10-postgis-3
         - g++-8
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev
+        - postgresql-10-postgis-3
         - qt512-meta-minimal
         - qt512imageformats
         - doxygen
