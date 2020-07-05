@@ -25,7 +25,7 @@ struct wkt {
 };
 
 template <class T>
-wkt(T)->wkt<T>;
+wkt(T) -> wkt<T>;
 
 namespace detail {
 

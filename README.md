@@ -57,7 +57,7 @@ Submodules:
     sudo apt-get -y install qt512-meta-minimal
     sudo apt-get -y install qt512imageformats
     source /opt/qt512/bin/qt512-env.sh
-    wget https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp
+    wget https://github.com/catchorg/Catch2/releases/download/v2.12.3/catch.hpp
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```
 
@@ -76,7 +76,7 @@ Submodules:
 * copy [boost](https://www.boost.org/users/download/) headers to ```C:\OSGeo4W64\include\boost```
 * Catch2 library (PowerShell)
   ```
-    Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
+    Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.12.3/catch.hpp -OutFile C:\OSGeo4W64\include\catch.hpp
   ```
 * install [Microsoft Visual C++](https://www.visualstudio.com/vs/cplusplus/) (Community)
 * install [Qt](https://www.qt.io/download) libraries and creator (Open Source)

@@ -37,7 +37,7 @@ for:
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
     - sh: source /opt/qt512/bin/qt512-env.sh
-    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
+    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.12.3/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
   build_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/example/nanogis
@@ -80,7 +80,7 @@ for:
   services:
     - mssql2017
     - mysql
-    - postgresql101
+    - postgresql201
 
   environment:
     NANOGIS_ARCHIVE: nanogis.windows.zip
@@ -95,12 +95,12 @@ for:
     - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
     - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
     - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-2.5.0x64.zip
-    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-2.5.0x64.zip > nul
-    - xcopy /s /y /q postgis-bundle-pg10-2.5.0x64 "C:\Program Files\PostgreSQL\10"
+    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg12/postgis-bundle-pg12-3.0.1x64.zip
+    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg12-3.0.1x64.zip > nul
+    - xcopy /s /y /q postgis-bundle-pg12-3.0.1x64 "C:\Program Files\PostgreSQL\12"
     - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.9.2/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
+    - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.12.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
     - 'SET INCLUDE=%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0;%INCLUDE%'
     - 'SET LIB=%OSGEO4W_ROOT%\lib;%LIB%'
 
@@ -117,7 +117,7 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
   before_test:
-    - call "C:\Program Files\PostgreSQL\10\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+    - call "C:\Program Files\PostgreSQL\12\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test

@@ -30,7 +30,7 @@ struct overloaded : Ts... {
 };
 
 template <class... Ts>
-overloaded(Ts...)->overloaded<Ts...>;
+overloaded(Ts...) -> overloaded<Ts...>;
 
 /// @see https://en.cppreference.com/w/cpp/iterator/iter_t
 template <class It>
@@ -173,7 +173,7 @@ struct list {
 };
 
 template <class... Ts>
-list(Ts...)->list<Ts...>;
+list(Ts...) -> list<Ts...>;
 
 class random_index {
 public:
@@ -209,7 +209,7 @@ struct same {
 };
 
 template <class T>
-same(T)->same<T>;
+same(T) -> same<T>;
 
 template <class Functor>
 struct streamable : Functor {
@@ -224,7 +224,7 @@ struct streamable : Functor {
 };
 
 template <class T>
-streamable(T)->streamable<T>;
+streamable(T) -> streamable<T>;
 
 }  // namespace bark
 

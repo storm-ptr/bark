@@ -37,7 +37,7 @@ struct param {
 };
 
 template <class T>
-param(T)->param<T>;
+param(T) -> param<T>;
 
 /// Convenient interface for preparing database queries.
 
