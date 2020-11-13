@@ -19,7 +19,6 @@ for:
   services:
     - mssql
     - mysql
-    - postgresql
 
   environment:
     COMPILER: g++-8
@@ -33,7 +32,6 @@ for:
     - sh: sudo apt-get -y install libboost-dev
     - sh: sudo apt-get -y install libgdal-dev
     - sh: sudo apt-get -y install libgl1-mesa-dev
-    - sh: sudo apt-get -y install postgresql-12-postgis-3
     - sh: sudo apt-get -y install qt512-meta-minimal
     - sh: sudo apt-get -y install qt512imageformats
     - sh: source /opt/qt512/bin/qt512-env.sh
@@ -53,13 +51,9 @@ for:
     - sh: cp $APPVEYOR_BUILD_FOLDER/example/nanogis/control.ubuntu.1804 $APPVEYOR_BUILD_FOLDER/$DEB_NAME/DEBIAN/control
     - sh: dpkg-deb --build $APPVEYOR_BUILD_FOLDER/$DEB_NAME
 
-  before_test:
-     - sh: sudo -u postgres psql -c "ALTER USER postgres with password 'Password12!';" postgres
-     - sh: psql 'host=localhost dbname=postgres user=postgres password=Password12!' -c "CREATE EXTENSION postgis;"
-
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
-    - sh: export CXXFLAGS="-DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_ODBC_MSSQL_SERVER=localhost -DBARK_TEST_POSTGRES_SERVER=localhost -DBARK_TEST_DATABASE_PWD=Password12!"
+    - sh: export CXXFLAGS="-DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_ODBC_MSSQL_SERVER=localhost -DBARK_TEST_DATABASE_PWD=Password12!"
     - sh: make -f ./makefile.ubuntu test CXX=$COMPILER
 
   artifacts:
@@ -95,9 +89,9 @@ for:
     - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
     - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
     - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/postgis-bundle-pg10-3.0.2x64.zip
-    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-3.0.2x64.zip > nul
-    - xcopy /s /y /q postgis-bundle-pg10-3.0.2x64 "C:\Program Files\PostgreSQL\10"
+    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/archive/postgis-bundle-pg10-3.0.1x64.zip
+    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-3.0.1x64.zip > nul
+    - xcopy /s /y /q postgis-bundle-pg10-3.0.1x64 "C:\Program Files\PostgreSQL\10"
     - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
