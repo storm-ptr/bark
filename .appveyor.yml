@@ -95,7 +95,7 @@ for:
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
     - 'SET INCLUDE=%INCLUDE%;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_73_0'
     - 'SET LIB=%LIB%;%OSGEO4W_ROOT%\lib'
-    - call C:\Qt\5.12\msvc2019_64\bin\qtenv2.bat
+    - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
   build_script:
