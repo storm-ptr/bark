@@ -76,6 +76,9 @@ for:
     - mysql
     - postgresql12
 
+  init:
+    - net start MSSQL$SQL2019
+
   environment:
     NANOGIS_ARCHIVE: nanogis.windows.zip
     NANOGIS_ROOT: C:\nanogis
