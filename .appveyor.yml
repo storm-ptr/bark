@@ -1,6 +1,6 @@
 image:
   - Ubuntu1804
-  - Visual Studio 2017
+  - Visual Studio 2019
 
 platform: x64
 
@@ -69,12 +69,12 @@ for:
 -
   matrix:
     only:
-      - image: Visual Studio 2017
+      - image: Visual Studio 2019
 
   services:
-    - mssql2017
+    - mssql2019
     - mysql
-    - postgresql101
+    - postgresql12
 
   environment:
     NANOGIS_ARCHIVE: nanogis.windows.zip
@@ -89,14 +89,14 @@ for:
     - call %OSGEO4W_ROOT%\osgeo4w-setup-x86_64.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P curl,gdal,libmysql,libmysql-devel,libpq,proj,spatialite,sqlite3 -R %OSGEO4W_ROOT% > NUL
     - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
     - call %OSGEO4W_ROOT%\bin\o4w_env.bat
-    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg10/postgis-bundle-pg10-3.0.2x64.zip
-    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg10-3.0.2x64.zip > nul
-    - xcopy /s /y /q postgis-bundle-pg10-3.0.2x64 "C:\Program Files\PostgreSQL\10"
-    - call C:\Qt\5.12\msvc2017_64\bin\qtenv2.bat
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg12/postgis-bundle-pg12-3.0.2x64.zip
+    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg12-3.0.2x64.zip > nul
+    - xcopy /s /y /q postgis-bundle-pg12-3.0.2x64 "C:\Program Files\PostgreSQL\12"
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
-    - 'SET INCLUDE=%INCLUDE%;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_69_0'
+    - 'SET INCLUDE=%INCLUDE%;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_73_0'
     - 'SET LIB=%LIB%;%OSGEO4W_ROOT%\lib'
+    - call C:\Qt\5.12\msvc2019_64\bin\qtenv2.bat
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
   build_script:
     - cd %APPVEYOR_BUILD_FOLDER%/example/nanogis
@@ -111,11 +111,11 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" a %APPVEYOR_BUILD_FOLDER%\example\%NANOGIS_ARCHIVE% %NANOGIS_ROOT%
 
   before_test:
-    - call "C:\Program Files\PostgreSQL\10\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
+    - call "C:\Program Files\PostgreSQL\12\bin\psql" -d postgres -U postgres -c "CREATE EXTENSION postgis;"
 
   test_script:
     - cd %APPVEYOR_BUILD_FOLDER%/test
-    - SET CXXFLAGS=/DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_MSSQL_SERVER=(local)\\SQL2017 /DBARK_TEST_ODBC_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_POSTGRES_SERVER=localhost /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
+    - SET CXXFLAGS=/DBARK_TEST_MYSQL_SERVER=localhost /DBARK_TEST_ODBC_MSSQL_SERVER=(local)\\SQL2019 /DBARK_TEST_POSTGRES_SERVER=localhost /DBARK_TEST_DATABASE_PWD=Password12!&& nmake -f ./makefile.windows test
 
   artifacts:
     - path: example\%NANOGIS_ARCHIVE%
