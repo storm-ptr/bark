@@ -5,8 +5,11 @@
 
 #include <bark/db/mysql/detail/utility.hpp>
 #include <stdexcept>
+#include <type_traits>
 
 namespace bark::db::mysql {
+
+using bool_t = std::remove_pointer_t<decltype(MYSQL_BIND::is_null)>;
 
 struct column {
     virtual ~column() = default;
@@ -18,7 +21,7 @@ using column_holder = std::unique_ptr<column>;
 
 template <class T>
 class column_val : public column {
-    my_bool is_null_ = 0;
+    bool_t is_null_ = 0;
     T val_ = 0;
 
 public:
@@ -44,7 +47,7 @@ public:
 template <class T>
 class column_arr : public column {
     MYSQL_BIND& bnd_;
-    my_bool is_null_ = 0;
+    bool_t is_null_ = 0;
     unsigned long len_ = 0;
     blob buf_;
 
