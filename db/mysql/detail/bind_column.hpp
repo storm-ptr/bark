@@ -4,12 +4,8 @@
 #define BARK_DB_MYSQL_BIND_COLUMN_HPP
 
 #include <bark/db/mysql/detail/utility.hpp>
-#include <stdexcept>
-#include <type_traits>
 
 namespace bark::db::mysql {
-
-using bool_t = std::remove_pointer_t<decltype(MYSQL_BIND::is_null)>;
 
 struct column {
     virtual ~column() = default;

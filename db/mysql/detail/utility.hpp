@@ -17,8 +17,11 @@
 #include <mysql.h>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace bark::db::mysql {
+
+using bool_t = std::remove_pointer_t<decltype(MYSQL_BIND::is_null)>;
 
 template <class T>
 constexpr auto code_of()
@@ -71,12 +74,6 @@ void check(const HandleHolder& handle, bool condition)
             msg = "MySQL error";
         throw std::runtime_error(msg);
     }
-}
-
-template <class HandleHolder>
-void check(const HandleHolder& handle, int r)
-{
-    check(handle, r == 0);
 }
 
 }  // namespace bark::db::mysql

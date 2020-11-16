@@ -30,7 +30,7 @@ public:
         for (auto opt : {MYSQL_OPT_CONNECT_TIMEOUT,
                          MYSQL_OPT_READ_TIMEOUT,
                          MYSQL_OPT_WRITE_TIMEOUT})
-            check(con_, mysql_options(con_.get(), opt, &Timeout));
+            check(con_, mysql_options(con_.get(), opt, &Timeout) == 0);
         check(con_,
               mysql_real_connect(con_.get(),
                                  host.c_str(),
@@ -40,7 +40,7 @@ public:
                                  port,
                                  0,
                                  CLIENT_MULTI_STATEMENTS) == con_.get());
-        check(con_, mysql_set_character_set(con_.get(), "utf8"));
+        check(con_, mysql_set_character_set(con_.get(), "utf8") == 0);
     }
 
     sql_syntax syntax() override
@@ -59,14 +59,14 @@ public:
         auto r = prepare(sql);
         if (r != 0 && params.empty()) {
             reset_stmt(nullptr);
-            check(con_, mysql_query(con_.get(), sql.c_str()));
+            check(con_, mysql_query(con_.get(), sql.c_str()) == 0);
             for (int r = 0; r >= 0; r = mysql_next_result(con_.get())) {
-                check(con_, r);
+                check(con_, r == 0);
                 result_holder{mysql_store_result(con_.get())};
             }
         }
         else {
-            check(stmt_, r);
+            check(stmt_, r == 0);
             std::vector<MYSQL_BIND> binds(params.size());
             for (size_t i = 0; i < params.size(); ++i) {
                 auto viz = overloaded{
@@ -89,8 +89,9 @@ public:
                 std::visit(std::move(viz), params[i]);
             }
             if (!binds.empty())
-                check(stmt_, mysql_stmt_bind_param(stmt_.get(), binds.data()));
-            check(stmt_, mysql_stmt_execute(stmt_.get()));
+                check(stmt_,
+                      mysql_stmt_bind_param(stmt_.get(), binds.data()) == 0);
+            check(stmt_, mysql_stmt_execute(stmt_.get()) == 0);
         }
     }
 
@@ -111,7 +112,8 @@ public:
             cols_[i] = bind_column(fld->type, binds_[i]);
         }
         if (cols)
-            check(stmt_, mysql_stmt_bind_result(stmt_.get(), binds_.data()));
+            check(stmt_,
+                  mysql_stmt_bind_result(stmt_.get(), binds_.data()) == 0);
         return names;
     }
 
@@ -130,7 +132,7 @@ public:
             if (cols_[i]->resize())
                 check(stmt_,
                       mysql_stmt_fetch_column(
-                          stmt_.get(), binds_.data() + i, (unsigned)i, 0));
+                          stmt_.get(), binds_.data() + i, (unsigned)i, 0) == 0);
             cols_[i]->write(os);
         }
         return true;
