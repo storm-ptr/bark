@@ -23,14 +23,14 @@ public:
     {
         using namespace std::chrono;
         constexpr auto Timeout =
-            (unsigned int)duration_cast<seconds>(DbTimeout).count();
+            (unsigned)duration_cast<seconds>(DbTimeout).count();
         con_.reset(mysql_init(0));
         if (!con_)
             throw std::runtime_error("MySQL error");
         for (auto opt : {MYSQL_OPT_CONNECT_TIMEOUT,
                          MYSQL_OPT_READ_TIMEOUT,
                          MYSQL_OPT_WRITE_TIMEOUT})
-            check(con_, mysql_options(con_.get(), opt, &Timeout) == 0);
+            check(con_, !mysql_options(con_.get(), opt, &Timeout));
         check(con_,
               mysql_real_connect(con_.get(),
                                  host.c_str(),
@@ -40,7 +40,7 @@ public:
                                  port,
                                  0,
                                  CLIENT_MULTI_STATEMENTS) == con_.get());
-        check(con_, mysql_set_character_set(con_.get(), "utf8") == 0);
+        check(con_, !mysql_set_character_set(con_.get(), "utf8"));
     }
 
     sql_syntax syntax() override
@@ -59,14 +59,14 @@ public:
         auto r = prepare(sql);
         if (r != 0 && params.empty()) {
             reset_stmt(nullptr);
-            check(con_, mysql_query(con_.get(), sql.c_str()) == 0);
+            check(con_, !mysql_query(con_.get(), sql.c_str()));
             for (int r = 0; r >= 0; r = mysql_next_result(con_.get())) {
-                check(con_, r == 0);
+                check(con_, !r);
                 result_holder{mysql_store_result(con_.get())};
             }
         }
         else {
-            check(stmt_, r == 0);
+            check(stmt_, !r);
             std::vector<MYSQL_BIND> binds(params.size());
             for (size_t i = 0; i < params.size(); ++i) {
                 auto viz = overloaded{
@@ -89,9 +89,8 @@ public:
                 std::visit(std::move(viz), params[i]);
             }
             if (!binds.empty())
-                check(stmt_,
-                      mysql_stmt_bind_param(stmt_.get(), binds.data()) == 0);
-            check(stmt_, mysql_stmt_execute(stmt_.get()) == 0);
+                check(stmt_, !mysql_stmt_bind_param(stmt_.get(), binds.data()));
+            check(stmt_, !mysql_stmt_execute(stmt_.get()));
         }
     }
 
@@ -109,11 +108,10 @@ public:
         for (unsigned i = 0; i < cols; ++i) {
             auto fld = mysql_fetch_field_direct(res.get(), i);
             names[i] = fld->name;
-            cols_[i] = bind_column(fld->type, binds_[i]);
+            cols_[i] = bind_column(fld->type, fld->charsetnr, binds_[i]);
         }
         if (cols)
-            check(stmt_,
-                  mysql_stmt_bind_result(stmt_.get(), binds_.data()) == 0);
+            check(stmt_, !mysql_stmt_bind_result(stmt_.get(), binds_.data()));
         return names;
     }
 
@@ -128,11 +126,11 @@ public:
             return false;
         check(stmt_, 1 != r);
 
-        for (size_t i = 0; i < cols_.size(); ++i) {
+        for (unsigned i = 0; i < (unsigned)cols_.size(); ++i) {
             if (cols_[i]->resize())
                 check(stmt_,
-                      mysql_stmt_fetch_column(
-                          stmt_.get(), binds_.data() + i, (unsigned)i, 0) == 0);
+                      !mysql_stmt_fetch_column(
+                          stmt_.get(), binds_.data() + i, i, 0));
             cols_[i]->write(os);
         }
         return true;

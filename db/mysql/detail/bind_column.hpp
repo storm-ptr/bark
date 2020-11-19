@@ -74,7 +74,9 @@ public:
     }
 };
 
-inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
+inline column_holder bind_column(enum_field_types type,
+                                 unsigned charsetnr,
+                                 MYSQL_BIND& bnd)
 {
     switch (type) {
         case MYSQL_TYPE_SHORT:
@@ -88,6 +90,12 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
         case MYSQL_TYPE_DOUBLE:
         case MYSQL_TYPE_NEWDECIMAL:
             return std::make_unique<column_val<double>>(bnd);
+        case MYSQL_TYPE_BLOB:
+        case MYSQL_TYPE_LONG_BLOB:
+        case MYSQL_TYPE_MEDIUM_BLOB:
+        case MYSQL_TYPE_TINY_BLOB:
+            if (63 == charsetnr)
+                return std::make_unique<column_arr<blob_view>>(bnd);
         case MYSQL_TYPE_DATE:
         case MYSQL_TYPE_DATETIME:
         case MYSQL_TYPE_NEWDATE:
@@ -99,11 +107,6 @@ inline column_holder bind_column(enum_field_types type, MYSQL_BIND& bnd)
         case MYSQL_TYPE_VARCHAR:
         case MYSQL_TYPE_YEAR:
             return std::make_unique<column_arr<std::string_view>>(bnd);
-        case MYSQL_TYPE_BLOB:
-        case MYSQL_TYPE_LONG_BLOB:
-        case MYSQL_TYPE_MEDIUM_BLOB:
-        case MYSQL_TYPE_TINY_BLOB:
-            return std::make_unique<column_arr<blob_view>>(bnd);
         default:
             throw std::runtime_error("unsupported MySQL type: " +
                                      std::to_string(type));
