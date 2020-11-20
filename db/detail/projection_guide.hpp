@@ -3,7 +3,6 @@
 #ifndef BARK_DB_PROJECTION_GUIDE_HPP
 #define BARK_DB_PROJECTION_GUIDE_HPP
 
-#include <bark/db/detail/provider_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/proj/bimap.hpp>
 #include <bark/proj/epsg.hpp>
@@ -33,7 +32,9 @@ protected:
     {
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().projection_sql(bld, col_nm, type);
-        return fetch_or_default<int>(as_mixin(), bld);
+        auto cmd = as_mixin().make_command();
+        exec(*cmd, bld);
+        return fetch_or(*cmd, 0);
     }
 
     int find_srid(const std::string& pj)

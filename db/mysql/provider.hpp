@@ -34,7 +34,10 @@ public:
              std::string pwd)
         : provider_impl<provider>{
               [=] { return new command(host, port, db, usr, pwd); },
-              std::make_unique<mysql_dialect>()}
+              [&]() -> dialect_holder {
+                  auto cmd = command(host, port, db, usr, pwd);
+                  return std::make_unique<mysql_dialect>(cmd);
+              }()}
     {
     }
 };

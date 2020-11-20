@@ -36,13 +36,14 @@ public:
         : provider_impl<provider>{
               [=] { return new command(conn_str); },
               [&]() -> dialect_holder {
-                  auto dbms = unicode::to_lower(command(conn_str).dbms_name());
+                  auto cmd = command(conn_str);
+                  auto dbms = unicode::to_lower(cmd.dbms_name());
                   if (within(dbms)("db2"))
                       return std::make_unique<db2_dialect>();
                   else if (all_of({"microsoft", "sql", "server"}, within(dbms)))
                       return std::make_unique<mssql_dialect>();
                   else if (within(dbms)("mysql"))
-                      return std::make_unique<mysql_dialect>();
+                      return std::make_unique<mysql_dialect>(cmd);
                   else if (within(dbms)("postgres"))
                       return std::make_unique<postgres_dialect>();
                   else

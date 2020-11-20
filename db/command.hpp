@@ -6,6 +6,7 @@
 #include <bark/db/fwd.hpp>
 #include <bark/db/rowset.hpp>
 #include <bark/db/sql_builder.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
 
@@ -57,6 +58,14 @@ inline rowset fetch_all(command& cmd)
     while (cmd.fetch(os))
         ;
     return {std::move(cols), std::move(os.data)};
+}
+
+template <class Result>
+auto fetch_or(command& cmd, const Result& val)
+{
+    auto rows = fetch_all(cmd);
+    auto is = variant_istream{rows.data};
+    return is.data.empty() ? val : boost::lexical_cast<Result>(read(is));
 }
 
 }  // namespace bark::db

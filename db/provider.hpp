@@ -85,16 +85,16 @@ inline sql_builder builder(provider& pvd)
 }
 
 template <class Sql>
-void exec(provider& pvd, const Sql& sql)
+void exec(provider& pvd, Sql&& sql)
 {
-    exec(*pvd.make_command(), sql);
+    exec(*pvd.make_command(), std::forward<Sql>(sql));
 }
 
 template <class Sql>
-rowset fetch_all(provider& pvd, const Sql& sql)
+rowset fetch_all(provider& pvd, Sql&& sql)
 {
     auto cmd = pvd.make_command();
-    exec(*cmd, sql);
+    exec(*cmd, std::forward<Sql>(sql));
     return fetch_all(*cmd);
 }
 
@@ -153,6 +153,11 @@ inline sql_builder drop_sql(provider& pvd, const qualified_name& tbl_nm)
     auto res = builder(pvd);
     res << "DROP TABLE " << tbl_nm;
     return res;
+}
+
+inline column_def column(provider& pvd, const qualified_name& col_nm)
+{
+    return *find(pvd.table(qualifier(col_nm)).columns, col_nm.back());
 }
 
 }  // namespace bark::db

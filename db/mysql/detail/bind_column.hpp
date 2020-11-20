@@ -96,6 +96,7 @@ inline column_holder bind_column(enum_field_types type,
         case MYSQL_TYPE_TINY_BLOB:
             if (63 == charsetnr)
                 return std::make_unique<column_arr<blob_view>>(bnd);
+            [[fallthrough]];
         case MYSQL_TYPE_DATE:
         case MYSQL_TYPE_DATETIME:
         case MYSQL_TYPE_NEWDATE:

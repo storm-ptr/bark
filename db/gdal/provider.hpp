@@ -4,7 +4,6 @@
 #define BARK_DB_GDAL_PROVIDER_HPP
 
 #include <bark/db/detail/cacher.hpp>
-#include <bark/db/detail/provider_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/db/gdal/command.hpp>
 #include <bark/db/gdal/detail/dataset.hpp>

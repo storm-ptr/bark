@@ -5,7 +5,6 @@
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/pool.hpp>
-#include <bark/db/detail/provider_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <boost/lexical_cast.hpp>
@@ -128,9 +127,11 @@ protected:
 
     std::string load_current_schema()
     {
-        auto bld = builder(as_mixin());
+        auto bld = builder(*this);
         as_dialect().current_schema_sql(bld);
-        return fetch_or_default<std::string>(as_mixin(), bld);
+        auto cmd = make_command();
+        exec(*cmd, bld);
+        return fetch_or(*cmd, std::string{});
     }
 
     rtree load_tiles(const qualified_name& col_nm, std::string_view type)
