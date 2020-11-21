@@ -1,7 +1,7 @@
 language: cpp
 if: tag IS present
 sudo: true
-dist: bionic
+dist: focal
 git:
   depth: 1
 services:
@@ -9,14 +9,14 @@ services:
 matrix:
   include:
   - os: linux
-    env: COMPILER=g++-8
+    env: COMPILER=g++
     addons:
       apt:
         sources:
-        - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
+        - sourceline: ppa:beineri/opt-qt-5.12.9-focal
         - sourceline: ppa:ubuntugis/ubuntugis-unstable
         packages:
-        - g++-8
+        - g++
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev

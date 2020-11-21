@@ -3,6 +3,6 @@ Version: 1.0.0
 Section: base
 Priority: optional
 Architecture: amd64
-Depends: libgdal20, qt512base
+Depends: libgdal27, qt512base
 Maintainer: Andrew Naplavkov <andrew.naplavkov@gmail.com>
 Description: nanogis
