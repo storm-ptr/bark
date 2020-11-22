@@ -53,13 +53,14 @@ string_map column_matching_dialog::matching() const
 {
     string_map res;
     for (int i(0); i < grid_->rowCount(); ++i) {
-        auto from = static_cast<QLabel*>(grid_->itemAtPosition(i, 0)->widget())
-                        ->text()
-                        .toStdString();
-        auto to = static_cast<QComboBox*>(grid_->itemAtPosition(i, 1)->widget())
-                      ->currentText()
+        auto to = static_cast<QLabel*>(grid_->itemAtPosition(i, 0)->widget())
+                      ->text()
                       .toStdString();
-        if (!to.empty())
+        auto from =
+            static_cast<QComboBox*>(grid_->itemAtPosition(i, 1)->widget())
+                ->currentText()
+                .toStdString();
+        if (!from.empty())
             res.insert({from, to});
     }
     return res;

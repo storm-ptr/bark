@@ -146,9 +146,9 @@ TEST_CASE("db_geometry")
         cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, rows_from));
         cmd->commit();
         pvd_to->refresh();
-        auto rowset_from =
+        auto rowset_to =
             fetch_all(*pvd_to, select_sql(*pvd_to, tbl_to.name, 0, Limit));
-        auto rows_to = select(cols, rowset_from);
+        auto rows_to = select(cols, rowset_to);
         bark::db::for_each_blob(rows_to, col, wkb_unifier{});
         REQUIRE(rows_from == rows_to);
 
