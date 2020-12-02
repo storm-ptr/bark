@@ -91,8 +91,8 @@ for:
     - del /Q /F %OSGEO4W_ROOT%\bin\boost*.dll %OSGEO4W_ROOT%\bin\mod_spatialite.dll
     - call %OSGEO4W_ROOT%\bin\o4w_env.bat
     - curl -L -O -S -s http://download.osgeo.org/postgis/windows/pg12/postgis-bundle-pg12-3.0.3x64.zip
-    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg12-3.0.2x64.zip > nul
-    - xcopy /s /y /q postgis-bundle-pg12-3.0.2x64 "C:\Program Files\PostgreSQL\12"
+    - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg12-3.0.3x64.zip > nul
+    - xcopy /s /y /q postgis-bundle-pg12-3.0.3x64 "C:\Program Files\PostgreSQL\12"
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
     - 'SET INCLUDE=%INCLUDE%;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_73_0'
     - 'SET LIB=%LIB%;%OSGEO4W_ROOT%\lib'
