@@ -13,48 +13,41 @@ namespace bark::db {
 struct dialect {
     virtual ~dialect() = default;
 
-    /// SRID, EPSG, PROJ4
-    virtual void projections_sql(sql_builder& bld) = 0;
+    /// SCHEMA_NAME
+    virtual void current_schema_sql(sql_builder&) = 0;
 
     /// TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME
-    virtual void geometries_sql(sql_builder& bld) = 0;
+    virtual void geometries_sql(sql_builder&) = 0;
+
+    /// SRID, EPSG, PROJ4
+    virtual void projections_sql(sql_builder&) = 0;
 
     /// COLUMN_NAME, DATA_TYPE, NUMERIC_SCALE
-    virtual void columns_sql(sql_builder& bld,
-                             const qualified_name& tbl_nm) = 0;
-
-    /// SRID
-    virtual void projection_sql(sql_builder& bld,
-                                const qualified_name& col_nm,
-                                std::string_view type) = 0;
+    virtual void columns_sql(sql_builder&, const qualified_name& tbl_nm) = 0;
 
     /// INDEX_SCHEMA, INDEX_NAME, IS_PRIMARY, COLUMN_NAME, IS_DESCENDING
-    virtual void indexes_sql(sql_builder& bld,
-                             const qualified_name& tbl_nm) = 0;
+    virtual void indexes_sql(sql_builder&, const qualified_name& tbl_nm) = 0;
+
+    /// SRID
+    virtual void projection_sql(sql_builder&, const qualified_name& col_nm) = 0;
 
     /// COUNT, ((XMIN, YMIN, XMAX, YMAX) | EXTENT)
-    virtual void extent_sql(sql_builder& bld,
-                            const qualified_name& col_nm,
-                            std::string_view type) = 0;
+    virtual void extent_sql(sql_builder&, const qualified_name& col_nm) = 0;
 
-    /// SCHEMA_NAME
-    virtual void current_schema_sql(sql_builder& bld) = 0;
-
-    virtual void add_geometry_column_sql(sql_builder& bld,
-                                         const table_def& tbl,
-                                         std::string_view col_nm,
+    virtual void add_geometry_column_sql(sql_builder&,
+                                         const qualified_name& col_nm,
                                          int srid) = 0;
 
-    virtual void create_spatial_index_sql(sql_builder& bld,
-                                          const table_def& tbl,
-                                          const index_def& idx) = 0;
+    virtual void create_spatial_index_sql(sql_builder&,
+                                          const qualified_name& col_nm,
+                                          const geometry::box&) = 0;
 
-    virtual void window_clause(sql_builder& bld,
+    virtual void window_clause(sql_builder&,
                                const table_def& tbl,
                                std::string_view col_nm,
                                const geometry::box& extent) = 0;
 
-    virtual void page_clause(sql_builder& bld, size_t offset, size_t limit) = 0;
+    virtual void page_clause(sql_builder&, size_t offset, size_t limit) = 0;
 
     virtual column_type type(std::string_view type, int scale) = 0;
 

@@ -50,14 +50,19 @@ public:
         return iso_type(type, scale);
     }
 
-    void projection_sql(sql_builder& bld,
-                        const qualified_name& col_nm,
-                        std::string_view type) override
+    void projection_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        if (type == "geography")
-            bld << "SELECT 4326";
-        else
-            ogc_projection_sql(bld, col_nm);
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
+        bld << "(SELECT srid FROM geometry_columns WHERE "
+            << "LOWER(f_table_schema) = LOWER(" << param{scm} << ") AND "
+            << "LOWER(f_table_name) = LOWER(" << param{tbl}
+            << ") AND LOWER(f_geometry_column) = LOWER(" << param{col}
+            << ")) UNION ALL (SELECT srid FROM geography_columns WHERE "
+            << "LOWER(f_table_schema) = LOWER(" << param{scm} << ") AND "
+            << "LOWER(f_table_name) = LOWER(" << param{tbl}
+            << ") AND LOWER(f_geography_column) = LOWER(" << param{col} << "))";
     }
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
@@ -96,15 +101,10 @@ WHERE attrelid = tbl AND attnum = cols[col])";
             return st_geom_from_wkb(srid);
     }
 
-    void extent_sql(sql_builder& bld,
-                    const qualified_name& col_nm,
-                    std::string_view type) override
+    void extent_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        if (type == "geography")
-            ogc_extent_sql(bld, col_nm);
-        else
-            bld << "SELECT COUNT(1), ST_AsBinary(ST_Extent("
-                << id(col_nm.back()) << ")) FROM " << qualifier(col_nm);
+        bld << "SELECT COUNT(1), ST_AsBinary(ST_Extent(" << id(col_nm.back())
+            << "::geometry)) FROM " << qualifier(col_nm);
     }
 
     void window_clause(sql_builder& bld,
@@ -137,22 +137,23 @@ WHERE attrelid = tbl AND attnum = cols[col])";
     }
 
     void add_geometry_column_sql(sql_builder& bld,
-                                 const table_def& tbl,
-                                 std::string_view col_nm,
+                                 const qualified_name& col_nm,
                                  int srid) override
     {
-        auto& scm = tbl.name.at(-2);
-        bld << "SELECT AddGeometryColumn(" << param{scm} << ", "
-            << param{tbl.name.back()} << ", " << param{col_nm} << ", " << srid
-            << ", " << param{"GEOMETRY"} << ", 2)";
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
+        bld << "SELECT AddGeometryColumn(" << param{scm} << ", " << param{tbl}
+            << ", " << param{col} << ", " << srid << ", " << param{"GEOMETRY"}
+            << ", 2)";
     }
 
     void create_spatial_index_sql(sql_builder& bld,
-                                  const table_def& tbl,
-                                  const index_def& idx) override
+                                  const qualified_name& col_nm,
+                                  const geometry::box&) override
     {
-        bld << "CREATE INDEX ON " << tbl.name << " USING GIST ("
-            << list{idx.columns, ", ", id<>} << ")";
+        bld << "CREATE INDEX " << index_name(col_nm) << " ON "
+            << qualifier(col_nm) << " USING GIST (" << id(col_nm.back()) << ")";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override

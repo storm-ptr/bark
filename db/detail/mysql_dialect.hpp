@@ -66,9 +66,7 @@ public:
         return iso_type(type, scale);
     }
 
-    void projection_sql(sql_builder& bld,
-                        const qualified_name& col_nm,
-                        std::string_view) override
+    void projection_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
         auto& col = col_nm.back();
         auto& tbl = col_nm.at(-2);
@@ -120,24 +118,22 @@ public:
             };
     }
 
-    void extent_sql(sql_builder& bld,
-                    const qualified_name& col_nm,
-                    std::string_view) override
+    void extent_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        if (version_ < 8)
-            ogc_extent_sql(bld, col_nm);
-        else
-            bld << R"(
+        bld << R"(
 SELECT
     COUNT(1),
     Min(ST_X(ST_PointN(e, 1))),
     Min(ST_Y(ST_PointN(e, 1))),
     Max(ST_X(ST_PointN(e, 3))),
     Max(ST_Y(ST_PointN(e, 3)))
-FROM (
-    SELECT ST_ExteriorRing(ST_Envelope(ST_GeomFromWKB(ST_AsBinary()"
-                << id(col_nm.back()) << ", 'axis-order=long-lat')))) e FROM "
-                << qualifier(col_nm) << ") t";
+FROM (SELECT ST_ExteriorRing(ST_Envelope()";
+        if (version_ >= 8)
+            bld << "ST_GeomFromWKB(ST_AsBinary(";
+        bld << id(col_nm.back());
+        if (version_ >= 8)
+            bld << ", 'axis-order=long-lat'))";
+        bld << ")) e FROM " << qualifier(col_nm) << ") t";
     }
 
     void window_clause(sql_builder& bld,
@@ -170,12 +166,11 @@ FROM (
     }
 
     void add_geometry_column_sql(sql_builder& bld,
-                                 const table_def& tbl,
-                                 std::string_view col_nm,
+                                 const qualified_name& col_nm,
                                  int srid) override
     {
-        bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
-            << " GEOMETRY NOT NULL";
+        bld << "ALTER TABLE " << qualifier(col_nm) << " ADD "
+            << id(col_nm.back()) << " GEOMETRY NOT NULL";
         if (version_ < 8)
             bld << " COMMENT " << param{std::to_string(srid)};
         else
@@ -183,11 +178,11 @@ FROM (
     }
 
     void create_spatial_index_sql(sql_builder& bld,
-                                  const table_def& tbl,
-                                  const index_def& idx) override
+                                  const qualified_name& col_nm,
+                                  const geometry::box&) override
     {
-        bld << "CREATE SPATIAL INDEX " << index_name(tbl.name, idx.columns)
-            << " ON " << tbl.name << " (" << id(idx.columns.front()) << ")";
+        bld << "CREATE SPATIAL INDEX " << index_name(col_nm) << " ON "
+            << qualifier(col_nm) << " (" << id(col_nm.back()) << ")";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override

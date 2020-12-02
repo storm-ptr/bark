@@ -35,11 +35,13 @@ public:
                                  : iso_type(type, scale);
     }
 
-    void projection_sql(sql_builder& bld,
-                        const qualified_name& col_nm,
-                        std::string_view) override
+    void projection_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        ogc_projection_sql(bld, col_nm);
+        auto& tbl = col_nm.at(-2);
+        auto& col = col_nm.back();
+        bld << "SELECT srid FROM geometry_columns WHERE "
+            << "LOWER(f_table_name) = LOWER(" << param{tbl}
+            << ") AND LOWER(f_geometry_column) = LOWER(" << param{col} << ")";
     }
 
     void indexes_sql(sql_builder&, const qualified_name&) override
@@ -54,9 +56,7 @@ public:
         return st_geom_from_wkb(srid);
     }
 
-    void extent_sql(sql_builder& bld,
-                    const qualified_name& col_nm,
-                    std::string_view) override
+    void extent_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
         bld << "SELECT COUNT(1), ST_AsBinary(Extent(" << id(col_nm.back())
             << ")) FROM " << qualifier(col_nm);
@@ -70,7 +70,8 @@ public:
         using namespace geometry;
         auto cols = {col_nm};
         if (indexed(tbl.indexes, cols))
-            bld << "rowid IN (SELECT pkid FROM " << index_name(tbl.name, cols)
+            bld << "rowid IN (SELECT pkid FROM "
+                << index_name(tbl.name.back(), cols)
                 << " WHERE xmax >= " << param{left(ext)}
                 << " AND xmin <= " << param{right(ext)}
                 << " AND ymax >= " << param{bottom(ext)}
@@ -98,21 +99,23 @@ public:
     }
 
     void add_geometry_column_sql(sql_builder& bld,
-                                 const table_def& tbl,
-                                 std::string_view col_nm,
+                                 const qualified_name& col_nm,
                                  int srid) override
     {
-        bld << "SELECT AddGeometryColumn(" << param{tbl.name.back()} << ", "
-            << param{col_nm} << ", " << srid << ", " << param{"GEOMETRY"}
-            << ")";
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        bld << "SELECT AddGeometryColumn(" << param{tbl} << ", " << param{col}
+            << ", " << srid << ", " << param{"GEOMETRY"} << ")";
     }
 
     void create_spatial_index_sql(sql_builder& bld,
-                                  const table_def& tbl,
-                                  const index_def& idx) override
+                                  const qualified_name& col_nm,
+                                  const geometry::box&) override
     {
-        bld << "SELECT CreateSpatialIndex(" << param{tbl.name.back()} << ", "
-            << param{idx.columns.front()} << ")";
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        bld << "SELECT CreateSpatialIndex(" << param{tbl} << ", " << param{col}
+            << ")";
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override

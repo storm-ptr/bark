@@ -28,10 +28,10 @@ protected:
         return res.empty() ? proj::epsg() : res;
     }
 
-    int load_projection(const qualified_name& col_nm, std::string_view type)
+    int load_projection(const qualified_name& col_nm)
     {
         auto bld = builder(as_mixin());
-        as_mixin().as_dialect().projection_sql(bld, col_nm, type);
+        as_mixin().as_dialect().projection_sql(bld, col_nm);
         auto cmd = as_mixin().make_command();
         exec(*cmd, bld);
         return fetch_or(*cmd, 0);

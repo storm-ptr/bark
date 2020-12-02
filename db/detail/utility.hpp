@@ -12,11 +12,16 @@
 namespace bark::db {
 
 template <class ColumnNames>
-auto index_name(const qualified_name& tbl, const ColumnNames& cols)
+auto index_name(std::string_view tbl, const ColumnNames& cols)
 {
     std::ostringstream os;
-    os << "idx_" << tbl.back() << "_" << list{cols, "_"};
+    os << "idx_" << tbl << "_" << list{cols, "_"};
     return id(os.str());
+}
+
+inline auto index_name(const qualified_name& col_nm)
+{
+    return index_name(col_nm.at(-2), std::initializer_list{col_nm.back()});
 }
 
 /// OpenGIS Document 99-049
@@ -90,30 +95,6 @@ inline void iso_columns_sql(sql_builder& bld, const qualified_name& tbl_nm)
            "information_schema.columns WHERE table_schema = "
         << param{scm} << " AND table_name = " << param{tbl_nm.back()}
         << " ORDER BY ordinal_position";
-}
-
-inline void ogc_projection_sql(sql_builder& bld, const qualified_name& col_nm)
-{
-    auto& tbl = col_nm.at(-2);
-    auto& scm = col_nm.at(-3);
-    bld << "SELECT srid FROM geometry_columns WHERE ";
-    if (!scm.empty())
-        bld << "LOWER(f_table_schema) = LOWER(" << param{scm} << ") AND ";
-    bld << "LOWER(f_table_name) = LOWER(" << param{tbl}
-        << ") AND LOWER(f_geometry_column) = LOWER(" << param{col_nm.back()}
-        << ")";
-}
-
-inline void ogc_extent_sql(sql_builder& bld, const qualified_name& col_nm)
-{
-    bld << R"(
-SELECT COUNT(1),
-       Min(ST_X(ST_PointN(e, 1))),
-       Min(ST_Y(ST_PointN(e, 1))),
-       Max(ST_X(ST_PointN(e, 3))),
-       Max(ST_Y(ST_PointN(e, 3)))
-FROM (SELECT ST_ExteriorRing(ST_Envelope()"
-        << id(col_nm.back()) << ")) e FROM " << qualifier(col_nm) << ") t";
 }
 
 inline auto st_as_binary()

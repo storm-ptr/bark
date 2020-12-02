@@ -134,10 +134,10 @@ protected:
         return fetch_or(*cmd, std::string{});
     }
 
-    rtree load_tiles(const qualified_name& col_nm, std::string_view type)
+    rtree load_tiles(const qualified_name& col_nm)
     {
         auto bld = builder(as_mixin());
-        as_dialect().extent_sql(bld, col_nm, type);
+        as_dialect().extent_sql(bld, col_nm);
         auto rows = fetch_all(as_mixin(), bld);
         auto row = select(rows).front();
         auto count = boost::lexical_cast<size_t>(row[0]);
@@ -160,11 +160,11 @@ protected:
                                  std::string_view type)
     {
         auto col_nm = id(tbl_nm, col.name);
-        auto srid = as_mixin().load_projection(col_nm, type);
+        auto srid = as_mixin().load_projection(col_nm);
         col.projection = as_mixin().find_proj(srid);
         col.decoder = as_dialect().geometry_decoder();
         col.encoder = as_dialect().geometry_encoder(type, srid);
-        col.tiles = as_mixin().load_tiles(col_nm, type);
+        col.tiles = as_mixin().load_tiles(col_nm);
     }
 
 private:

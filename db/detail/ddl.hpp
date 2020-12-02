@@ -8,6 +8,7 @@
 #include <bark/db/sql_builder.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <initializer_list>
 #include <sstream>
 
 namespace bark::db {
@@ -50,8 +51,8 @@ private:
                     [&](auto& col) {
                         auto name = col.name;
                         auto type = dial.type_name(col.type);
-                        auto cols = {col.name};
-                        auto not_null = indexed(tbl.indexes, cols);
+                        auto not_null = indexed(
+                            tbl.indexes, std::initializer_list{col.name});
                         return column{name, type, not_null};
                     }};
         auto pri =
@@ -76,7 +77,7 @@ private:
                 }
             }
             as_mixin().as_dialect().add_geometry_column_sql(
-                bld, tbl, col.name, srid);
+                bld, id(tbl.name, col.name), srid);
             bld << ";\n";
         }
     }
@@ -87,11 +88,12 @@ private:
                                            same{index_type::Secondary})) {
             auto& col = *db::find(tbl.columns, idx.columns.front());
             if (col.type == column_type::Geometry)
-                as_mixin().as_dialect().create_spatial_index_sql(bld, tbl, idx);
+                as_mixin().as_dialect().create_spatial_index_sql(
+                    bld, id(tbl.name, col.name), extent(col));
             else
-                bld << "CREATE INDEX " << index_name(tbl.name, idx.columns)
-                    << " ON " << tbl.name << " ("
-                    << list{idx.columns, ", ", id<>} << ")";
+                bld << "CREATE INDEX "
+                    << index_name(tbl.name.back(), idx.columns) << "ON "
+                    << tbl.name << " (" << list{idx.columns, ", ", id<>} << ")";
             bld << ";\n";
         }
     }

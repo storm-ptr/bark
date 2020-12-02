@@ -8,7 +8,6 @@
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
-#include <boost/algorithm/cxx11/any_of.hpp>
 
 namespace bark::db {
 
@@ -43,9 +42,7 @@ public:
         return iso_type(type, scale);
     }
 
-    void projection_sql(sql_builder& bld,
-                        const qualified_name& col_nm,
-                        std::string_view) override
+    void projection_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
         auto& col = col_nm.back();
         auto& tbl = col_nm.at(-2);
@@ -83,12 +80,15 @@ public:
         };
     }
 
-    void extent_sql(sql_builder& bld,
-                    const qualified_name& col_nm,
-                    std::string_view type) override
+    void extent_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        bld << "SELECT COUNT(1), " << type << "::EnvelopeAggregate("
-            << id(col_nm.back()) << ").STAsBinary() FROM " << qualifier(col_nm);
+        // @see
+        // https://stackoverflow.com/questions/47725899/sql-geographyenvelopeaggregate-output-not-accurate
+        auto col = id(col_nm.back());
+        bld << "SELECT COUNT(1), "
+               "geometry::EnvelopeAggregate(geometry::STGeomFromWKB("
+            << col << ".STAsBinary(), " << col << ".STSrid)).STAsBinary() FROM "
+            << qualifier(col_nm);
     }
 
     void window_clause(sql_builder& bld,
@@ -121,33 +121,30 @@ public:
     }
 
     void add_geometry_column_sql(sql_builder& bld,
-                                 const table_def& tbl,
-                                 std::string_view col_nm,
+                                 const qualified_name& col_nm,
                                  int srid) override
     {
-        auto& scm = tbl.name.at(-2);
-        bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        auto& scm = col_nm.at(-3);
+        bld << "ALTER TABLE " << qualifier(col_nm) << " ADD " << id(col)
             << " geometry;\nEXEC sp_addextendedproperty @name = "
             << param{"SRID"} << ", @value = " << srid
             << ",\n\t@level0type = " << param{"Schema"}
             << ", @level0name = " << param{scm}
             << ",\n\t@level1type = " << param{"Table"}
-            << ", @level1name = " << param{tbl.name.back()}
+            << ", @level1name = " << param{tbl}
             << ",\n\t@level2type = " << param{"Column"}
-            << ", @level2name = " << param{col_nm};
+            << ", @level2name = " << param{col};
     }
 
     void create_spatial_index_sql(sql_builder& bld,
-                                  const table_def& tbl,
-                                  const index_def& idx) override
+                                  const qualified_name& col_nm,
+                                  const geometry::box& ext) override
     {
         using namespace geometry;
-        if (!boost::algorithm::any_of(tbl.indexes, same{index_type::Primary}))
-            return;
-        auto col_nm = idx.columns.front();
-        auto ext = extent(*db::find(tbl.columns, col_nm));
-        bld << "CREATE SPATIAL INDEX " << index_name(tbl.name, idx.columns)
-            << " ON " << tbl.name << " (" << id(col_nm)
+        bld << "CREATE SPATIAL INDEX " << index_name(col_nm) << " ON "
+            << qualifier(col_nm) << " (" << id(col_nm.back())
             << ")\n\tWITH(BOUNDING_BOX=(" << left(ext) << "," << bottom(ext)
             << "," << right(ext) << "," << top(ext) << "))";
     }

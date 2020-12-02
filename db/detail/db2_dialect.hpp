@@ -46,9 +46,7 @@ public:
         return iso_type(type, scale);
     }
 
-    void projection_sql(sql_builder& bld,
-                        const qualified_name& col_nm,
-                        std::string_view) override
+    void projection_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
         auto& col = col_nm.back();
         auto& tbl = col_nm.at(-2);
@@ -85,15 +83,11 @@ public:
         };
     }
 
-    void extent_sql(sql_builder& bld,
-                    const qualified_name& col_nm,
-                    std::string_view) override
+    void extent_sql(sql_builder& bld, const qualified_name& col_nm) override
     {
-        auto col = id(col_nm.back());
-        bld << "SELECT COUNT(1), MIN(db2gse.ST_MinX(" << col
-            << ")), MIN(db2gse.ST_MinY(" << col << ")), MAX(db2gse.ST_MaxX("
-            << col << ")), MAX(db2gse.ST_MaxY(" << col << ")) FROM "
-            << qualifier(col_nm);
+        bld << "SELECT COUNT(1), db2gse.ST_AsBinary(db2gse.ST_GetAggrResult("
+               "MAX(db2gse.ST_BuildMBRAggr("
+            << id(col_nm.back()) << ")))) FROM " << qualifier(col_nm);
     }
 
     void window_clause(sql_builder& bld,
@@ -126,25 +120,26 @@ public:
     }
 
     void add_geometry_column_sql(sql_builder& bld,
-                                 const table_def& tbl,
-                                 std::string_view col_nm,
+                                 const qualified_name& col_nm,
                                  int srid) override
     {
-        bld << "ALTER TABLE " << tbl.name << " ADD " << id(col_nm)
+        auto& col = col_nm.back();
+        auto& tbl = col_nm.at(-2);
+        bld << "ALTER TABLE " << qualifier(col_nm) << " ADD " << id(col)
             << " db2gse.st_geometry;\nCALL "
                "db2gse.st_register_spatial_column(\n\tNULL,\n\t"
-            << param{id(tbl.name.back())} << ",\n\t" << param{id(col_nm)}
+            << param{id(tbl)} << ",\n\t" << param{id(col)}
             << ",\n\t(SELECT srs_name FROM db2gse.st_spatial_reference_systems "
                "WHERE srs_id = "
             << srid << "),\n\t?,\n\t?)";
     }
 
     void create_spatial_index_sql(sql_builder& bld,
-                                  const table_def& tbl,
-                                  const index_def& idx) override
+                                  const qualified_name& col_nm,
+                                  const geometry::box&) override
     {
-        bld << "CREATE INDEX " << index_name(tbl.name, idx.columns) << " ON "
-            << tbl.name << " (" << id(idx.columns.front())
+        bld << "CREATE INDEX " << index_name(col_nm) << " ON "
+            << qualifier(col_nm) << " (" << id(col_nm.back())
             << ")\n\tEXTEND USING db2gse.spatial_index(1, 0, 0)";
     }
 
