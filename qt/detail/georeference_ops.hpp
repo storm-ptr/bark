@@ -7,6 +7,7 @@
 #include <QRectF>
 #include <bark/db/provider.hpp>
 #include <bark/geometry/geometry_ops.hpp>
+#include <bark/proj/epsg.hpp>
 #include <bark/proj/transformer.hpp>
 #include <bark/qt/common.hpp>
 #include <bark/qt/detail/adapt.hpp>
@@ -65,7 +66,7 @@ auto set_center(Point pos)
 
 inline auto set_scale(qreal sc)
 {
-    return [=](georeference ref) {
+    return [sc](georeference ref) {
         ref.scale = sc;
         return ref;
     };
@@ -99,6 +100,20 @@ inline auto fit(geometry::box ext)
     };
 };
 
+template <class Point>
+auto set_general_perspective(Point lon_lat)
+{
+    return [lon_lat = std::move(lon_lat)](georeference ref) {
+        std::ostringstream os;
+        os << "+proj=ortho +lat_0=" << lon_lat.y() << " +lon_0=" << lon_lat.x()
+           << " +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs";
+        auto pj = os.str();
+        auto tf = proj::transformer{ref.projection, pj};
+        auto ext = tf.forward(extent(ref));
+        return std::move(ref) | set_projection(pj) | fit(ext);
+    };
+}
+
 inline auto undistort(layer lr)
 {
     return [lr = std::move(lr)](georeference ref) {
@@ -111,6 +126,16 @@ inline auto undistort(layer lr)
         return std::move(ref) | set_projection(pj) | set_center(pos) |
                set_scale(sc);
     };
+}
+
+template <class Size>
+auto make_globe_mercator(Size sz)
+{
+    auto longlat = proj::epsg().find_proj(4326);
+    auto merc = proj::epsg().find_proj(3857);
+    auto tf = proj::transformer{longlat, merc};
+    auto ext = tf.forward({{-180., -90.}, {180., 90.}});
+    return georeference{} | set_size(sz) | set_projection(merc) | fit(ext);
 }
 
 }  // namespace bark::qt

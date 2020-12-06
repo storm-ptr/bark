@@ -7,7 +7,6 @@
 #include <QPainter>
 #include <QtConcurrent/QtConcurrentRun>
 #include <bark/detail/utility.hpp>
-#include <bark/proj/epsg.hpp>
 #include <bark/qt/common_ops.hpp>
 #include <bark/qt/detail/rendering_task.hpp>
 #include <bark/qt/map_widget.hpp>
@@ -17,9 +16,7 @@ namespace bark::qt {
 
 inline map_widget::map_widget(QWidget* parent)
     : QWidget(parent)
-    , ref_{georeference{} | set_size(size()) |
-           set_projection(proj::epsg().find_proj(4326)) |
-           qt::fit({{-180., -90.}, {180., 90.}})}
+    , ref_{make_globe_mercator(size())}
     , map_{make<geoimage>(ref_)}
 {
     setMouseTracking(true);
@@ -63,7 +60,8 @@ inline void map_widget::start_rendering()
 
 inline void map_widget::fit(georeference ref)
 {
-    set_georeference([ref = std::move(ref)] { return ref; });
+    set_georeference([&] { return ref; });
+    start_rendering();
 }
 
 inline void map_widget::fit(layer lr)
@@ -125,7 +123,7 @@ inline void map_widget::timerEvent(QTimerEvent* event)
 inline void map_widget::paintEvent(QPaintEvent*)
 {
     if (size() != ref_.size)
-        set_georeference([this] { return ref_ | set_size(this->size()); });
+        set_georeference([&] { return ref_ | set_size(size()); });
     else if (ref_ == map_.ref) {
         QPainter painter(this);
         painter.drawImage(rect(), map_.img);
@@ -153,7 +151,14 @@ inline void map_widget::mousePressEvent(QMouseEvent* event)
 
 inline void map_widget::mouseDoubleClickEvent(QMouseEvent* event)
 {
-    mousePressEvent(event);
+    if (event->button() != Qt::LeftButton)
+        return;
+    set_georeference([&] {
+        auto ll = lon_lat(event);
+        geometry::check(ll);
+        return ref_ | set_general_perspective(ll);
+    });
+    start_rendering();
 }
 
 inline void map_widget::mouseMoveEvent(QMouseEvent* event)
