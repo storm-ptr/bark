@@ -3,65 +3,49 @@
 #ifndef BARK_ANY_HASHABLE_HPP
 #define BARK_ANY_HASHABLE_HPP
 
+#include <any>
 #include <boost/functional/hash.hpp>
-#include <memory>
-#include <typeinfo>
+#include <type_traits>
 
 namespace bark {
 
-/// Polymorphic wrapper of hashable value. std::any analogue.
-/// @see https://en.wikibooks.org/wiki/More_C++_Idioms/Type_Erasure
 class any_hashable {
 public:
     any_hashable() = delete;
 
-    template <class T>
-    explicit any_hashable(const T& val) : ptr_{std::make_shared<model<T>>(val)}
+    template <class T,
+              std::enable_if_t<!std::is_same_v<any_hashable, std::decay_t<T>>,
+                               void*> = nullptr>
+    explicit any_hashable(T&& val)
+        : any_{std::forward<T>(val)}
+        , equal_to_{[](const std::any& lhs, const std::any& rhs) {
+            return std::any_cast<const T&>(lhs) == std::any_cast<const T&>(rhs);
+        }}
+        , hash_value_{[](const std::any& that) {
+            using boost::hash_value;
+            return hash_value(std::any_cast<const T&>(that));
+        }}
     {
     }
 
     friend bool operator==(const any_hashable& lhs, const any_hashable& rhs)
     {
-        return typeid(*lhs.ptr_) == typeid(*rhs.ptr_) &&
-               lhs.ptr_->equal_to(*rhs.ptr_);
+        return lhs.any_.type() == rhs.any_.type() &&
+               lhs.equal_to_(lhs.any_, rhs.any_);
     }
 
     friend size_t hash_value(const any_hashable& that)
     {
         size_t res = 0;
-        boost::hash_combine(res, typeid(*that.ptr_).hash_code());
-        boost::hash_combine(res, that.ptr_->hash_code());
+        boost::hash_combine(res, that.any_.type().hash_code());
+        boost::hash_combine(res, that.hash_value_(that.any_));
         return res;
     }
 
 private:
-    struct concept
-    {
-        virtual ~concept() = default;
-        virtual bool equal_to(const concept&) const = 0;
-        virtual size_t hash_code() const = 0;
-    };
-
-    template <class T>
-    class model : public concept {
-        T val_;
-
-    public:
-        explicit model(const T& val) : val_{val} {}
-
-        bool equal_to(const concept& that) const override
-        {
-            return this->val_ == dynamic_cast<const model&>(that).val_;
-        }
-
-        size_t hash_code() const override
-        {
-            using boost::hash_value;
-            return hash_value(val_);
-        }
-    };
-
-    std::shared_ptr<concept> ptr_;
+    std::any any_;
+    bool (*equal_to_)(const std::any&, const std::any&);
+    size_t (*hash_value_)(const std::any&);
 };
 
 }  // namespace bark
