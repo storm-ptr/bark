@@ -25,7 +25,7 @@ Submodules:
 #### ubuntu 20.04
 
   ```
-    sudo add-apt-repository -y ppa:beineri/opt-qt-5.12.9-focal
+    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.0-focal
     sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.2004.deb
@@ -46,7 +46,7 @@ Submodules:
 #### ubuntu 20.04
 
   ```
-    sudo add-apt-repository -y ppa:beineri/opt-qt-5.12.9-focal
+    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.0-focal
     sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo apt-get -y install g++
@@ -55,9 +55,9 @@ Submodules:
     sudo apt-get -y install libgdal-dev
     sudo apt-get -y install libgl1-mesa-dev
     sudo apt-get -y install make
-    sudo apt-get -y install qt512-meta-minimal
-    sudo apt-get -y install qt512imageformats
-    source /opt/qt512/bin/qt512-env.sh
+    sudo apt-get -y install qt515base
+    sudo apt-get -y install qt515imageformats
+    source /opt/qt515/bin/qt515-env.sh
     wget https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp
     git clone --depth=1 https://github.com/storm-ptr/bark.git
   ```
