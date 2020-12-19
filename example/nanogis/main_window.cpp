@@ -7,10 +7,10 @@
 #include "tree_view.h"
 #include "utility.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QList>
 #include <QMetaType>
 #include <QPixmap>
+#include <QScreen>
 #include <QSplitter>
 #include <QStatusBar>
 #include <bark/proj/epsg.hpp>
@@ -59,7 +59,7 @@ main_window::main_window()
 
     const float w(std::min<float>(width(), height()));
     resize(w, w / 4. * 3.);
-    move(QApplication::desktop()->screen()->rect().center() - rect().center());
+    move(QApplication::primaryScreen()->geometry().center() - rect().center());
 
     QList<int> sizes;
     sizes.push_back(splitter->size().width() * .3);

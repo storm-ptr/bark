@@ -134,8 +134,8 @@ inline void map_widget::paintEvent(QPaintEvent*)
         painter.save();
         painter.translate(offset(map_.ref, ref_));
         painter.scale(factor, factor);
-        QRectF exposed =
-            painter.matrix().inverted().mapRect(rect()).adjusted(-1, -1, 1, 1);
+        auto exposed = painter.transform().inverted().mapRect(rect()).adjusted(
+            -1, -1, 1, 1);
         painter.drawImage(exposed, map_.img, exposed);
         painter.restore();
     }
@@ -184,7 +184,7 @@ inline void map_widget::wheelEvent(QWheelEvent* event)
 {
     set_georeference([&] {
         auto factor = pow(.8, event->angleDelta().y() / 120.);
-        auto focus = backward(ref_, event->pos());
+        auto focus = backward(ref_, event->position());
         auto offset = (ref_.center - adapt(focus)) * (factor - 1.);
         return ref_ | set_center(ref_.center + offset) |
                set_scale(ref_.scale * factor);
