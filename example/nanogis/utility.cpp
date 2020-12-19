@@ -2,7 +2,6 @@
 
 #include "utility.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <boost/algorithm/string.hpp>
 
 static QString resourceIconPath(const QString& resourceIcon)
@@ -12,7 +11,7 @@ static QString resourceIconPath(const QString& resourceIcon)
 
 QIcon icon(QStyle::StandardPixmap standard)
 {
-    return QApplication::desktop()->style()->standardIcon(standard);
+    return QApplication::style()->standardIcon(standard);
 }
 
 QIcon icon(const QString& resourceIcon)
