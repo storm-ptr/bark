@@ -23,7 +23,7 @@ for:
     DEB_NAME: "nanogis.ubuntu.2004"
 
   install:
-    - sh: sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.0-focal
+    - sh: sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.2-focal
     - sh: sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     - sh: sudo apt-get update
     - sh: sudo apt-get -y install git

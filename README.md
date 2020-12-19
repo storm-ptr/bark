@@ -25,7 +25,7 @@ Submodules:
 #### ubuntu 20.04
 
   ```
-    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.0-focal
+    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.2-focal
     sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo dpkg -i ./nanogis.ubuntu.2004.deb
@@ -46,7 +46,7 @@ Submodules:
 #### ubuntu 20.04
 
   ```
-    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.0-focal
+    sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.2-focal
     sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     sudo apt-get update
     sudo apt-get -y install g++

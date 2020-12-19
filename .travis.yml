@@ -13,18 +13,18 @@ matrix:
     addons:
       apt:
         sources:
-        - sourceline: ppa:beineri/opt-qt-5.12.9-focal
+        - sourceline: ppa:beineri/opt-qt-5.15.2-focal
         - sourceline: ppa:ubuntugis/ubuntugis-unstable
         packages:
         - g++
         - libboost-dev
         - libgdal-dev
         - libgl1-mesa-dev
-        - qt512-meta-minimal
-        - qt512imageformats
+        - qt515base
+        - qt515imageformats
         - doxygen
 install:
-- source /opt/qt512/bin/qt512-env.sh
+- source /opt/qt515/bin/qt515-env.sh
 script:
 - wget -P $TRAVIS_BUILD_DIR/.. https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp
 - cd $TRAVIS_BUILD_DIR/test
