@@ -17,6 +17,7 @@ for:
       - image: Ubuntu2004
 
   services:
+    - mssql
     - mysql
 
   environment:
@@ -51,7 +52,7 @@ for:
 
   test_script:
     - sh: cd $APPVEYOR_BUILD_FOLDER/test
-    - sh: export CXXFLAGS="-DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_DATABASE_PWD=Password12!"
+    - sh: export CXXFLAGS="-DBARK_TEST_MYSQL_SERVER=localhost -DBARK_TEST_ODBC_MSSQL_SERVER=localhost -DBARK_TEST_DATABASE_PWD=Password12!"
     - sh: make -f ./makefile.ubuntu test
 
   artifacts:
