@@ -27,7 +27,7 @@ for:
     - sh: sudo apt-get update
     - sh: sudo apt-get -y install libboost-dev
     - sh: sudo apt-get -y install libgdal-dev
-    - sh: source $HOME/Qt/5.15/bin/qt515-env.sh
+    - sh: source $HOME/Qt/5.15/gcc_64/bin/qt515-env.sh
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
   build_script:
