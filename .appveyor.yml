@@ -11,8 +11,7 @@ clone_depth: 1
 skip_tags: true
 
 for:
--
-  matrix:
+- matrix:
     only:
       - image: Ubuntu2004
 
@@ -24,16 +23,11 @@ for:
     DEB_NAME: "nanogis.ubuntu.2004"
 
   install:
-    - sh: sudo add-apt-repository -y ppa:beineri/opt-qt-5.15.2-focal
     - sh: sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     - sh: sudo apt-get update
-    - sh: sudo apt-get -y install git
     - sh: sudo apt-get -y install libboost-dev
     - sh: sudo apt-get -y install libgdal-dev
-    - sh: sudo apt-get -y install libgl1-mesa-dev
-    - sh: sudo apt-get -y install qt515base
-    - sh: sudo apt-get -y install qt515imageformats
-    - sh: source /opt/qt515/bin/qt515-env.sh
+    - sh: source $HOME/Qt/5.15/bin/qt515-env.sh
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
   build_script:
@@ -65,8 +59,7 @@ for:
       secure: eK6200vsXUmBfsFy8CVFVCsgBL+WDOP2j2HHHdbcEo5ToHFBljTDUWDNgFq0U5xw
     artifact: $(DEB_NAME).deb
 
--
-  matrix:
+- matrix:
     only:
       - image: Visual Studio 2019
 
@@ -95,7 +88,7 @@ for:
     - call "C:\Program Files\7-Zip\7z.exe" x postgis-bundle-pg12-3.0.3x64.zip > nul
     - xcopy /s /y /q postgis-bundle-pg12-3.0.3x64 "C:\Program Files\PostgreSQL\12"
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:OSGEO4W_ROOT\include\catch.hpp
-    - 'SET INCLUDE=%INCLUDE%;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql;C:\Libraries\boost_1_73_0'
+    - 'SET INCLUDE=%INCLUDE%;C:\Libraries\boost_1_73_0;%OSGEO4W_ROOT%\include;%OSGEO4W_ROOT%\include\libpq;%OSGEO4W_ROOT%\include\mysql'
     - 'SET LIB=%LIB%;%OSGEO4W_ROOT%\lib'
     - call C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
