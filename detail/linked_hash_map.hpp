@@ -3,8 +3,7 @@
 #ifndef BARK_LINKED_HASH_MAP_HPP
 #define BARK_LINKED_HASH_MAP_HPP
 
-#include <boost/functional/hash.hpp>
-#include <boost/noncopyable.hpp>
+#include <functional>
 #include <list>
 #include <unordered_map>
 
@@ -13,16 +12,22 @@ namespace bark {
 /// Associative container that maintains insertion order. Complexity of any
 /// operation is O(1). Iterators that removed by erase() are invalidated. All
 /// other iterators keep their validity.
-template <class Key, class T>
-class linked_hash_map : boost::noncopyable {
+template <class Key,
+          class T,
+          class Hash = std::hash<Key>,
+          class Equal = std::equal_to<Key>>
+class linked_hash_map {
 public:
     using key_type = Key;
     using mapped_type = T;
     using value_type = std::pair<const Key, T>;
     using container_type = std::list<value_type>;
     using iterator = typename container_type::iterator;
-    using index_type = std::unordered_map<Key, iterator, boost::hash<Key>>;
+    using index_type = std::unordered_map<Key, iterator, Hash, Equal>;
 
+    linked_hash_map() = default;
+    linked_hash_map(const linked_hash_map&) = delete;
+    linked_hash_map& operator=(const linked_hash_map&) = delete;
     bool empty() const { return data_.empty(); }
     size_t size() const { return data_.size(); }
     iterator begin() { return data_.begin(); }

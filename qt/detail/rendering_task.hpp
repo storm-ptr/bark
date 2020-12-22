@@ -32,7 +32,7 @@ public:
 
     geoimage get_recent()
     {
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         return {ref_, img_};
     }
 
@@ -72,7 +72,7 @@ public:
 
     void cancel()
     {
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         is_canceled_ = true;
     }
 
@@ -86,7 +86,7 @@ private:
 
     void check()
     {
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         if (is_canceled_)
             throw cancel_exception{};
     }
@@ -96,7 +96,7 @@ private:
         for (auto& map : maps) {
             if (map.img.isNull())
                 continue;
-            std::lock_guard lock{guard_};
+            auto lock = std::lock_guard{guard_};
             if (img_.isNull())
                 img_ = make<QImage>(ref_);
             QPainter painter{&img_};

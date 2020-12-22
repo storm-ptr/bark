@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -14,13 +15,13 @@
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 
 namespace bark {
 
 constexpr std::chrono::seconds DbTimeout(60);
-constexpr std::chrono::milliseconds CacheTimeout(50);
 constexpr std::chrono::milliseconds UiTimeout(250);
 
 /// @see https://en.cppreference.com/w/cpp/utility/variant/visit
@@ -187,7 +188,7 @@ public:
 
     value_type operator()()
     {
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         return dist_(gen_);
     }
 
@@ -225,6 +226,38 @@ struct streamable : Functor {
 
 template <class T>
 streamable(T) -> streamable<T>;
+
+/// Synchronization primitive for value semantics.
+/// @see https://en.cppreference.com/w/cpp/named_req/TimedLockable
+template <class T, class Hash = std::hash<T>, class Equal = std::equal_to<T>>
+class timed_lockable {
+public:
+    explicit timed_lockable(const T& val) : val_{val} {}
+
+    template <class Rep, class Period>
+    bool try_lock_for(const std::chrono::duration<Rep, Period>& duration)
+    {
+        auto lock = std::unique_lock{guard_};
+        return notifier_.wait_for(lock, duration, [&] {
+            return !locked_.count(val_);
+        }) && locked_.insert(val_).second;
+    }
+
+    void unlock()
+    {
+        {
+            auto lock = std::unique_lock{guard_};
+            locked_.erase(val_);
+        }
+        notifier_.notify_all();
+    }
+
+private:
+    T val_;
+    inline static std::mutex guard_;
+    inline static std::condition_variable notifier_;
+    inline static std::unordered_set<T, Hash, Equal> locked_;
+};
 
 }  // namespace bark
 

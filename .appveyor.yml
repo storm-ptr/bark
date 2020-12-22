@@ -28,7 +28,7 @@ for:
     - sh: sudo apt-get -y install libboost-dev
     - sh: sudo apt-get -y install libgdal-dev
     - sh: sudo apt-get -y install libgl1-mesa-dev
-    - sh: PATH=$PATH:$HOME/Qt/5.15/gcc_64/bin
+    - sh: PATH=$PATH:$HOME/Qt/5.15.2/gcc_64/bin
     - ps: Invoke-WebRequest -Uri https://github.com/catchorg/Catch2/releases/download/v2.13.3/catch.hpp -OutFile $env:APPVEYOR_BUILD_FOLDER\..\catch.hpp
 
   build_script:

@@ -24,7 +24,7 @@ public:
         auto self = shared_from_this();
         auto deleter = [self](command* cmd) { self->push(cmd); };
         auto res = command_holder(nullptr, deleter);
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         if (commands_.empty())
             res.reset(alloc_());
         else {
@@ -47,7 +47,7 @@ private:
             return;
         auto holder = command_holder(cmd, std::default_delete<command>());
         cmd->set_autocommit(true);
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         if (commands_.size() < Limit)
             commands_.emplace(std::move(holder));
     }

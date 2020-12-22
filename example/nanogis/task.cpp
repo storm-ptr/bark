@@ -16,7 +16,7 @@ task::task() : state_(status::Waiting), output_(&str_) {}
 void task::run()
 try {
     {
-        std::lock_guard lock{guard_};
+        auto lock = std::lock_guard{guard_};
         switch (state_) {
             case task::status::Waiting:
                 state_ = status::Running;
@@ -30,18 +30,18 @@ try {
 
     run_event();
 
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     state_ = status::Successed;
 }
 catch (const std::exception& e) {
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     state_ = status::Failed;
     output_ << e.what() << '\n';
 }
 
 task::status task::state()
 {
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     return state_;
 }
 
@@ -49,7 +49,7 @@ void task::push_output(const QString& msg)
 {
     auto txt = trim_right_copy(msg);
 
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     switch (state_) {
         case task::status::Running:
             if (!txt.isEmpty())
@@ -64,7 +64,7 @@ void task::push_output(const QString& msg)
 
 QString task::pop_output()
 {
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     auto res = trim_right_copy(str_);
     str_.clear();
     return res;
@@ -72,7 +72,7 @@ QString task::pop_output()
 
 void task::cancel()
 {
-    std::lock_guard lock{guard_};
+    auto lock = std::lock_guard{guard_};
     if (state_ != status::Successed && state_ != status::Failed)
         state_ = status::Canceling;
 }
