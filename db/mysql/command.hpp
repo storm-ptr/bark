@@ -25,21 +25,28 @@ public:
         constexpr auto Timeout =
             (unsigned)duration_cast<seconds>(DbTimeout).count();
         con_.reset(mysql_init(0));
-        if (!con_)
-            throw std::runtime_error("MySQL error");
+        check(con_, !!con_);
         for (auto opt : {MYSQL_OPT_CONNECT_TIMEOUT,
                          MYSQL_OPT_READ_TIMEOUT,
                          MYSQL_OPT_WRITE_TIMEOUT})
             check(con_, !mysql_options(con_.get(), opt, &Timeout));
-        check(con_,
-              mysql_real_connect(con_.get(),
-                                 host.c_str(),
-                                 usr.c_str(),
-                                 pwd.c_str(),
-                                 db.c_str(),
-                                 port,
-                                 0,
-                                 CLIENT_MULTI_STATEMENTS) == con_.get());
+        auto connect = [&] {
+            return mysql_real_connect(con_.get(),
+                                      host.c_str(),
+                                      usr.c_str(),
+                                      pwd.c_str(),
+                                      db.c_str(),
+                                      port,
+                                      0,
+                                      CLIENT_MULTI_STATEMENTS);
+        };
+        if (connect() != con_.get()) {
+            if (error(con_.get()).find("SSL") == std::string::npos)
+                check(con_, false);
+            constexpr auto Mode = (unsigned)SSL_MODE_DISABLED;
+            check(con_, !mysql_options(con_.get(), MYSQL_OPT_SSL_MODE, &Mode));
+            check(con_, connect() == con_.get());
+        }
         check(con_, !mysql_set_character_set(con_.get(), "utf8"));
     }
 
