@@ -159,6 +159,7 @@ inline SQLLEN numeric_attr(const stmt_holder& handle,
     return res;
 }
 
+constexpr SQLSMALLINT SQL_DB2_BOOLEAN = 16;
 constexpr SQLSMALLINT SQL_DB2_UNICODE_CHAR = -95;
 constexpr SQLSMALLINT SQL_DB2_UNICODE_VARCHAR = -96;
 constexpr SQLSMALLINT SQL_DB2_UNICODE_LONGVARCHAR = -97;

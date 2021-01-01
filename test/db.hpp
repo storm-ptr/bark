@@ -99,7 +99,7 @@ inline std::vector<bark::db::provider_ptr> make_write_providers()
         std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"SQL", "Server"}) + ";UID=sa;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=master;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_ODBC_MSSQL_SERVER)),
 #endif
 #if defined(BARK_TEST_ODBC_MYSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=mysql;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER) ";MULTI_STATEMENTS=1"),
+        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=mysql;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER) ";MULTI_STATEMENTS=1;SSLMODE=disabled"),
 #endif
 #if defined(BARK_TEST_ODBC_POSTGRES_SERVER) && defined(BARK_TEST_DATABASE_PWD)
         std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) + ";UID=postgres;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=postgres;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER)),

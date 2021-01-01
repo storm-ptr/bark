@@ -141,6 +141,7 @@ inline column_holder bind_column(const stmt_holder& stmt, SQLUSMALLINT col)
         case SQL_SMALLINT:
         case SQL_INTEGER:
         case SQL_BIGINT:
+        case SQL_DB2_BOOLEAN:
             return std::make_unique<column_val<int64_t>>();
         case SQL_REAL:
         case SQL_DECIMAL:
