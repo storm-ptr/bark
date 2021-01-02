@@ -24,7 +24,7 @@ public:
     {
     }
 
-    std::map<qualified_name, layer_type> dir() override
+    std::map<qualified_name, meta::layer_type> dir() override
     {
         return as_mixin().cached_dir();
     }
@@ -36,7 +36,7 @@ public:
 
     geometry::box extent(const qualified_name& lr_nm) override
     {
-        return db::extent(column(*this, lr_nm));
+        return geometry::envelope(column(*this, lr_nm).tiles);
     }
 
     geometry::box undistorted_pixel(const qualified_name&,
@@ -61,14 +61,14 @@ public:
 
     command_holder make_command() override { return pool_->make_command(); }
 
-    table_def table(const qualified_name& tbl_nm) override
+    meta::table table(const qualified_name& tbl_nm) override
     {
         return as_mixin().cached_table(tbl_nm);
     }
 
-    std::pair<qualified_name, std::string> script(const table_def& tbl) override
+    std::pair<qualified_name, std::string> ddl(const meta::table& tbl) override
     {
-        return as_mixin().make_script(tbl);
+        return as_mixin().script(tbl);
     }
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override
@@ -81,10 +81,10 @@ public:
 protected:
     dialect& as_dialect() { return *dialect_.get(); }
 
-    std::map<qualified_name, layer_type> load_dir()
+    std::map<qualified_name, meta::layer_type> load_dir()
     try {
         enum columns { Schema, Table, Column };
-        auto res = std::map<qualified_name, layer_type>{};
+        auto res = std::map<qualified_name, meta::layer_type>{};
         auto bld = builder(as_mixin());
         as_dialect().geometries_sql(bld);
         auto rows = fetch_all(as_mixin(), bld);
@@ -92,7 +92,7 @@ protected:
             res.insert({id(boost::lexical_cast<std::string>(row[Schema]),
                            boost::lexical_cast<std::string>(row[Table]),
                            boost::lexical_cast<std::string>(row[Column])),
-                        layer_type::Geometry});
+                        meta::layer_type::Geometry});
         return res;
     }
     catch (const std::exception&) {
@@ -134,7 +134,7 @@ protected:
         return fetch_or(*cmd, std::string{});
     }
 
-    rtree load_tiles(const qualified_name& col_nm)
+    geometry::box_rtree load_tiles(const qualified_name& col_nm)
     {
         auto bld = builder(as_mixin());
         as_dialect().extent_sql(bld, col_nm);
@@ -156,14 +156,14 @@ protected:
     }
 
     void prepare_geometry_column(const qualified_name& tbl_nm,
-                                 column_def& col,
+                                 meta::column& col,
                                  std::string_view type)
     {
         auto col_nm = id(tbl_nm, col.name);
         auto srid = as_mixin().load_projection(col_nm);
         col.projection = as_mixin().find_proj(srid);
-        col.decoder = as_dialect().geometry_decoder();
-        col.encoder = as_dialect().geometry_encoder(type, srid);
+        col.decoder = as_dialect().geom_decoder();
+        col.encoder = as_dialect().geom_encoder(type, srid);
         col.tiles = as_mixin().load_tiles(col_nm);
     }
 

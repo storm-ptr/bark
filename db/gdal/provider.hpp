@@ -27,7 +27,10 @@ public:
             ref_ = georeference{dataset{file_}};
     }
 
-    std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
+    std::map<qualified_name, meta::layer_type> dir() override
+    {
+        return cached_dir();
+    }
 
     std::string projection(const qualified_name& lr_nm) override
     {
@@ -71,12 +74,12 @@ public:
                               std::default_delete<db::command>());
     }
 
-    db::table_def table(const qualified_name& tbl_nm) override
+    db::meta::table table(const qualified_name& tbl_nm) override
     {
         return cached_table(tbl_nm);
     }
 
-    std::pair<qualified_name, std::string> script(const table_def&) override
+    std::pair<qualified_name, std::string> ddl(const meta::table&) override
     {
         throw std::logic_error{"not implemented"};
     }
@@ -92,20 +95,21 @@ private:
     const std::string file_;
     std::optional<georeference> ref_;
 
-    std::map<qualified_name, layer_type> load_dir()
+    std::map<qualified_name, meta::layer_type> load_dir()
     {
-        std::map<qualified_name, layer_type> res;
+        std::map<qualified_name, meta::layer_type> res;
         for (auto& item : dataset{file_}.layers())
-            res.emplace(item, layer_type::Geometry);
+            res.emplace(item, meta::layer_type::Geometry);
         if (res.empty())
-            res.emplace(id(file_), layer_type::Raster);
+            res.emplace(id(file_), meta::layer_type::Raster);
         return res;
     }
 
     bool is_raster()
     {
         auto reg = dir();
-        return reg.size() == 1 && reg.begin()->second == layer_type::Raster;
+        return reg.size() == 1 &&
+               reg.begin()->second == meta::layer_type::Raster;
     }
 
     auto load_table(const qualified_name& tbl_nm)
@@ -119,12 +123,12 @@ private:
                 return db::find(tbl.columns, col.name) == std::end(tbl.columns);
             });
         auto it = boost::range::find_if(
-            tbl.columns, std::not_fn(same{column_type::Geometry}));
+            tbl.columns, std::not_fn(same{meta::column_type::Geometry}));
         auto count = tbl.columns.size();
         tbl.columns.insert(it, std::begin(diff), std::end(diff));
         if (tbl.columns.size() - count == 1)
             tbl.indexes.insert(tbl.indexes.begin(),
-                               {index_type::Primary, names(diff)});
+                               {meta::index_type::Primary, names(diff)});
         return tbl;
     }
 

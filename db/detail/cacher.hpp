@@ -21,9 +21,9 @@ class cacher {
 protected:
     cacher() : scope_{lru_cache::new_scope()} {}
 
-    std::map<qualified_name, layer_type> cached_dir()
+    std::map<qualified_name, meta::layer_type> cached_dir()
     {
-        return std::any_cast<std::map<qualified_name, layer_type>>(
+        return std::any_cast<std::map<qualified_name, meta::layer_type>>(
             lru_cache::get_or_invoke(
                 scope_, Dir, [&] { return as_mixin().load_dir(); }));
     }
@@ -36,9 +36,9 @@ protected:
             }));
     }
 
-    table_def cached_table(const qualified_name& tbl_nm)
+    meta::table cached_table(const qualified_name& tbl_nm)
     {
-        return std::any_cast<table_def>(lru_cache::get_or_invoke(
+        return std::any_cast<meta::table>(lru_cache::get_or_invoke(
             scope_, tbl_nm, [&] { return as_mixin().load_table(tbl_nm); }));
     }
 

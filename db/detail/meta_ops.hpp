@@ -1,12 +1,11 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_TABLE_DEF_OPS_HPP
-#define BARK_DB_TABLE_DEF_OPS_HPP
+#ifndef BARK_DB_META_OPS_HPP
+#define BARK_DB_META_OPS_HPP
 
-#include <bark/db/table_def.hpp>
+#include <bark/db/meta.hpp>
 #include <bark/detail/grid.hpp>
 #include <bark/detail/unicode.hpp>
-#include <bark/geometry/envelope.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/search.hpp>
@@ -14,23 +13,26 @@
 
 namespace bark::db {
 
-inline geometry::box extent(const column_def& col)
-{
-    if (col.tiles.empty())
-        return {};
-    return geometry::envelope(bounds(col.tiles));
-}
-
-inline bool sortable(const column_def& col)
+inline bool sortable(const meta::column& col)
 {
     switch (col.type) {
-        case column_type::Integer:
-        case column_type::Real:
-        case column_type::Text:
+        case meta::column_type::Integer:
+        case meta::column_type::Real:
+        case meta::column_type::Text:
             return true;
         default:
             return false;
     }
+}
+
+inline auto decode(const meta::column& col)
+{
+    return streamable([&](sql_builder& bld) { col.decoder(bld, col.name); });
+}
+
+inline auto encode(const meta::column& col, const variant_t& var)
+{
+    return streamable([&](sql_builder& bld) { col.encoder(bld, var); });
 }
 
 template <class Indexes, class ColumnNames>
@@ -59,10 +61,10 @@ auto names(Rng&& rng)
                                         [&](auto& item) { return item.name; });
 }
 
-inline rtree make_tiles(size_t count, geometry::box ext)
+inline geometry::box_rtree make_tiles(size_t count, geometry::box ext)
 {
     constexpr size_t RowsPerTile = 2000;
-    rtree res;
+    geometry::box_rtree res;
     if (count) {
         auto side = size_t(ceil(sqrt(count / double(RowsPerTile))));
         grid gr(ext, side + 1, side + 1);
@@ -74,16 +76,6 @@ inline rtree make_tiles(size_t count, geometry::box ext)
     return res;
 }
 
-inline auto decode(const column_def& col)
-{
-    return streamable([&](sql_builder& bld) { col.decoder(bld, col.name); });
-}
-
-inline auto encode(const column_def& col, const variant_t& var)
-{
-    return streamable([&](sql_builder& bld) { col.encoder(bld, var); });
-}
-
 }  // namespace bark::db
 
-#endif  // BARK_DB_TABLE_DEF_OPS_HPP
+#endif  // BARK_DB_META_OPS_HPP

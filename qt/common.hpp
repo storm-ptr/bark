@@ -22,8 +22,8 @@ struct link {
     bool queryable = false;
 };
 
-/// Describes spatial data set
-struct layer_def {
+/// Drawing preferences for a spatial data set
+struct layer_settings {
     db::qualified_name name;
     Qt::CheckState state = Qt::Unchecked;
     QPen pen;
@@ -31,11 +31,11 @@ struct layer_def {
 };
 
 /// Spatial data set
-struct layer : link, layer_def {
+struct layer : link, layer_settings {
     layer() = default;
 
-    layer(link lnk, layer_def lr)
-        : link(std::move(lnk)), layer_def(std::move(lr))
+    layer(link lnk, layer_settings lr)
+        : link(std::move(lnk)), layer_settings(std::move(lr))
     {
     }
 };

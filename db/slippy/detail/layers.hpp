@@ -33,11 +33,11 @@ public:
                          boost::lexical_cast<std::string>(name));
     }
 
-    std::map<qualified_name, layer_type> dir()
+    std::map<qualified_name, meta::layer_type> dir()
     {
-        std::map<qualified_name, layer_type> res;
+        std::map<qualified_name, meta::layer_type> res;
         boost::fusion::for_each(layers_, [&](auto& lr) {
-            res.insert({lr.name(), layer_type::Raster});
+            res.insert({lr.name(), meta::layer_type::Raster});
         });
         return res;
     }

@@ -2,6 +2,7 @@
 
 #include "task.h"
 #include <QThreadPool>
+#include <bark/geometry/envelope.hpp>
 #include <bark/geometry/geom_from_wkb.hpp>
 #include <bark/proj/transformer.hpp>
 #include <bark/qt/common_ops.hpp>

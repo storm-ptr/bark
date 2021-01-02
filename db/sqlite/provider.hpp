@@ -7,9 +7,9 @@
 #include <bark/db/detail/ddl.hpp>
 #include <bark/db/detail/projection_guide.hpp>
 #include <bark/db/detail/provider_impl.hpp>
+#include <bark/db/detail/sqlite_dialect.hpp>
+#include <bark/db/detail/table_guide.hpp>
 #include <bark/db/sqlite/command.hpp>
-#include <bark/db/sqlite/detail/dialect.hpp>
-#include <bark/db/sqlite/detail/table_guide.hpp>
 #include <exception>
 #include <memory>
 #include <string>
@@ -30,7 +30,7 @@ class provider : private cacher<provider>,
 public:
     provider(std::string file)
         : provider_impl<provider>{[=] { return new command(file); },
-                                  std::make_unique<dialect>()}
+                                  std::make_unique<sqlite_dialect>()}
     {
         try {
             exec(*this, "SELECT InitSpatialMetaData(1)");

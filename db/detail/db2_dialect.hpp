@@ -4,14 +4,13 @@
 #define BARK_DB_DB2_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
 
 namespace bark::db {
 
-class db2_dialect : public dialect {
-public:
+struct db2_dialect : dialect {
     void projections_sql(sql_builder& bld) override
     {
         bld << "SELECT srs_id, organization_coordsys_id, NULL FROM "
@@ -28,21 +27,22 @@ public:
 
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
+        auto& tbl = tbl_nm.back();
         auto& scm = tbl_nm.at(-2);
         bld << "SELECT colname, LOWER(CASE typeschema WHEN " << param{"SYSIBM"}
             << " THEN typename WHEN " << param{"DB2GSE"}
             << " THEN typename ELSE RTRIM(typeschema) || " << param{"."}
             << " || typename END), scale FROM syscat.columns WHERE tabschema = "
-            << param{scm} << " AND tabname = " << param{tbl_nm.back()}
+            << param{scm} << " AND tabname = " << param{tbl}
             << " ORDER BY colno";
     }
 
-    column_type type(std::string_view type, int scale) override
+    meta::column_type type(std::string_view type, int scale) override
     {
         if (is_ogc_type(type))
-            return column_type::Geometry;
+            return meta::column_type::Geometry;
         if (any_of({"graphic", "vargraphic"}, equals(type)))
-            return column_type::Text;
+            return meta::column_type::Text;
         return iso_type(type, scale);
     }
 
@@ -59,23 +59,24 @@ public:
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
+        auto& tbl = tbl_nm.back();
         auto& scm = tbl_nm.at(-2);
         bld << "SELECT RTRIM(i.indschema), i.indname, colname, uniquerule = "
             << param{"P"} << ", colorder = " << param{"D"}
             << " FROM syscat.indexes i JOIN syscat.indexcoluse "
                "USING(indschema, indname) WHERE tabschema = "
-            << param{scm} << " AND tabname = " << param{tbl_nm.back()}
+            << param{scm} << " AND tabname = " << param{tbl}
             << " ORDER BY 1, 2, colseq";
     }
 
-    column_decoder geometry_decoder() override
+    meta::decoder_t geom_decoder() override
     {
         return [](sql_builder& bld, std::string_view col_nm) {
             bld << "db2gse.ST_AsBinary(" << id(col_nm) << ") AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(std::string_view type, int srid) override
+    meta::encoder_t geom_encoder(std::string_view type, int srid) override
     {
         return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
             bld << "db2gse." << type << "(CAST(" << param{v}
@@ -91,7 +92,7 @@ public:
     }
 
     void window_clause(sql_builder& bld,
-                       const table_def& tbl,
+                       const meta::table& tbl,
                        std::string_view col_nm,
                        const geometry::box& ext) override
     {
@@ -105,14 +106,14 @@ public:
         bld << "VALUES RTRIM(current_schema)";
     }
 
-    std::string type_name(column_type type) override
+    std::string type_name(meta::column_type type) override
     {
         switch (type) {
-            case column_type::Blob:
+            case meta::column_type::Blob:
                 return "blob";
-            case column_type::Integer:
+            case meta::column_type::Integer:
                 return "bigint";
-            case column_type::Real:
+            case meta::column_type::Real:
                 return "double";
             default:
                 return "vargraphic(250)";

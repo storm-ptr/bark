@@ -4,15 +4,14 @@
 #define BARK_DB_MSSQL_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
 namespace bark::db {
 
-class mssql_dialect : public dialect {
-public:
+struct mssql_dialect : dialect {
     void projections_sql(sql_builder& bld) override
     {
         bld << "SELECT spatial_reference_id AS srid, "
@@ -31,14 +30,14 @@ public:
         iso_columns_sql(bld, tbl_nm);
     }
 
-    column_type type(std::string_view type, int scale) override
+    meta::column_type type(std::string_view type, int scale) override
     {
         if (any_of({"geometry", "geography"}, equals(type)))
-            return column_type::Geometry;
+            return meta::column_type::Geometry;
         if (type == "bit")
-            return column_type::Integer;
+            return meta::column_type::Integer;
         if (type == "image")
-            return column_type::Blob;
+            return meta::column_type::Blob;
         return iso_type(type, scale);
     }
 
@@ -65,14 +64,14 @@ public:
             << param{tbl_nm} << ") ORDER BY name, key_ordinal";
     }
 
-    column_decoder geometry_decoder() override
+    meta::decoder_t geom_decoder() override
     {
         return [](sql_builder& bld, std::string_view col_nm) {
             bld << id(col_nm) << ".STAsBinary() AS " << id(col_nm);
         };
     }
 
-    column_encoder geometry_encoder(std::string_view type, int srid) override
+    meta::encoder_t geom_encoder(std::string_view type, int srid) override
     {
         return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
             bld << type << "::STGeomFromWKB(" << param{v} << ", " << srid
@@ -92,7 +91,7 @@ public:
     }
 
     void window_clause(sql_builder& bld,
-                       const table_def& tbl,
+                       const meta::table& tbl,
                        std::string_view col_nm,
                        const geometry::box& extent) override
     {
@@ -106,14 +105,14 @@ public:
         bld << "SELECT SCHEMA_NAME()";
     }
 
-    std::string type_name(column_type type) override
+    std::string type_name(meta::column_type type) override
     {
         switch (type) {
-            case column_type::Blob:
+            case meta::column_type::Blob:
                 return "varbinary(max)";
-            case column_type::Integer:
+            case meta::column_type::Integer:
                 return "bigint";
-            case column_type::Real:
+            case meta::column_type::Real:
                 return "float";
             default:
                 return "nvarchar(250)";

@@ -19,9 +19,9 @@ class table_guide {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
-    table_def load_table(const qualified_name& tbl_nm)
+    meta::table load_table(const qualified_name& tbl_nm)
     {
-        table_def res;
+        meta::table res;
         res.name = tbl_nm;
         load_columns(res);
         load_indexes(res);
@@ -29,18 +29,18 @@ protected:
     }
 
 private:
-    column_def make_column(const qualified_name& tbl_nm,
-                           std::string_view name,
-                           std::string_view type,
-                           int scale)
+    meta::column make_column(const qualified_name& tbl_nm,
+                             std::string_view name,
+                             std::string_view type,
+                             int scale)
     {
-        column_def res;
+        meta::column res;
         auto& dial = as_mixin().as_dialect();
         res.name = name;
         res.type = dial.type(type, scale);
-        if (column_type::Geometry == res.type)
+        if (meta::column_type::Geometry == res.type)
             as_mixin().prepare_geometry_column(tbl_nm, res, type);
-        else if (column_type::Text == res.type)
+        else if (meta::column_type::Text == res.type)
             res.decoder = [type = dial.type_name(res.type)](
                               sql_builder& bld, std::string_view col_nm) {
                 bld << "CAST(" << id(col_nm) << " AS " << type << ") AS "
@@ -49,7 +49,7 @@ private:
         return res;
     }
 
-    void load_columns(table_def& tbl)
+    void load_columns(meta::table& tbl)
     {
         enum columns { Name, Type, Scale };
         auto bld = builder(as_mixin());
@@ -61,7 +61,7 @@ private:
             auto scale =
                 is_null(row[Scale]) ? -1 : boost::lexical_cast<int>(row[Scale]);
             auto col = make_column(tbl.name, name, type, scale);
-            if (col.type == column_type::Invalid)
+            if (col.type == meta::column_type::Invalid)
                 std::cerr << "unknown type: " << type << "("
                           << id(tbl.name, col.name) << ")" << std::endl;
             else
@@ -72,11 +72,11 @@ private:
                 "no columns: " + boost::lexical_cast<std::string>(tbl.name));
     }
 
-    void load_indexes(table_def& tbl)
+    void load_indexes(meta::table& tbl)
     {
         enum columns { Schema, Name, Column, Primary, Descending };
         auto idx_nm = qualified_name{};
-        auto idx = index_def{};
+        auto idx = meta::index{};
         auto bld = builder(as_mixin());
         as_mixin().as_dialect().indexes_sql(bld, tbl.name);
         auto rows = fetch_all(as_mixin(), bld);
@@ -84,22 +84,23 @@ private:
             auto name = id(boost::lexical_cast<std::string>(row[Schema]),
                            boost::lexical_cast<std::string>(row[Name]));
             if (name != idx_nm) {
-                if (index_type::Invalid != idx.type)
+                if (meta::index_type::Invalid != idx.type)
                     tbl.indexes.push_back(idx);
 
                 idx_nm = name;
-                idx = index_def();
-                idx.type = test(row[Primary]) ? index_type::Primary
-                                              : index_type::Secondary;
+                idx = meta::index();
+                idx.type = test(row[Primary]) ? meta::index_type::Primary
+                                              : meta::index_type::Secondary;
             }
 
             auto col = boost::lexical_cast<std::string>(row[Column]);
             idx.columns.push_back(col);
             if (db::find(tbl.columns, col) == tbl.columns.end() ||
                 test(row[Descending]))
-                idx.type = index_type::Invalid;  // expression or descending
+                idx.type =
+                    meta::index_type::Invalid;  // expression or descending
         }
-        if (index_type::Invalid != idx.type)
+        if (meta::index_type::Invalid != idx.type)
             tbl.indexes.push_back(idx);
     }
 };

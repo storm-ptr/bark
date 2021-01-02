@@ -1,65 +1,60 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_TABLE_DEF_HPP
-#define BARK_DB_TABLE_DEF_HPP
+#ifndef BARK_DB_META_HPP
+#define BARK_DB_META_HPP
 
 #include <bark/db/sql_builder.hpp>
-#include <bark/geometry/as_text.hpp>
 #include <bark/geometry/geometry.hpp>
 #include <bark/proj/epsg.hpp>
-#include <boost/geometry/index/rtree.hpp>
 #include <functional>
 #include <ostream>
 #include <string>
 #include <vector>
 
-namespace bark::db {
+namespace bark::db::meta {
 
 enum class column_type { Invalid, Blob, Geometry, Integer, Real, Text };
 
 enum class index_type { Invalid, Primary, Secondary };
 
+enum class layer_type { Invalid, Geometry, Raster };
+
 /// Converts the well-known binary representation of the geometry
-using column_decoder = std::function<void(sql_builder&, std::string_view name)>;
+using decoder_t = std::function<void(sql_builder&, std::string_view name)>;
 
 /// Creates a geometry instance from a well-known binary representation
-using column_encoder = std::function<void(sql_builder&, variant_t var)>;
-
-/// Spatial index to store values of @ref geometry::box
-using rtree =
-    boost::geometry::index::rtree<geometry::box,
-                                  boost::geometry::index::quadratic<16>>;
+using encoder_t = std::function<void(sql_builder&, variant_t var)>;
 
 /// Describes column
-struct column_def {
+struct column {
     std::string name;
     column_type type = column_type::Invalid;
     std::string projection;  ///< PROJ.4 string for the spatial reference system
-    rtree tiles;             ///< balanced data grid
+    geometry::box_rtree tiles;  ///< balanced data grid
 
-    column_decoder decoder
+    decoder_t decoder
 
         = [](sql_builder& bld, std::string_view name) { bld << id(name); };
 
-    column_encoder encoder
+    encoder_t encoder
 
         = [](sql_builder& bld, variant_t var) { bld << param{var}; };
 };
 
 /// Describes index
-struct index_def {
+struct index {
     index_type type = index_type::Invalid;
     std::vector<std::string> columns;
 };
 
 /// Describes table
-struct table_def {
+struct table {
     qualified_name name;
-    std::vector<column_def> columns;
-    std::vector<index_def> indexes;
+    std::vector<column> columns;
+    std::vector<index> indexes;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const column_def& col)
+inline std::ostream& operator<<(std::ostream& os, const column& col)
 {
     static const char* Types[] = {
         "INVALID", "BLOB", "GEOMETRY", "INTEGER", "REAL", "TEXT"};
@@ -78,14 +73,14 @@ inline std::ostream& operator<<(std::ostream& os, const column_def& col)
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const index_def& idx)
+inline std::ostream& operator<<(std::ostream& os, const index& idx)
 {
     static const char* Types[] = {"INVALID", "PRIMARY", "SECONDARY"};
     return os << Types[(size_t)idx.type] << " INDEX ("
               << list{idx.columns, ", "} << ")";
 }
 
-inline std::ostream& operator<<(std::ostream& os, const table_def& tbl)
+inline std::ostream& operator<<(std::ostream& os, const table& tbl)
 {
     os << "TABLE " << tbl.name << " (\n\t" << list{tbl.columns, ",\n\t"};
     if (!tbl.indexes.empty())
@@ -93,6 +88,6 @@ inline std::ostream& operator<<(std::ostream& os, const table_def& tbl)
     return os << "\n)";
 }
 
-}  // namespace bark::db
+}  // namespace bark::db::meta
 
-#endif  // BARK_DB_TABLE_DEF_HPP
+#endif  // BARK_DB_META_HPP

@@ -8,10 +8,9 @@
 #include <bark/geometry/as_binary.hpp>
 #include <bark/geometry/geometry_ops.hpp>
 
-namespace bark::db::sqlite {
+namespace bark::db {
 
-class dialect : public db::dialect {
-public:
+struct sqlite_dialect : dialect {
     void projections_sql(sql_builder& bld) override
     {
         ogc_projections_sql(bld);
@@ -24,14 +23,16 @@ public:
                "LOWER(t.name)";
     }
 
-    void columns_sql(sql_builder&, const qualified_name&) override
+    void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        throw std::logic_error{"not implemented"};
+        auto& tbl = tbl_nm.back();
+        bld << "SELECT name, LOWER(type), NULL FROM pragma_table_info("
+            << param{tbl} << ")";
     }
 
-    column_type type(std::string_view type, int scale) override
+    meta::column_type type(std::string_view type, int scale) override
     {
-        return is_ogc_type(type) ? column_type::Geometry
+        return is_ogc_type(type) ? meta::column_type::Geometry
                                  : iso_type(type, scale);
     }
 
@@ -44,14 +45,57 @@ public:
             << ") AND LOWER(f_geometry_column) = LOWER(" << param{col} << ")";
     }
 
-    void indexes_sql(sql_builder&, const qualified_name&) override
+    void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        throw std::logic_error{"not implemented"};
+        auto& tbl = tbl_nm.back();
+        bld << R"(
+SELECT
+  NULL AS INDEX_SCHEMA,
+  i.name AS INDEX_NAME,
+  c.name AS COLUMN_NAME,
+  i.origin = 'pk' AS IS_PRIMARY,
+  c.desc AS IS_DESCENDING,
+  c.seqno AS SEQ
+FROM pragma_index_list()"
+            << param{tbl} << R"() AS i, pragma_index_xinfo(i.name) AS c
+WHERE c.key
+
+UNION ALL
+
+SELECT
+  NULL,
+  'PRIMARY',
+  name,
+  1,
+  0,
+  pk - 1
+FROM pragma_table_info()"
+            << param{tbl} << R"()
+WHERE pk > 0
+AND NOT EXISTS(SELECT * FROM pragma_index_list()"
+            << param{tbl} << R"() WHERE origin = 'pk')
+
+UNION ALL
+
+SELECT
+  NULL,
+  'idx_' || f_table_name || '_' || f_geometry_column,
+  f_geometry_column,
+  0,
+  0,
+  0
+FROM geometry_columns
+WHERE spatial_index_enabled
+AND LOWER(f_table_name) = LOWER()"
+            << param{tbl} << R"()
+
+ORDER BY IS_PRIMARY DESC, INDEX_NAME, SEQ
+)";
     }
 
-    column_decoder geometry_decoder() override { return st_as_binary(); }
+    meta::decoder_t geom_decoder() override { return st_as_binary(); }
 
-    column_encoder geometry_encoder(std::string_view, int srid) override
+    meta::encoder_t geom_encoder(std::string_view, int srid) override
     {
         return st_geom_from_wkb(srid);
     }
@@ -63,7 +107,7 @@ public:
     }
 
     void window_clause(sql_builder& bld,
-                       const table_def& tbl,
+                       const meta::table& tbl,
                        std::string_view col_nm,
                        const geometry::box& ext) override
     {
@@ -84,14 +128,14 @@ public:
 
     void current_schema_sql(sql_builder& bld) override { bld << "SELECT NULL"; }
 
-    std::string type_name(column_type type) override
+    std::string type_name(meta::column_type type) override
     {
         switch (type) {
-            case column_type::Blob:
+            case meta::column_type::Blob:
                 return "blob";
-            case column_type::Integer:
+            case meta::column_type::Integer:
                 return "integer";
-            case column_type::Real:
+            case meta::column_type::Real:
                 return "real";
             default:
                 return "text";
@@ -124,6 +168,6 @@ public:
     }
 };
 
-}  // namespace bark::db::sqlite
+}  // namespace bark::db
 
 #endif  // BARK_DB_SQLITE_DIALECT_HPP

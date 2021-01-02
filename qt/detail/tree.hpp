@@ -9,7 +9,7 @@
 
 namespace bark::qt {
 
-using node = std::variant<std::monostate, link, layer_def>;
+using node = std::variant<std::monostate, link, layer_settings>;
 
 struct tree : std::enable_shared_from_this<tree> {
     tree* parent = nullptr;

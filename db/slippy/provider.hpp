@@ -21,7 +21,10 @@ public:
     {
     }
 
-    std::map<qualified_name, layer_type> dir() override { return cached_dir(); }
+    std::map<qualified_name, meta::layer_type> dir() override
+    {
+        return cached_dir();
+    }
 
     std::string projection(const qualified_name&) override
     {
@@ -62,12 +65,12 @@ public:
         throw std::logic_error{"not implemented"};
     }
 
-    table_def table(const qualified_name&) override
+    meta::table table(const qualified_name&) override
     {
         throw std::logic_error{"not implemented"};
     }
 
-    std::pair<qualified_name, std::string> script(const table_def&) override
+    std::pair<qualified_name, std::string> ddl(const meta::table&) override
     {
         throw std::logic_error{"not implemented"};
     }
@@ -83,7 +86,10 @@ private:
     std::string useragent_;
     layers layers_;
 
-    std::map<qualified_name, layer_type> load_dir() { return layers_.dir(); }
+    std::map<qualified_name, meta::layer_type> load_dir()
+    {
+        return layers_.dir();
+    }
 
     geometry::multi_box make_tile_coverage(const qualified_name& lr_nm,
                                            const geometry::box& ext,

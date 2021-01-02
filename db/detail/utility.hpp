@@ -51,20 +51,20 @@ inline bool is_ogc_type(std::string_view type)
         equals(type));
 }
 
-inline column_type iso_type(std::string_view type, int scale)
+inline meta::column_type iso_type(std::string_view type, int scale)
 {
     if ((within(type)("int") && !within(type)("interval")) ||
         type.find("bool") == 0)
-        return column_type::Integer;
+        return meta::column_type::Integer;
     if (any_of({"date", "time", "char", "clob", "text"}, within(type)))
-        return column_type::Text;
+        return meta::column_type::Text;
     if (any_of({"real", "float", "double"}, within(type)))
-        return column_type::Real;
+        return meta::column_type::Real;
     if (any_of({"decimal", "number", "numeric"}, equals(type)))
-        return scale ? column_type::Real : column_type::Integer;
+        return scale ? meta::column_type::Real : meta::column_type::Integer;
     if (any_of({"binary", "blob"}, within(type)))
-        return column_type::Blob;
-    return column_type::Invalid;
+        return meta::column_type::Blob;
+    return meta::column_type::Invalid;
 }
 
 inline sql_syntax embeded_params(sql_syntax syntax)

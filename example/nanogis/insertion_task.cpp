@@ -78,7 +78,7 @@ insertion_task::insertion_task(QVector<bark::qt::layer> from,
         self.push_output(to.uri.toDisplayString(QUrl::DecodeReserved));
         for (const auto& lr_from : from) {
             if (action::PrintSqlOnly == act)
-                ::push_output(self, script(lr_from, to).second);
+                ::push_output(self, ddl(lr_from, to).second);
             else {
                 auto lr_to = self.create(lr_from, to);
                 emit self.refresh_sig();
@@ -103,13 +103,13 @@ insertion_task::insertion_task(bark::qt::layer from,
 bark::qt::layer insertion_task::create(const bark::qt::layer& from,
                                        const bark::qt::link& to)
 {
-    auto [name, sql] = script(from, to);
+    auto [name, sql] = ddl(from, to);
     exec(*to.provider, sql);
     to.provider->refresh();
     ::push_output(*this, sql);
-    bark::qt::layer_def def;
-    def.name = id(name, from.name.back());
-    return {to, def};
+    bark::qt::layer_settings lr;
+    lr.name = id(name, from.name.back());
+    return {to, lr};
 }
 
 void insertion_task::insert(const bark::qt::layer& from,

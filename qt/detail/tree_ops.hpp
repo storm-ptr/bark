@@ -94,8 +94,8 @@ inline QString to_string(tree* ptr)
                    [](const link& lnk) {
                        return lnk.uri.toDisplayString(QUrl::DecodeReserved);
                    },
-                   [](const layer_def& def) {
-                       return adapt(boost::lexical_cast<std::string>(def.name));
+                   [](const layer_settings& lr) {
+                       return adapt(boost::lexical_cast<std::string>(lr.name));
                    }},
         ptr->data);
 }
@@ -116,12 +116,12 @@ inline std::shared_ptr<tree> dir(const QUrl& uri)
     auto res = std::make_shared<tree>();
     auto lnk = make_link(uri);
     res->data = lnk;
-    for (auto& pair : lnk.provider->dir()) {
-        layer_def def;
-        def.name = pair.first;
+    for (const auto& [name, type] : lnk.provider->dir()) {
+        layer_settings lr;
+        lr.name = name;
         auto child = std::make_shared<tree>();
         child->parent = res.get();
-        child->data = def;
+        child->data = lr;
         res->children.push_back(child);
     }
     return res;
@@ -142,25 +142,25 @@ inline bool is_link(tree* ptr)
 
 inline bool is_layer(tree* ptr)
 {
-    return ptr->data.index() == variant_index<node, layer_def>();
+    return ptr->data.index() == variant_index<node, layer_settings>();
 }
 
 inline std::optional<Qt::CheckState> state(tree* ptr)
 {
     if (!is_layer(ptr))
         return {};
-    return std::get<layer_def>(ptr->data).state;
+    return std::get<layer_settings>(ptr->data).state;
 }
 
 inline bool toggle(tree* ptr)
 {
     if (is_layer(ptr))
-        switch (auto& def = std::get<layer_def>(ptr->data); def.state) {
+        switch (auto& lr = std::get<layer_settings>(ptr->data); lr.state) {
             case Qt::Unchecked:
-                def.state = Qt::Checked;
+                lr.state = Qt::Checked;
                 return true;
             case Qt::Checked:
-                def.state = Qt::Unchecked;
+                lr.state = Qt::Unchecked;
                 return true;
             case Qt::PartiallyChecked:
                 break;
@@ -180,7 +180,7 @@ inline std::optional<layer> get_layer(tree* ptr)
     if (!ptr->parent || !is_link(ptr->parent) || !is_layer(ptr))
         return {};
     return layer{std::get<link>(ptr->parent->data),
-                 std::get<layer_def>(ptr->data)};
+                 std::get<layer_settings>(ptr->data)};
 }
 
 inline void set_layer(tree* ptr, const layer& lr)
@@ -188,9 +188,9 @@ inline void set_layer(tree* ptr, const layer& lr)
     if (!ptr->parent || !is_link(ptr->parent) || !is_layer(ptr))
         return;
     auto& lnk = std::get<link>(ptr->parent->data);
-    auto& def = std::get<layer_def>(ptr->data);
-    if (lnk.uri == lr.uri && def.name == lr.name)
-        def = lr;
+    auto& stg = std::get<layer_settings>(ptr->data);
+    if (lnk.uri == lr.uri && stg.name == lr.name)
+        stg = lr;
 }
 
 }  // namespace bark::qt

@@ -4,7 +4,7 @@
 #define BARK_DB_PROVIDER_HPP
 
 #include <bark/db/command.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/fwd.hpp>
 #include <bark/detail/lru_cache.hpp>
 #include <bark/geometry/geometry.hpp>
@@ -14,8 +14,6 @@
 
 namespace bark::db {
 
-enum class layer_type { Invalid, Geometry, Raster };
-
 using busy_exception = lru_cache::busy_exception;
 
 /// Thread-safe, caching interface for spatial data source
@@ -23,7 +21,7 @@ struct provider {
     virtual ~provider() = default;
 
     /// Returns layers in this data source
-    virtual std::map<qualified_name, layer_type> dir() = 0;
+    virtual std::map<qualified_name, meta::layer_type> dir() = 0;
 
     /// Returns PROJ.4 string for the spatial reference system
     virtual std::string projection(const qualified_name& layer) = 0;
@@ -58,10 +56,10 @@ struct provider {
     virtual command_holder make_command() = 0;
 
     /// Describes table
-    virtual table_def table(const qualified_name& tbl_nm) = 0;
+    virtual meta::table table(const qualified_name& tbl_nm) = 0;
 
     /// Returns name and DDL command to create a table
-    virtual std::pair<qualified_name, std::string> script(const table_def&) = 0;
+    virtual std::pair<qualified_name, std::string> ddl(const meta::table&) = 0;
 
     /// Outputs SQL LIMIT clause
     virtual void page_clause(sql_builder&, size_t offset, size_t limit) = 0;
@@ -105,7 +103,8 @@ inline sql_builder select_sql(provider& pvd,
 {
     auto res = builder(pvd);
     auto tbl = pvd.table(tbl_nm);
-    auto pri = boost::range::find_if(tbl.indexes, same{index_type::Primary});
+    auto pri =
+        boost::range::find_if(tbl.indexes, same{meta::index_type::Primary});
     res << "SELECT " << list{tbl.columns, ", ", decode} << " FROM " << tbl_nm
         << " ORDER BY "
         << list{pri != tbl.indexes.end()
@@ -125,7 +124,7 @@ sql_builder insert_sql(provider& pvd,
                        const Rows& rows)
 {
     auto tbl = pvd.table(tbl_nm);
-    auto cols = as<std::vector<column_def>>(col_nms, [&](const auto& col_nm) {
+    auto cols = as<std::vector<meta::column>>(col_nms, [&](const auto& col_nm) {
         return *db::find(tbl.columns, col_nm);
     });
     auto encode = [&](const auto& row) {
@@ -155,7 +154,7 @@ inline sql_builder drop_sql(provider& pvd, const qualified_name& tbl_nm)
     return res;
 }
 
-inline column_def column(provider& pvd, const qualified_name& col_nm)
+inline meta::column column(provider& pvd, const qualified_name& col_nm)
 {
     return *find(pvd.table(qualifier(col_nm)).columns, col_nm.back());
 }

@@ -23,7 +23,7 @@ class painter {
     using path = std::reference_wrapper<decltype(cached_path_)>;
 
 public:
-    painter(geoimage& map, const layer_def& lr)
+    painter(geoimage& map, const layer_settings& lr)
         : ref_(map.ref), painter_(&map.img)
     {
         check(map);

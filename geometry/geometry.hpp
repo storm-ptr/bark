@@ -8,6 +8,7 @@
 #include <boost/geometry/geometries/linestring.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/index/rtree.hpp>
 #include <boost/geometry/multi/geometries/multi_linestring.hpp>
 #include <boost/geometry/multi/geometries/multi_point.hpp>
 #include <boost/geometry/multi/geometries/multi_polygon.hpp>
@@ -30,13 +31,17 @@ using geometry = boost::variant<point,
                                 multi_point,
                                 multi_linestring,
                                 multi_polygon,
-                                boost::recursive_wrapper<geometry_collection> >;
+                                boost::recursive_wrapper<geometry_collection>>;
 
 struct geometry_collection : std::vector<geometry> {
 };
 
 using box = boost::geometry::model::box<point>;
+
 using multi_box = std::vector<box>;
+
+using box_rtree =
+    boost::geometry::index::rtree<box, boost::geometry::index::quadratic<16>>;
 
 }  // namespace bark::geometry
 

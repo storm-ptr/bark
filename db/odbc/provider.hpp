@@ -8,9 +8,11 @@
 #include <bark/db/detail/ddl.hpp>
 #include <bark/db/detail/mssql_dialect.hpp>
 #include <bark/db/detail/mysql_dialect.hpp>
+#include <bark/db/detail/mysql_old_dialect.hpp>
 #include <bark/db/detail/postgres_dialect.hpp>
 #include <bark/db/detail/projection_guide.hpp>
 #include <bark/db/detail/provider_impl.hpp>
+#include <bark/db/detail/sqlite_dialect.hpp>
 #include <bark/db/detail/table_guide.hpp>
 #include <bark/db/odbc/command.hpp>
 #include <bark/detail/unicode.hpp>
@@ -42,10 +44,17 @@ public:
                       return std::make_unique<db2_dialect>();
                   else if (all_of({"microsoft", "sql", "server"}, within(dbms)))
                       return std::make_unique<mssql_dialect>();
-                  else if (within(dbms)("mysql"))
-                      return std::make_unique<mysql_dialect>(cmd);
+                  else if (within(dbms)("mysql")) {
+                      exec(cmd, "SELECT version()");
+                      if (std::stoi(fetch_or(cmd, std::string{"8"}).data()) < 8)
+                          return std::make_unique<mysql_old_dialect>();
+                      else
+                          return std::make_unique<mysql_dialect>();
+                  }
                   else if (within(dbms)("postgres"))
                       return std::make_unique<postgres_dialect>();
+                  else if (within(dbms)("sqlite"))
+                      return std::make_unique<sqlite_dialect>();
                   else
                       throw std::runtime_error("unsupported DBMS: " + dbms);
               }()}

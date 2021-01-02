@@ -8,6 +8,7 @@
 #include <bark/db/odbc/provider.hpp>
 #include <bark/db/postgres/provider.hpp>
 #include <bark/db/sqlite/provider.hpp>
+#include <bark/geometry/as_text.hpp>
 #include <bark/test/wkb_unifier.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/preprocessor/stringize.hpp>
@@ -25,20 +26,22 @@ inline bool operator==(const rowset& lhs, const rowset& rhs)
                            static_cast<blob_view>(rhs.data));
 }
 
-inline bool operator==(const column_def& lhs, const column_def& rhs)
+namespace meta {
+
+inline bool operator==(const column& lhs, const column& rhs)
 {
     return unicode::case_insensitive_equal_to{}(lhs.name, rhs.name) &&
            lhs.type == rhs.type && lhs.projection == rhs.projection;
 }
 
-inline bool operator==(const index_def& lhs, const index_def& rhs)
+inline bool operator==(const index& lhs, const index& rhs)
 {
     return lhs.type == rhs.type &&
            boost::range::equal(
                lhs.columns, rhs.columns, unicode::case_insensitive_equal_to{});
 }
 
-inline bool operator==(const table_def& lhs, const table_def& rhs)
+inline bool operator==(const table& lhs, const table& rhs)
 {
     /// the table name is not compared (structure only)
     return std::is_permutation(lhs.columns.begin(),
@@ -50,6 +53,8 @@ inline bool operator==(const table_def& lhs, const table_def& rhs)
                                rhs.indexes.begin(),
                                rhs.indexes.end());
 }
+
+}  // namespace meta
 
 }  // namespace bark::db
 
@@ -134,7 +139,7 @@ TEST_CASE("db_geometry")
     bark::db::for_each_blob(rows_from, col, wkb_unifier{});
     for (auto& pvd_to : make_write_providers()) {
         auto [name, sql] =
-            pvd_to->script({random_name(), tbl_from.columns, tbl_from.indexes});
+            pvd_to->ddl({random_name(), tbl_from.columns, tbl_from.indexes});
         REQUIRE_THROWS(pvd_to->table(name));
         exec(*pvd_to, sql);
         pvd_to->refresh();

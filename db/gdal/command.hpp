@@ -4,7 +4,7 @@
 #define BARK_DB_GDAL_COMMAND_HPP
 
 #include <bark/db/command.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/detail/transaction.hpp>
 #include <bark/db/gdal/detail/bind_column.hpp>
 #include <bark/db/gdal/detail/dataset.hpp>

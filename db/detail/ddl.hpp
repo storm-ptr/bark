@@ -4,7 +4,7 @@
 #define BARK_DB_DDL_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/sql_builder.hpp>
 #include <bark/proj/epsg.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -18,7 +18,7 @@ class ddl {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
-    std::pair<qualified_name, std::string> make_script(table_def tbl)
+    std::pair<qualified_name, std::string> script(meta::table tbl)
     {
         tbl.name = id(as_mixin().cached_schema(), tbl.name.back());
         sql_builder bld{embeded_params(as_mixin().make_command()->syntax())};
@@ -41,12 +41,12 @@ private:
         }
     };
 
-    void create_table_sql(sql_builder& bld, const table_def& tbl)
+    void create_table_sql(sql_builder& bld, const meta::table& tbl)
     {
         auto& dial = as_mixin().as_dialect();
         bld << "CREATE TABLE " << tbl.name << " (\n\t"
-            << list{tbl.columns | boost::adaptors::filtered(
-                                      std::not_fn(same{column_type::Geometry})),
+            << list{tbl.columns | boost::adaptors::filtered(std::not_fn(
+                                      same{meta::column_type::Geometry})),
                     ",\n\t",
                     [&](auto& col) {
                         auto name = col.name;
@@ -56,17 +56,17 @@ private:
                         return column{name, type, not_null};
                     }};
         auto pri =
-            boost::range::find_if(tbl.indexes, same{index_type::Primary});
+            boost::range::find_if(tbl.indexes, same{meta::index_type::Primary});
         if (pri != tbl.indexes.end())
             bld << ",\n\tPRIMARY KEY (" << list{pri->columns, ", ", id<>}
                 << ")";
         bld << "\n);\n";
     }
 
-    void add_geometry_columns_sql(sql_builder& bld, const table_def& tbl)
+    void add_geometry_columns_sql(sql_builder& bld, const meta::table& tbl)
     {
-        for (auto&& col : tbl.columns | boost::adaptors::filtered(
-                                            same{column_type::Geometry})) {
+        for (auto&& col : tbl.columns | boost::adaptors::filtered(same{
+                                            meta::column_type::Geometry})) {
             int srid = 0;
             for (auto pj : {col.projection, proj::epsg().find_proj(4326)}) {
                 try {
@@ -82,17 +82,17 @@ private:
         }
     }
 
-    void create_indexes_sql(sql_builder& bld, const table_def& tbl)
+    void create_indexes_sql(sql_builder& bld, const meta::table& tbl)
     {
         for (auto& idx : tbl.indexes | boost::adaptors::filtered(
-                                           same{index_type::Secondary})) {
+                                           same{meta::index_type::Secondary})) {
             auto& col = *db::find(tbl.columns, idx.columns.front());
-            if (col.type == column_type::Geometry)
+            if (col.type == meta::column_type::Geometry)
                 as_mixin().as_dialect().create_spatial_index_sql(
-                    bld, id(tbl.name, col.name), extent(col));
+                    bld, id(tbl.name, col.name), geometry::envelope(col.tiles));
             else
                 bld << "CREATE INDEX "
-                    << index_name(tbl.name.back(), idx.columns) << "ON "
+                    << index_name(tbl.name.back(), idx.columns) << " ON "
                     << tbl.name << " (" << list{idx.columns, ", ", id<>} << ")";
             bld << ";\n";
         }

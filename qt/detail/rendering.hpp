@@ -101,11 +101,11 @@ inline QVector<geoimage> rendering(const layer& lr,
                                    const georeference& ref)
 try {
     switch (lr.provider->dir().at(lr.name)) {
-        case db::layer_type::Invalid:
+        case db::meta::layer_type::Invalid:
             break;
-        case db::layer_type::Geometry:
+        case db::meta::layer_type::Geometry:
             return geometry_rendering(lr, tl, ref);
-        case db::layer_type::Raster:
+        case db::meta::layer_type::Raster:
             return raster_rendering(lr, tl, ref);
     }
     throw std::logic_error("layer type");

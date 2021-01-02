@@ -4,14 +4,13 @@
 #define BARK_DB_POSTGRES_DIALECT_HPP
 
 #include <bark/db/detail/dialect.hpp>
-#include <bark/db/detail/table_def_ops.hpp>
+#include <bark/db/detail/meta_ops.hpp>
 #include <bark/db/detail/utility.hpp>
 #include <bark/geometry/as_binary.hpp>
 
 namespace bark::db {
 
-class postgres_dialect : public dialect {
-public:
+struct postgres_dialect : dialect {
     void projections_sql(sql_builder& bld) override
     {
         ogc_projections_sql(bld);
@@ -35,18 +34,18 @@ public:
             << " ORDER BY ordinal_position";
     }
 
-    column_type type(std::string_view type, int scale) override
+    meta::column_type type(std::string_view type, int scale) override
     {
         if (within(type)("array"))
-            return column_type::Invalid;
+            return meta::column_type::Invalid;
         if (any_of({"geography", "geometry"}, equals(type)))
-            return column_type::Geometry;
+            return meta::column_type::Geometry;
         if (within(type)("serial"))
-            return column_type::Integer;
+            return meta::column_type::Integer;
         if (any_of({"json", "jsonb", "xml", "hstore"}, equals(type)))
-            return column_type::Text;
+            return meta::column_type::Text;
         if (type == "bytea")
-            return column_type::Blob;
+            return meta::column_type::Blob;
         return iso_type(type, scale);
     }
 
@@ -89,9 +88,9 @@ FROM columns, pg_attribute
 WHERE attrelid = tbl AND attnum = cols[col])";
     }
 
-    column_decoder geometry_decoder() override { return st_as_binary(); }
+    meta::decoder_t geom_decoder() override { return st_as_binary(); }
 
-    column_encoder geometry_encoder(std::string_view type, int srid) override
+    meta::encoder_t geom_encoder(std::string_view type, int srid) override
     {
         if (type == "geography")
             return [](sql_builder& bld, variant_t v) {
@@ -108,7 +107,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
     }
 
     void window_clause(sql_builder& bld,
-                       const table_def& tbl,
+                       const meta::table& tbl,
                        std::string_view col_nm,
                        const geometry::box& ext) override
     {
@@ -122,14 +121,14 @@ WHERE attrelid = tbl AND attnum = cols[col])";
         bld << "SELECT current_schema()";
     }
 
-    std::string type_name(column_type type) override
+    std::string type_name(meta::column_type type) override
     {
         switch (type) {
-            case column_type::Blob:
+            case meta::column_type::Blob:
                 return "bytea";
-            case column_type::Integer:
+            case meta::column_type::Integer:
                 return "bigint";
-            case column_type::Real:
+            case meta::column_type::Real:
                 return "float";
             default:
                 return "text";
@@ -158,7 +157,7 @@ WHERE attrelid = tbl AND attnum = cols[col])";
 
     void page_clause(sql_builder& bld, size_t offset, size_t limit) override
     {
-        return iso_page_clause(bld, offset, limit);
+        iso_page_clause(bld, offset, limit);
     }
 };
 

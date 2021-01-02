@@ -24,7 +24,7 @@ inline QDataStream& operator<<(QDataStream& os, const node& v)
     os << static_cast<quint8>(v.index());
     std::visit(overloaded{[&](const std::monostate&) {},
                           [&](const link& v) { os << v.uri; },
-                          [&](const layer_def& v) {
+                          [&](const layer_settings& v) {
                               os << adapt(v.name)
                                  << static_cast<quint8>(v.state) << v.pen
                                  << v.brush;
@@ -44,8 +44,8 @@ inline node read<node>(QDataStream& is)
             is >> lnk.uri;
             return lnk;
         }
-        case variant_index<node, layer_def>(): {
-            layer_def lr;
+        case variant_index<node, layer_settings>(): {
+            layer_settings lr;
             lr.name = adapt(read<QStringList>(is));
             lr.state = static_cast<Qt::CheckState>(read<quint8>(is));
             is >> lr.pen >> lr.brush;

@@ -6,6 +6,7 @@
 #include <bark/db/detail/cacher.hpp>
 #include <bark/db/detail/ddl.hpp>
 #include <bark/db/detail/mysql_dialect.hpp>
+#include <bark/db/detail/mysql_old_dialect.hpp>
 #include <bark/db/detail/projection_guide.hpp>
 #include <bark/db/detail/provider_impl.hpp>
 #include <bark/db/detail/table_guide.hpp>
@@ -36,7 +37,11 @@ public:
               [=] { return new command(host, port, db, usr, pwd); },
               [&]() -> dialect_holder {
                   auto cmd = command(host, port, db, usr, pwd);
-                  return std::make_unique<mysql_dialect>(cmd);
+                  exec(cmd, "SELECT version()");
+                  if (std::stoi(fetch_or(cmd, std::string{"8"}).data()) < 8)
+                      return std::make_unique<mysql_old_dialect>();
+                  else
+                      return std::make_unique<mysql_dialect>();
               }()}
     {
     }

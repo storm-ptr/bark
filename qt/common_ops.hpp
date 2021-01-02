@@ -31,15 +31,16 @@ inline auto table(const layer& lr)
     return lr.provider->table(qualifier(lr.name));
 }
 
-inline auto script(const layer& from, const link& to)
+inline auto ddl(const layer& from, const link& to)
 {
-    return to.provider->script(table(from));
+    return to.provider->ddl(table(from));
 }
 
 inline auto attr_names(const layer& lr)
 {
-    return db::names(table(lr).columns | boost::adaptors::filtered(std::not_fn(
-                                             same{db::column_type::Geometry})));
+    return db::names(table(lr).columns |
+                     boost::adaptors::filtered(
+                         std::not_fn(same{db::meta::column_type::Geometry})));
 }
 
 inline auto tile_coverage(const layer& lr,
