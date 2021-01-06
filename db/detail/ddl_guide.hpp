@@ -1,7 +1,7 @@
 // Andrew Naplavkov
 
-#ifndef BARK_DB_DDL_HPP
-#define BARK_DB_DDL_HPP
+#ifndef BARK_DB_DDL_GUIDE_HPP
+#define BARK_DB_DDL_GUIDE_HPP
 
 #include <bark/db/detail/dialect.hpp>
 #include <bark/db/detail/meta_ops.hpp>
@@ -14,7 +14,7 @@
 namespace bark::db {
 
 template <class T>
-class ddl {
+class ddl_guide {
     T& as_mixin() { return static_cast<T&>(*this); }
 
 protected:
@@ -101,4 +101,4 @@ private:
 
 }  // namespace bark::db
 
-#endif  // BARK_DB_DDL_HPP
+#endif  // BARK_DB_DDL_GUIDE_HPP

@@ -5,7 +5,7 @@
 
 #include <bark/db/detail/cacher.hpp>
 #include <bark/db/detail/db2_dialect.hpp>
-#include <bark/db/detail/ddl.hpp>
+#include <bark/db/detail/ddl_guide.hpp>
 #include <bark/db/detail/mssql_dialect.hpp>
 #include <bark/db/detail/mysql_dialect.hpp>
 #include <bark/db/detail/mysql_old_dialect.hpp>
@@ -23,12 +23,12 @@
 namespace bark::db::odbc {
 
 class provider : private cacher<provider>,
-                 private ddl<provider>,
+                 private ddl_guide<provider>,
                  private projection_guide<provider>,
                  public provider_impl<provider>,
                  private table_guide<provider> {
     friend cacher<provider>;
-    friend ddl<provider>;
+    friend ddl_guide<provider>;
     friend projection_guide<provider>;
     friend provider_impl<provider>;
     friend table_guide<provider>;

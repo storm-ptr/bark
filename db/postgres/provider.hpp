@@ -4,7 +4,7 @@
 #define BARK_DB_POSTGRES_PROVIDER_HPP
 
 #include <bark/db/detail/cacher.hpp>
-#include <bark/db/detail/ddl.hpp>
+#include <bark/db/detail/ddl_guide.hpp>
 #include <bark/db/detail/postgres_dialect.hpp>
 #include <bark/db/detail/projection_guide.hpp>
 #include <bark/db/detail/provider_impl.hpp>
@@ -16,12 +16,12 @@
 namespace bark::db::postgres {
 
 class provider : private cacher<provider>,
-                 private ddl<provider>,
+                 private ddl_guide<provider>,
                  private projection_guide<provider>,
                  public provider_impl<provider>,
                  private table_guide<provider> {
     friend cacher<provider>;
-    friend ddl<provider>;
+    friend ddl_guide<provider>;
     friend projection_guide<provider>;
     friend provider_impl<provider>;
     friend table_guide<provider>;
