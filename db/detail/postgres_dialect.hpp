@@ -66,6 +66,7 @@ struct postgres_dialect : dialect {
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
+        auto& tbl = tbl_nm.back();
         auto& scm = tbl_nm.at(-2);
         bld << R"(
 WITH indexes AS (
@@ -79,13 +80,16 @@ WITH indexes AS (
     AND s.nspname = )"
             << param{scm} << R"(
     AND t.relname = )"
-            << param{tbl_nm.back()} << R"(
+            << param{tbl} << R"(
 ), columns AS (
   SELECT indexes.*, generate_series(lb, ub) col FROM indexes
 )
 SELECT scm, nm, attname, pri, (opts[col] & 1)
 FROM columns, pg_attribute
-WHERE attrelid = tbl AND attnum = cols[col])";
+WHERE attrelid = tbl
+AND attnum = cols[col]
+ORDER BY pri DESC, scm, nm, col
+)";
     }
 
     meta::decoder_t geom_decoder() override { return st_as_binary(); }

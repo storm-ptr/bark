@@ -61,7 +61,8 @@ struct mssql_dialect : dialect {
                "is_primary_key, is_descending_key FROM sys.indexes i JOIN "
                "sys.index_columns c ON i.object_id = c.object_id AND "
                "i.index_id = c.index_id WHERE i.object_id = OBJECT_ID("
-            << param{tbl_nm} << ") ORDER BY name, key_ordinal";
+            << param{tbl_nm}
+            << ") ORDER BY is_primary_key DESC, name, key_ordinal";
     }
 
     meta::decoder_t geom_decoder() override

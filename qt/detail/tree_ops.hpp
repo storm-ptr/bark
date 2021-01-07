@@ -116,9 +116,9 @@ inline std::shared_ptr<tree> dir(const QUrl& uri)
     auto res = std::make_shared<tree>();
     auto lnk = make_link(uri);
     res->data = lnk;
-    for (const auto& [name, type] : lnk.provider->dir()) {
+    for (const auto& pair : lnk.provider->dir()) {
         layer_settings lr;
-        lr.name = name;
+        lr.name = pair.first;
         auto child = std::make_shared<tree>();
         child->parent = res.get();
         child->data = lr;

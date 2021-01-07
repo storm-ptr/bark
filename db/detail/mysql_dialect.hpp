@@ -54,14 +54,14 @@ struct mysql_dialect : dialect {
 
     void indexes_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
-        auto& scm = tbl_nm.at(-2);
         auto& tbl = tbl_nm.back();
+        auto& scm = tbl_nm.at(-2);
         bld << "SELECT NULL, index_name, column_name, index_name = "
-            << param{"PRIMARY"} << ", collation = " << param{"D"}
+            << param{"PRIMARY"} << " AS is_primary, collation = " << param{"D"}
             << " FROM information_schema.statistics WHERE LOWER(table_schema) "
                "= LOWER("
             << param{scm} << ") AND LOWER(table_name) = LOWER(" << param{tbl}
-            << ") ORDER BY index_name, seq_in_index";
+            << ") ORDER BY is_primary DESC, index_name, seq_in_index";
     }
 
     meta::decoder_t geom_decoder() override

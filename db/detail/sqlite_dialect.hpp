@@ -50,12 +50,13 @@ struct sqlite_dialect : dialect {
         auto& tbl = tbl_nm.back();
         bld << R"(
 SELECT
-  NULL AS INDEX_SCHEMA,
-  i.name AS INDEX_NAME,
-  c.name AS COLUMN_NAME,
-  i.origin = 'pk' AS IS_PRIMARY,
-  c.desc AS IS_DESCENDING,
-  c.seqno AS SEQ
+  NULL,
+  i.name AS index_name,
+  c.name AS column_name,
+  i.origin = )"
+            << param{"pk"} << R"( AS is_primary,
+  c.desc,
+  c.seqno AS seqno
 FROM pragma_index_list()"
             << param{tbl} << R"() AS i, pragma_index_xinfo(i.name) AS c
 WHERE c.key
@@ -64,7 +65,8 @@ UNION ALL
 
 SELECT
   NULL,
-  'PRIMARY',
+  )" << param{"PRIMARY"}
+            << R"(,
   name,
   1,
   0,
@@ -73,13 +75,14 @@ FROM pragma_table_info()"
             << param{tbl} << R"()
 WHERE pk > 0
 AND NOT EXISTS(SELECT * FROM pragma_index_list()"
-            << param{tbl} << R"() WHERE origin = 'pk')
+            << param{tbl} << R"() WHERE origin = )" << param{"pk"} << R"()
 
 UNION ALL
 
 SELECT
-  NULL,
-  'idx_' || f_table_name || '_' || f_geometry_column,
+  NULL,)" << param{"idx_"}
+            << R"( || f_table_name || )" << param{"_"}
+            << R"( || f_geometry_column,
   f_geometry_column,
   0,
   0,
@@ -89,7 +92,7 @@ WHERE spatial_index_enabled
 AND LOWER(f_table_name) = LOWER()"
             << param{tbl} << R"()
 
-ORDER BY IS_PRIMARY DESC, INDEX_NAME, SEQ
+ORDER BY is_primary DESC, index_name, seqno
 )";
     }
 

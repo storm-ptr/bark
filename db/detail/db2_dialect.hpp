@@ -61,12 +61,12 @@ struct db2_dialect : dialect {
     {
         auto& tbl = tbl_nm.back();
         auto& scm = tbl_nm.at(-2);
-        bld << "SELECT RTRIM(i.indschema), i.indname, colname, uniquerule = "
-            << param{"P"} << ", colorder = " << param{"D"}
+        bld << "SELECT indschema, indname, colname, uniquerule = " << param{"P"}
+            << " AS is_primary, colorder = " << param{"D"}
             << " FROM syscat.indexes i JOIN syscat.indexcoluse "
                "USING(indschema, indname) WHERE tabschema = "
             << param{scm} << " AND tabname = " << param{tbl}
-            << " ORDER BY 1, 2, colseq";
+            << " ORDER BY is_primary DESC, indschema, indname, colseq";
     }
 
     meta::decoder_t geom_decoder() override
