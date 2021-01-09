@@ -60,9 +60,7 @@ inline bool operator==(const table& lhs, const table& rhs)
 
 inline auto random_name()
 {
-    std::ostringstream os;
-    os << "drop_me_" << bark::random_index{10000}();
-    return bark::db::id(os.str());
+    return bark::db::id(bark::concat("drop_me_", bark::random_index{10000}()));
 }
 
 inline const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
@@ -72,11 +70,9 @@ inline const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
     auto it = boost::range::find_if(Drivers, [tokens](const auto& drv) {
         return all_of(tokens, within(drv));
     });
-    if (it == std::end(Drivers)) {
-        std::ostringstream os;
-        os << "ODBC driver not found: " << list{tokens, ", "};
-        throw std::runtime_error(os.str());
-    }
+    if (it == std::end(Drivers))
+        throw std::runtime_error(
+            concat("ODBC driver not found: ", list{tokens, ", "}));
     return *it;
 }
 

@@ -12,6 +12,7 @@
 #include <iterator>
 #include <mutex>
 #include <random>
+#include <sstream>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
@@ -91,6 +92,14 @@ void resize_and_assign(Container& container, size_t pos, Item&& item)
     if (container.size() <= pos)
         container.resize(pos + 1);
     container[pos] = std::forward<Item>(item);
+}
+
+template <class... Args>
+std::string concat(const Args&... args)
+{
+    std::ostringstream os;
+    ((os << args), ...);
+    return os.str();
 }
 
 /// @see https://en.cppreference.com/w/cpp/utility/functional/identity

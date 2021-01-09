@@ -36,7 +36,7 @@ public:
 
         auto drv = GDALGetDriverByName("PNG");
         check(!!drv);
-        auto file = "/vsimem/" + std::to_string(++file_id_) + ".png";
+        auto file = concat("/vsimem/", ++file_id_, ".png");
         {
             dataset_holder cp(
                 GDALCreateCopy(drv, file.c_str(), ds_.get(), false, 0, 0, 0));

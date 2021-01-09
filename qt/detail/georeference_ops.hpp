@@ -104,10 +104,12 @@ template <class Point>
 auto set_general_perspective(Point lon_lat)
 {
     return [lon_lat = std::move(lon_lat)](georeference ref) {
-        std::ostringstream os;
-        os << "+proj=ortho +lat_0=" << lon_lat.y() << " +lon_0=" << lon_lat.x()
-           << " +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs";
-        auto pj = os.str();
+        auto pj =
+            concat("+proj=ortho +lat_0=",
+                   lon_lat.y(),
+                   " +lon_0=",
+                   lon_lat.x(),
+                   " +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs");
         auto tf = proj::transformer{ref.projection, pj};
         auto ext = tf.forward(extent(ref));
         return std::move(ref) | set_projection(pj) | fit(ext);

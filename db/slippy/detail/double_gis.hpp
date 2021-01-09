@@ -4,7 +4,6 @@
 #define BARK_DB_SLIPPY_DOUBLE_GIS_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
@@ -14,11 +13,14 @@ struct double_gis : layer {
     std::string url(const tile& tl) override
     {
         static random_index subdomain_{4};
-        std::ostringstream os;
-        os << "http://tile" << char('0' + subdomain_())
-           << ".maps.2gis.com/tiles?x=" << tl.x << "&y=" << tl.y
-           << "&z=" << tl.z;
-        return os.str();
+        return concat("http://tile",
+                      char('0' + subdomain_()),
+                      ".maps.2gis.com/tiles?x=",
+                      tl.x,
+                      "&y=",
+                      tl.y,
+                      "&z=",
+                      tl.z);
     }
 
     int zmax() override { return 18; }

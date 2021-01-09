@@ -37,14 +37,15 @@ public:
                   SQL_DRIVER_NOPROMPT));
     }
 
-    sql_syntax syntax() override
+    sql_quoted_identifier quoted_identifier() override
     {
-        sql_syntax res{};
         auto quote = get_info(dbc_, SQL_IDENTIFIER_QUOTE_CHAR);
-        res.delimited_identifier = [=](const auto& id) {
-            return quote + id + quote;
-        };
-        return res;
+        return [quote](auto id) { return concat(quote, id, quote); };
+    }
+
+    sql_parameter_marker parameter_marker() override
+    {
+        return [](auto) { return "?"; };
     }
 
     void exec(const sql_builder& bld) override

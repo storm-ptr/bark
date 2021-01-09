@@ -7,21 +7,20 @@
 #include <bark/db/sql_builder.hpp>
 #include <bark/geometry/as_binary.hpp>
 #include <initializer_list>
-#include <sstream>
 
 namespace bark::db {
 
 template <class ColumnNames>
-auto index_name(std::string_view tbl, const ColumnNames& cols)
+qualified_name index_name(std::string_view tbl, const ColumnNames& cols)
 {
-    std::ostringstream os;
-    os << "idx_" << tbl << "_" << list{cols, "_"};
-    return id(os.str());
+    return id(concat("idx_", tbl, "_", list{cols, "_"}));
 }
 
-inline auto index_name(const qualified_name& col_nm)
+inline qualified_name index_name(const qualified_name& col_nm)
 {
-    return index_name(col_nm.at(-2), std::initializer_list{col_nm.back()});
+    auto& col = col_nm.back();
+    auto& tbl = col_nm.at(-2);
+    return index_name(tbl, std::initializer_list{col});
 }
 
 /// OpenGIS Document 99-049
@@ -67,12 +66,6 @@ inline meta::column_type iso_type(std::string_view type, int scale)
     return meta::column_type::Invalid;
 }
 
-inline sql_syntax embeded_params(sql_syntax syntax)
-{
-    syntax.parameter_marker = nullptr;
-    return syntax;
-}
-
 inline void ogc_projections_sql(sql_builder& bld)
 {
     bld << "SELECT srid, (CASE LOWER(auth_name) WHEN " << param{"epsg"}
@@ -90,10 +83,11 @@ inline void iso_layers_sql(sql_builder& bld,
 
 inline void iso_columns_sql(sql_builder& bld, const qualified_name& tbl_nm)
 {
+    auto& tbl = tbl_nm.back();
     auto& scm = tbl_nm.at(-2);
     bld << "SELECT column_name, LOWER(data_type), numeric_scale FROM "
            "information_schema.columns WHERE table_schema = "
-        << param{scm} << " AND table_name = " << param{tbl_nm.back()}
+        << param{scm} << " AND table_name = " << param{tbl}
         << " ORDER BY ordinal_position";
 }
 

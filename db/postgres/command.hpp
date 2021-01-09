@@ -8,7 +8,6 @@
 #include <bark/db/postgres/detail/bind_column.hpp>
 #include <bark/db/postgres/detail/bind_param.hpp>
 #include <bark/db/postgres/detail/utility.hpp>
-#include <sstream>
 #include <stdexcept>
 
 namespace bark::db::postgres {
@@ -24,25 +23,34 @@ public:
             std::string_view pwd)
     {
         using namespace std::chrono;
-        std::ostringstream con;
-        con << "host='" << host << "' port='" << port << "' dbname='" << db
-            << "' user='" << usr << "' password='" << pwd
-            << "' connect_timeout=" << duration_cast<seconds>(DbTimeout).count()
-            << " options='-c statement_timeout="
-            << duration_cast<milliseconds>(DbTimeout).count()
-            << "' client_encoding='UTF8'";
-        con_.reset(PQconnectdb((char*)con.str().c_str()));
+        auto con = concat("host='",
+                          host,
+                          "' port='",
+                          port,
+                          "' dbname='",
+                          db,
+                          "' user='",
+                          usr,
+                          "' password='",
+                          pwd,
+                          "' connect_timeout=",
+                          duration_cast<seconds>(DbTimeout).count(),
+                          " options='-c statement_timeout=",
+                          duration_cast<milliseconds>(DbTimeout).count(),
+                          "' client_encoding='UTF8'");
+        con_.reset(PQconnectdb((char*)con.c_str()));
         if (!con_ || PQstatus(con_.get()) != CONNECTION_OK)
             throw std::runtime_error("Postgres error");
     }
 
-    sql_syntax syntax() override
+    sql_quoted_identifier quoted_identifier() override
     {
-        sql_syntax res{};
-        res.parameter_marker = [](auto order) {
-            return '$' + std::to_string(order + 1);
-        };
-        return res;
+        return [](auto id) { return concat('"', id, '"'); };
+    }
+
+    sql_parameter_marker parameter_marker() override
+    {
+        return [](auto number) { return concat('$', number + 1); };
     }
 
     void exec(const sql_builder& bld) override

@@ -109,8 +109,7 @@ inline column_holder bind_column(enum_field_types type,
         case MYSQL_TYPE_YEAR:
             return std::make_unique<column_arr<std::string_view>>(bnd);
         default:
-            throw std::runtime_error("unsupported MySQL type: " +
-                                     std::to_string(type));
+            throw std::runtime_error(concat("unsupported MySQL type: ", type));
     }
 }
 

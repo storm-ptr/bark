@@ -96,9 +96,9 @@ ORDER BY is_primary DESC, index_name, seqno
 )";
     }
 
-    meta::decoder_t geom_decoder() override { return st_as_binary(); }
+    sql_decoder geom_decoder() override { return st_as_binary(); }
 
-    meta::encoder_t geom_encoder(std::string_view, int srid) override
+    sql_encoder geom_encoder(std::string_view, int srid) override
     {
         return st_geom_from_wkb(srid);
     }

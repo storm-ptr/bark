@@ -19,12 +19,6 @@ enum class index_type { Invalid, Primary, Secondary };
 
 enum class layer_type { Invalid, Geometry, Raster };
 
-/// Converts the well-known binary representation of the geometry
-using decoder_t = std::function<void(sql_builder&, std::string_view name)>;
-
-/// Creates a geometry instance from a well-known binary representation
-using encoder_t = std::function<void(sql_builder&, variant_t var)>;
-
 /// Describes column
 struct column {
     std::string name;
@@ -32,11 +26,11 @@ struct column {
     std::string projection;  ///< PROJ.4 string for the spatial reference system
     geometry::box_rtree tiles;  ///< balanced data grid
 
-    decoder_t decoder
+    sql_decoder decoder
 
         = [](sql_builder& bld, std::string_view name) { bld << id(name); };
 
-    encoder_t encoder
+    sql_encoder encoder
 
         = [](sql_builder& bld, variant_t var) { bld << param{var}; };
 };

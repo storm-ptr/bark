@@ -16,8 +16,11 @@ namespace bark::db {
 struct command {
     virtual ~command() = default;
 
-    /// Returns the options for constructing @ref sql_builder
-    virtual sql_syntax syntax() = 0;
+    /// Option for constructing @ref sql_builder
+    virtual sql_quoted_identifier quoted_identifier() = 0;
+
+    /// Option for constructing @ref sql_builder
+    virtual sql_parameter_marker parameter_marker() = 0;
 
     /// Executes the SQL in @ref sql_builder
     virtual void exec(const sql_builder&) = 0;
@@ -37,7 +40,7 @@ struct command {
 
 inline sql_builder builder(command& cmd)
 {
-    return sql_builder{cmd.syntax()};
+    return sql_builder{cmd.quoted_identifier(), cmd.parameter_marker()};
 }
 
 inline void exec(command& cmd, const sql_builder& bld)

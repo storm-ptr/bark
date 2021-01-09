@@ -33,7 +33,7 @@ public:
     {
         auto it = index_.left.find(srid);
         if (it == index_.left.end())
-            throw std::out_of_range("srid: " + std::to_string(srid));
+            throw std::out_of_range(concat("srid: ", srid));
         return it->second;
     }
 

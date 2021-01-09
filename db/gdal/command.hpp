@@ -24,7 +24,12 @@ public:
     {
     }
 
-    sql_syntax syntax() override { return embeded_params({}); }
+    sql_quoted_identifier quoted_identifier() override
+    {
+        return [](auto id) { return concat('"', id, '"'); };
+    }
+
+    sql_parameter_marker parameter_marker() override { return nullptr; }
 
     void exec(const sql_builder& bld) override
     {

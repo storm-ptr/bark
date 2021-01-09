@@ -65,14 +65,14 @@ struct mssql_dialect : dialect {
             << ") ORDER BY is_primary_key DESC, name, key_ordinal";
     }
 
-    meta::decoder_t geom_decoder() override
+    sql_decoder geom_decoder() override
     {
         return [](sql_builder& bld, std::string_view col_nm) {
             bld << id(col_nm) << ".STAsBinary() AS " << id(col_nm);
         };
     }
 
-    meta::encoder_t geom_encoder(std::string_view type, int srid) override
+    sql_encoder geom_encoder(std::string_view type, int srid) override
     {
         return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
             bld << type << "::STGeomFromWKB(" << param{v} << ", " << srid

@@ -50,13 +50,14 @@ public:
         check(con_, !mysql_set_character_set(con_.get(), "utf8"));
     }
 
-    sql_syntax syntax() override
+    sql_quoted_identifier quoted_identifier() override
     {
-        sql_syntax res{};
-        res.delimited_identifier = [](const auto& id) {
-            return '`' + id + '`';
-        };
-        return res;
+        return [](auto id) { return concat('`', id, '`'); };
+    }
+
+    sql_parameter_marker parameter_marker() override
+    {
+        return [](auto) { return "?"; };
     }
 
     void exec(const sql_builder& bld) override

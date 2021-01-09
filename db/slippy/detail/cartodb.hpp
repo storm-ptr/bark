@@ -4,7 +4,6 @@
 #define BARK_DB_SLIPPY_CARTODB_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
@@ -13,10 +12,13 @@ struct cartodb : layer {
 
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://basemaps.cartocdn.com/light_all/" << tl.z << "/" << tl.x
-           << "/" << tl.y << ".png";
-        return os.str();
+        return concat("http://basemaps.cartocdn.com/light_all/",
+                      tl.z,
+                      "/",
+                      tl.x,
+                      "/",
+                      tl.y,
+                      ".png");
     }
 };
 

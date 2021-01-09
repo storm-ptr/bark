@@ -46,7 +46,7 @@ inline const bimap& epsg()
 
 inline std::string abbreviation(const std::string& pj)
 try {
-    return "EPSG:" + std::to_string(epsg().find_srid(pj));
+    return concat("EPSG:", epsg().find_srid(pj));
 }
 catch (const std::out_of_range&) {
     return boost::trim_copy(pj);

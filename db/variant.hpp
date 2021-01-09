@@ -88,14 +88,13 @@ namespace std {
 inline std::ostream& operator<<(std::ostream& dest,
                                 const bark::db::variant_t& src)
 {
-    std::visit(
-        bark::overloaded{[&](std::monostate) { dest << ""; },
-                         [&](auto v) { dest << v; },
-                         [&](bark::blob_view v) {
-                             // call stream once
-                             dest << (std::to_string(v.size()) + " bytes");
-                         }},
-        src);
+    std::visit(bark::overloaded{[&](std::monostate) { dest << ""; },
+                                [&](auto v) { dest << v; },
+                                [&](bark::blob_view v) {
+                                    // call stream once
+                                    dest << bark::concat(v.size(), " bytes");
+                                }},
+               src);
     return dest;
 }
 

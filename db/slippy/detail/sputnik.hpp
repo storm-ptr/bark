@@ -4,7 +4,6 @@
 #define BARK_DB_SLIPPY_SPUTNIK_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
@@ -13,10 +12,8 @@ struct sputnik : layer {
 
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://tilessputnik.ru/" << tl.z << "/" << tl.x << "/" << tl.y
-           << ".png";
-        return os.str();
+        return concat(
+            "http://tilessputnik.ru/", tl.z, "/", tl.x, "/", tl.y, ".png");
     }
 };
 

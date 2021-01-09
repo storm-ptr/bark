@@ -4,16 +4,21 @@
 #define BARK_DB_SLIPPY_ARCGIS_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
 inline std::string arcgis_url(std::string_view lyr, const tile& tl)
 {
-    std::ostringstream os;
-    os << "http://services.arcgisonline.com/ArcGIS/rest/services/World_" << lyr
-       << "/MapServer/tile/" << tl.z << "/" << tl.y << "/" << tl.x << ".png";
-    return os.str();
+    return concat(
+        "http://services.arcgisonline.com/ArcGIS/rest/services/World_",
+        lyr,
+        "/MapServer/tile/",
+        tl.z,
+        "/",
+        tl.y,
+        "/",
+        tl.x,
+        ".png");
 }
 
 struct arcgis_imagery : layer {

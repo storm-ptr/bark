@@ -4,7 +4,6 @@
 #define BARK_DB_SLIPPY_BING_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
@@ -16,7 +15,7 @@ struct bing_quad_key {
     {
         for (auto i = that.tl.z; i > 0; i--) {
             char digit = '0';
-            const int mask = 1 << (i - 1);
+            int mask = 1 << (i - 1);
             if ((that.tl.x & mask) != 0) {
                 digit++;
             }
@@ -35,10 +34,9 @@ struct bing_maps : layer {
 
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://tiles.virtualearth.net/tiles/r" << bing_quad_key{tl}
-           << ".png?g=1&shading=hill&n=z";
-        return os.str();
+        return concat("http://tiles.virtualearth.net/tiles/r",
+                      bing_quad_key{tl},
+                      ".png?g=1&shading=hill&n=z");
     }
 };
 
@@ -47,10 +45,9 @@ struct bing_aerials : layer {
 
     std::string url(const tile& tl) override
     {
-        std::ostringstream os;
-        os << "http://tiles.virtualearth.net/tiles/a" << bing_quad_key{tl}
-           << ".jpeg?g=1";
-        return os.str();
+        return concat("http://tiles.virtualearth.net/tiles/a",
+                      bing_quad_key{tl},
+                      ".jpeg?g=1");
     }
 };
 

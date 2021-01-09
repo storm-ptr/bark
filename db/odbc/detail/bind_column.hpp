@@ -172,7 +172,7 @@ inline column_holder bind_column(const stmt_holder& stmt, SQLUSMALLINT col)
         case SQL_DB2_BLOB:
             return std::make_unique<column_blob>();
     }
-    throw std::runtime_error("invalid ODBC type: " + std::to_string(type));
+    throw std::runtime_error(concat("unsupported ODBC type: ", type));
 }
 
 }  // namespace bark::db::odbc

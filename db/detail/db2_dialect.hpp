@@ -69,14 +69,14 @@ struct db2_dialect : dialect {
             << " ORDER BY is_primary DESC, indschema, indname, colseq";
     }
 
-    meta::decoder_t geom_decoder() override
+    sql_decoder geom_decoder() override
     {
         return [](sql_builder& bld, std::string_view col_nm) {
             bld << "db2gse.ST_AsBinary(" << id(col_nm) << ") AS " << id(col_nm);
         };
     }
 
-    meta::encoder_t geom_encoder(std::string_view type, int srid) override
+    sql_encoder geom_encoder(std::string_view type, int srid) override
     {
         return [type = std::string{type}, srid](sql_builder& bld, variant_t v) {
             bld << "db2gse." << type << "(CAST(" << param{v}

@@ -53,9 +53,9 @@ struct dialect {
 
     virtual std::string type_name(meta::column_type) = 0;
 
-    virtual meta::decoder_t geom_decoder() = 0;
+    virtual sql_decoder geom_decoder() = 0;
 
-    virtual meta::encoder_t geom_encoder(std::string_view type, int srid) = 0;
+    virtual sql_encoder geom_encoder(std::string_view type, int srid) = 0;
 };
 
 using dialect_holder = std::unique_ptr<dialect>;

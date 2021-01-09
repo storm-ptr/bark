@@ -67,7 +67,7 @@ inline column_holder bind_column(Oid type)
         case PGRES_TYPE_BYTEA:
             return std::make_unique<column_arr<blob_view>>();
     }
-    throw std::runtime_error("invalid Postgres type: " + std::to_string(type));
+    throw std::runtime_error(concat("unsupported Postgres type: ", type));
 }
 
 }  // namespace bark::db::postgres

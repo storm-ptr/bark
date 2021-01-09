@@ -5,30 +5,21 @@
 
 #include <bark/db/qualified_name.hpp>
 #include <bark/db/variant.hpp>
-#include <functional>
 #include <limits>
 #include <locale>
-#include <sstream>
 #include <string>
 #include <vector>
 
 namespace bark::db {
 
-/// SQL dialect settings
-struct sql_syntax {
-    /// An SQL identifier that does not comply with the rules
-    /// for the format of regular identifiers must always be delimited.
-    std::function<std::string(const std::string& id)>
+/// An SQL identifier that does not comply with the rules for the format of
+/// regular identifiers must always be delimited.
+using sql_quoted_identifier = std::function<std::string(std::string_view id)>;
 
-        delimited_identifier = [](const auto& id) { return '"' + id + '"'; };
-
-    /// A parameter marker is a place holder in an SQL statement whose value is
-    /// obtained during statement execution. Empty marker means embedding the
-    /// parameters in the SQL text (with quotations if needed).
-    std::function<std::string(size_t order)>
-
-        parameter_marker = [](auto) { return "?"; };
-};
+/// A parameter marker is a place holder in an SQL statement whose value is
+/// obtained during statement execution. Empty marker means embedding the
+/// parameters in the SQL text (with quotations if needed).
+using sql_parameter_marker = std::function<std::string(size_t number)>;
 
 /// SQL manipulator
 template <class T>
@@ -49,7 +40,11 @@ param(T) -> param<T>;
 /// @endcode
 class sql_builder {
 public:
-    explicit sql_builder(sql_syntax syntax) : syntax_{std::move(syntax)}
+    sql_builder(sql_quoted_identifier quoted_identifier,
+                sql_parameter_marker parameter_marker)
+        : quoted_identifier_{std::move(quoted_identifier)}
+        , parameter_marker_{std::move(parameter_marker)}
+        , params_number_{0}
     {
         sql_.imbue(std::locale::classic());
         sql_.precision(std::numeric_limits<double>::max_digits10);
@@ -73,15 +68,15 @@ public:
 
     sql_builder& operator<<(const qualified_name& name)
     {
-        sql_ << list{name, ".", syntax_.delimited_identifier};
+        sql_ << list{name, ".", quoted_identifier_};
         return *this;
     }
 
     template <class T>
     sql_builder& operator<<(const param<T>& manip)
     {
-        if (syntax_.parameter_marker) {
-            sql_ << syntax_.parameter_marker(param_counter_++);
+        if (parameter_marker_) {
+            sql_ << parameter_marker_(params_number_++);
             params_ << manip.val;
         }
         else
@@ -91,7 +86,9 @@ public:
 
     sql_builder& operator<<(const param<qualified_name>& manip)
     {
-        return *this << param{(sql_builder{syntax_} << manip.val).sql()};
+        auto bld = sql_builder{quoted_identifier_, parameter_marker_};
+        bld << manip.val;
+        return *this << param{bld.sql()};
     }
 
     template <class T>
@@ -102,19 +99,20 @@ public:
     }
 
 private:
-    sql_syntax syntax_;
+    sql_quoted_identifier quoted_identifier_;
+    sql_parameter_marker parameter_marker_;
     std::ostringstream sql_;
     variant_ostream params_;
-    size_t param_counter_ = 0;
+    size_t params_number_;
 
-    void embed_param(const variant_t& val)
+    void embed_param(const variant_t& var)
     {
         std::visit(
             overloaded{[&](std::monostate) { sql_ << "NULL"; },
                        [&](auto v) { sql_ << v; },
                        [&](std::string_view v) { sql_ << "'" << v << "'"; },
                        [&](blob_view v) { sql_ << "X'" << hex{v} << "'"; }},
-            val);
+            var);
     }
 
     template <class T>
@@ -123,6 +121,12 @@ private:
         sql_ << val;
     }
 };
+
+/// Returns a well-known binary representation of a geometry column
+using sql_decoder = std::function<void(sql_builder&, std::string_view column)>;
+
+/// Creates a geometry instance from a well-known binary representation
+using sql_encoder = std::function<void(sql_builder&, variant_t parameter)>;
 
 }  // namespace bark::db
 

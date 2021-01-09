@@ -4,18 +4,22 @@
 #define BARK_DB_SLIPPY_GOOGLE_HPP
 
 #include <bark/db/slippy/detail/layer.hpp>
-#include <sstream>
 
 namespace bark::db::slippy {
 
 inline std::string google_url(char lyr, const tile& tl)
 {
     static random_index subdomain_{4};
-    std::ostringstream os;
-    os << "http://mt" << char('0' + subdomain_())
-       << ".google.com/vt/lyrs=" << lyr << "&x=" << tl.x << "&y=" << tl.y
-       << "&z=" << tl.z;
-    return os.str();
+    return concat("http://mt",
+                  char('0' + subdomain_()),
+                  ".google.com/vt/lyrs=",
+                  lyr,
+                  "&x=",
+                  tl.x,
+                  "&y=",
+                  tl.y,
+                  "&z=",
+                  tl.z);
 }
 
 struct google_hybrid : layer {

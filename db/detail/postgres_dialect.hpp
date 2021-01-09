@@ -92,9 +92,9 @@ ORDER BY pri DESC, scm, nm, col
 )";
     }
 
-    meta::decoder_t geom_decoder() override { return st_as_binary(); }
+    sql_decoder geom_decoder() override { return st_as_binary(); }
 
-    meta::encoder_t geom_encoder(std::string_view type, int srid) override
+    sql_encoder geom_encoder(std::string_view type, int srid) override
     {
         if (type == "geography")
             return [](sql_builder& bld, variant_t v) {

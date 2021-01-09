@@ -89,8 +89,8 @@ inline column_holder bind_column(OGRFieldType ogr_type)
         case OFTBinary:
             return std::make_unique<column_blob>();
         default:
-            throw std::runtime_error("unsupported OGR type: " +
-                                     std::to_string(ogr_type));
+            throw std::runtime_error(
+                concat("unsupported OGR type: ", ogr_type));
     }
 }
 

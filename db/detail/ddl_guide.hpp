@@ -9,7 +9,6 @@
 #include <bark/proj/epsg.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <initializer_list>
-#include <sstream>
 
 namespace bark::db {
 
@@ -21,7 +20,8 @@ protected:
     std::pair<qualified_name, std::string> script(meta::table tbl)
     {
         tbl.name = id(as_mixin().cached_schema(), tbl.name.back());
-        sql_builder bld{embeded_params(as_mixin().make_command()->syntax())};
+        auto bld = sql_builder{as_mixin().make_command()->quoted_identifier(),
+                               nullptr};
         create_table_sql(bld, tbl);
         add_geometry_columns_sql(bld, tbl);
         create_indexes_sql(bld, tbl);

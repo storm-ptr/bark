@@ -26,7 +26,15 @@ public:
         spatialite_init_ex(con_.get(), spatial_.get(), 0);
     }
 
-    sql_syntax syntax() override { return {}; }
+    sql_quoted_identifier quoted_identifier() override
+    {
+        return [](auto id) { return concat('"', id, '"'); };
+    }
+
+    sql_parameter_marker parameter_marker() override
+    {
+        return [](auto) { return "?"; };
+    }
 
     void exec(const sql_builder& bld) override
     {

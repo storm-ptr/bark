@@ -64,7 +64,7 @@ struct mysql_dialect : dialect {
             << ") ORDER BY is_primary DESC, index_name, seq_in_index";
     }
 
-    meta::decoder_t geom_decoder() override
+    sql_decoder geom_decoder() override
     {
         return [](sql_builder& bld, std::string_view col_nm) {
             bld << "ST_AsBinary(" << id(col_nm) << ", "
@@ -72,7 +72,7 @@ struct mysql_dialect : dialect {
         };
     }
 
-    meta::encoder_t geom_encoder(std::string_view, int srid) override
+    sql_encoder geom_encoder(std::string_view, int srid) override
     {
         return [srid](sql_builder& bld, variant_t val) {
             bld << "ST_GeomFromWKB(" << param{val} << ", " << srid << ", "

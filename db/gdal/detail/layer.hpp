@@ -62,8 +62,8 @@ private:
             case OFTBinary:
                 return meta::column_type::Blob;
             default:
-                throw std::runtime_error("unsupported OGR type: " +
-                                         std::to_string(ogr_type));
+                throw std::runtime_error(
+                    concat("unsupported OGR type: ", ogr_type));
         }
     }
 
