@@ -133,32 +133,31 @@ constexpr size_t variant_index()
 /// expected<T> is either a T or the exception preventing its creation.
 template <class T>
 class expected {
+    std::variant<std::exception_ptr, T> val_;
+
 public:
     template <class F, class... Args>
     static expected result_of(F&& f, Args&&... args) noexcept
     {
         expected res;
         try {
-            res.state_ =
+            res.val_ =
                 std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
         }
-        catch (const std::exception&) {
-            res.state_ = std::current_exception();
+        catch (...) {
+            res.val_ = std::current_exception();
         }
         return res;
     }
 
-    T get()
+    T get() &&
     {
-        return std::visit(overloaded{[](T& val) -> T { return std::move(val); },
-                                     [](std::exception_ptr& e) -> T {
-                                         std::rethrow_exception(std::move(e));
-                                     }},
-                          state_);
+        return std::visit(
+            overloaded{
+                [](std::exception_ptr e) -> T { std::rethrow_exception(e); },
+                [](T&& val) -> T { return std::move(val); }},
+            std::move(val_));
     }
-
-private:
-    std::variant<std::exception_ptr, T> state_;
 };
 
 /// Joins 'items' by adding user defined separator.
@@ -240,6 +239,11 @@ streamable(T) -> streamable<T>;
 /// @see https://en.cppreference.com/w/cpp/named_req/TimedLockable
 template <class T, class Hash = std::hash<T>, class Equal = std::equal_to<T>>
 class timed_lockable {
+    T val_;
+    inline static std::mutex guard_;
+    inline static std::condition_variable notifier_;
+    inline static std::unordered_set<T, Hash, Equal> locked_;
+
 public:
     explicit timed_lockable(const T& val) : val_{val} {}
 
@@ -260,12 +264,6 @@ public:
         }
         notifier_.notify_all();
     }
-
-private:
-    T val_;
-    inline static std::mutex guard_;
-    inline static std::condition_variable notifier_;
-    inline static std::unordered_set<T, Hash, Equal> locked_;
 };
 
 }  // namespace bark

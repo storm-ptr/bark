@@ -58,9 +58,8 @@ inline std::ostream& operator<<(std::ostream& os, const column& col)
         if (!col.projection.empty())
             opts.push_back(proj::abbreviation(col.projection));
         if (!col.tiles.empty())
-            opts.push_back("BOX" +
-                           boost::lexical_cast<std::string>(
-                               boost::geometry::dsv(bounds(col.tiles))));
+            opts.push_back(
+                concat("BOX", boost::geometry::dsv(bounds(col.tiles))));
         if (!opts.empty())
             os << " (" << list{opts, ", "} << ")";
     }

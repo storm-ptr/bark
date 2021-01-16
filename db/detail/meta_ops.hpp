@@ -5,7 +5,6 @@
 
 #include <bark/db/meta.hpp>
 #include <bark/detail/grid.hpp>
-#include <bark/detail/unicode.hpp>
 #include <boost/algorithm/cxx11/any_of.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/search.hpp>
@@ -39,26 +38,23 @@ template <class Indexes, class ColumnNames>
 bool indexed(Indexes&& indexes, ColumnNames&& col_nms)
 {
     return boost::algorithm::any_of(indexes, [&](auto& idx) {
-        return boost::range::search(idx.columns,
-                                    col_nms,
-                                    unicode::case_insensitive_equal_to{}) ==
+        return boost::range::search(idx.columns, col_nms) ==
                idx.columns.begin();
     });
 }
 
-template <class Rng>
-auto find(Rng&& rng, std::string_view name)
+template <class Columns>
+auto find(Columns&& cols, std::string_view col_nm)
 {
-    return boost::range::find_if(rng, [&](auto& item) {
-        return unicode::case_insensitive_equal_to{}(name, item.name);
-    });
+    return boost::range::find_if(cols,
+                                 [=](auto& col) { return col_nm == col.name; });
 }
 
-template <class Rng>
-auto names(Rng&& rng)
+template <class Columns>
+auto names(Columns&& cols)
 {
-    return as<std::vector<std::string>>(rng,
-                                        [&](auto& item) { return item.name; });
+    return as<std::vector<std::string>>(cols,
+                                        [&](auto& col) { return col.name; });
 }
 
 inline geometry::box_rtree make_tiles(size_t count, geometry::box ext)

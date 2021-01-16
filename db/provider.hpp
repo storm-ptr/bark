@@ -35,7 +35,7 @@ struct provider {
 
     /// Returns a balanced data grid.
 
-    /// @param layer is a data set;
+    /// @param layer is a data set identifier;
     /// @param extent is a spatial filter;
     /// @param pixel selects the level of the raster pyramid.
     virtual geometry::multi_box tile_coverage(const qualified_name& layer,
@@ -45,7 +45,7 @@ struct provider {
     /// Returns @ref rowset with spatial data set.
 
     /// Columns @code GEOMETRY[,IMAGE][,ATTRIBUTES...] @endcode
-    /// @param layer is a data set;
+    /// @param layer is a data set identifier;
     /// @param extent is a spatial filter;
     /// @param pixel selects the level of the raster pyramid.
     virtual rowset spatial_objects(const qualified_name& layer,
@@ -146,6 +146,13 @@ sql_builder insert_sql(provider& pvd,
         << list{rows, ",\n", encode};
     return res;
 };
+
+inline sql_builder insert_sql(provider& pvd,
+                              const qualified_name& tbl_nm,
+                              const rowset& rows)
+{
+    return insert_sql(pvd, tbl_nm, rows.columns, select(rows));
+}
 
 inline sql_builder drop_sql(provider& pvd, const qualified_name& tbl_nm)
 {

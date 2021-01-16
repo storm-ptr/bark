@@ -25,12 +25,13 @@ struct postgres_dialect : dialect {
 
     void columns_sql(sql_builder& bld, const qualified_name& tbl_nm) override
     {
+        auto& tbl = tbl_nm.back();
         auto& scm = tbl_nm.at(-2);
         bld << "SELECT column_name, LOWER(CASE data_type WHEN "
             << param{"USER-DEFINED"}
             << " THEN udt_name ELSE data_type END), numeric_scale FROM "
                "information_schema.columns WHERE table_schema = "
-            << param{scm} << " AND table_name = " << param{tbl_nm.back()}
+            << param{scm} << " AND table_name = " << param{tbl}
             << " ORDER BY ordinal_position";
     }
 

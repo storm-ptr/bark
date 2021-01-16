@@ -3,42 +3,43 @@
 #ifndef BARK_TEST_DB_HPP
 #define BARK_TEST_DB_HPP
 
-#include <bark/db/gdal/provider.hpp>
-#include <bark/db/mysql/provider.hpp>
-#include <bark/db/odbc/provider.hpp>
-#include <bark/db/postgres/provider.hpp>
-#include <bark/db/sqlite/provider.hpp>
-#include <bark/geometry/as_text.hpp>
-#include <bark/test/wkb_unifier.hpp>
+#include <bark/test/providers.hpp>
+#include <bark/test/simplify_geometry.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/range/algorithm/equal.hpp>
-#include <boost/range/algorithm/find_if.hpp>
 #include <iostream>
 
 namespace bark::db {
 
+inline void simplify_geometry_column(const rowset& rows, std::string_view col)
+{
+    auto it = std::find(rows.columns.begin(), rows.columns.end(), col);
+    auto offset = std::distance(rows.columns.begin(), it);
+    for_each_blob(select(rows), offset, simplify_geometry{});
+}
+
 inline bool operator==(const rowset& lhs, const rowset& rhs)
 {
-    return std::make_tuple(lhs.columns.size(),
-                           static_cast<blob_view>(lhs.data)) ==
-           std::make_tuple(rhs.columns.size(),
-                           static_cast<blob_view>(rhs.data));
+    return std::is_permutation(lhs.columns.begin(),
+                               lhs.columns.end(),
+                               rhs.columns.begin(),
+                               rhs.columns.end()) &&
+           select(lhs) == select(lhs.columns, rhs);
 }
 
 namespace meta {
 
 inline bool operator==(const column& lhs, const column& rhs)
 {
-    return unicode::case_insensitive_equal_to{}(lhs.name, rhs.name) &&
-           lhs.type == rhs.type && lhs.projection == rhs.projection;
+    return std::tie(lhs.name, lhs.type, lhs.projection) ==
+           std::tie(rhs.name, rhs.type, rhs.projection);
 }
 
 inline bool operator==(const index& lhs, const index& rhs)
 {
     return lhs.type == rhs.type &&
-           boost::range::equal(
-               lhs.columns, rhs.columns, unicode::case_insensitive_equal_to{});
+           boost::range::equal(lhs.columns, rhs.columns);
 }
 
 inline bool operator==(const table& lhs, const table& rhs)
@@ -58,120 +59,39 @@ inline bool operator==(const table& lhs, const table& rhs)
 
 }  // namespace bark::db
 
-inline auto random_name()
-{
-    return bark::db::id(bark::concat("drop_me_", bark::random_index{10000}()));
-}
-
-inline const auto& odbc_driver(std::initializer_list<std::string_view> tokens)
+TEST_CASE("db_insert")
 {
     using namespace bark;
-    static const auto Drivers = db::odbc::drivers();
-    auto it = boost::range::find_if(Drivers, [tokens](const auto& drv) {
-        return all_of(tokens, within(drv));
-    });
-    if (it == std::end(Drivers))
-        throw std::runtime_error(
-            concat("ODBC driver not found: ", list{tokens, ", "}));
-    return *it;
-}
-
-#if defined(BARK_TEST_DATABASE_SERVER)
-#define BARK_TEST_MYSQL_SERVER BARK_TEST_DATABASE_SERVER
-#define BARK_TEST_ODBC_DB2_SERVER BARK_TEST_DATABASE_SERVER
-#define BARK_TEST_ODBC_MSSQL_SERVER BARK_TEST_DATABASE_SERVER
-#define BARK_TEST_ODBC_MYSQL_SERVER BARK_TEST_DATABASE_SERVER
-#define BARK_TEST_ODBC_POSTGRES_SERVER BARK_TEST_DATABASE_SERVER
-#define BARK_TEST_POSTGRES_SERVER BARK_TEST_DATABASE_SERVER
-#endif
-
-inline std::vector<bark::db::provider_ptr> make_write_providers()
-{
     using namespace bark::db;
-    return
-    {
-#if defined(BARK_TEST_MYSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<mysql::provider>(BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER), 3306, "mysql", "root", BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD)),
-#endif
-#if defined(BARK_TEST_ODBC_DB2_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"IBM"}) + ";UID=DB2INST1;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=SAMPLE;HOSTNAME=" BOOST_PP_STRINGIZE(BARK_TEST_ODBC_DB2_SERVER)),
-#endif
-#if defined(BARK_TEST_ODBC_MSSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"SQL", "Server"}) + ";UID=sa;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=master;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_ODBC_MSSQL_SERVER)),
-#endif
-#if defined(BARK_TEST_ODBC_MYSQL_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"MySQL", "Unicode"}) + ";UID=root;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=mysql;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_MYSQL_SERVER) ";MULTI_STATEMENTS=1;SSLMODE=disabled"),
-#endif
-#if defined(BARK_TEST_ODBC_POSTGRES_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<odbc::provider>("DRIVER=" + odbc_driver({"PostgreSQL", "Unicode"}) + ";UID=postgres;PWD=" BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD) ";DATABASE=postgres;SERVER=" BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER)),
-#endif
-#if defined(BARK_TEST_POSTGRES_SERVER) && defined(BARK_TEST_DATABASE_PWD)
-        std::make_shared<postgres::provider>(BOOST_PP_STRINGIZE(BARK_TEST_POSTGRES_SERVER), 5432, "postgres", "postgres", BOOST_PP_STRINGIZE(BARK_TEST_DATABASE_PWD)),
-#endif
-        std::make_shared<sqlite::provider>(R"(./drop_me.sqlite)")
-    };
-}
-
-TEST_CASE("db_geometry")
-{
-    using namespace bark::db;
-    static constexpr size_t Limit = 10;
-
-    boost::io::ios_flags_saver ifs(std::cout);
-    gdal::provider pvd_from("./data/mexico.sqlite");
-    auto lr_from = pvd_from.dir().begin()->first;
-    auto tbl_from = pvd_from.table(qualifier(lr_from));
-    std::cout << tbl_from << std::endl;
-    REQUIRE(!tbl_from.columns.empty());
-    REQUIRE(!tbl_from.indexes.empty());
-    auto cols = names(tbl_from.columns);
-    auto col = std::distance(tbl_from.columns.begin(),
-                             find(tbl_from.columns, lr_from.back()));
-    auto rowset_from =
-        fetch_all(pvd_from, select_sql(pvd_from, tbl_from.name, 1, Limit));
-    std::cout << rowset_from << std::endl;
-    REQUIRE(!rowset_from.data.empty());
-    auto rows_from = select(cols, rowset_from);
-    bark::db::for_each_blob(rows_from, col, wkb_unifier{});
-    for (auto& pvd_to : make_write_providers()) {
-        auto [name, sql] =
-            pvd_to->ddl({random_name(), tbl_from.columns, tbl_from.indexes});
-        REQUIRE_THROWS(pvd_to->table(name));
-        exec(*pvd_to, sql);
-        pvd_to->refresh();
-        auto tbl_to = pvd_to->table(name);
-        REQUIRE(tbl_from == tbl_to);
-
-        auto cmd = pvd_to->make_command();
-        cmd->set_autocommit(false);
-        cmd->exec(insert_sql(*pvd_to, tbl_to.name, cols, rows_from));
-        cmd->commit();
-        pvd_to->refresh();
-        auto rowset_to =
-            fetch_all(*pvd_to, select_sql(*pvd_to, tbl_to.name, 0, Limit));
-        auto rows_to = select(cols, rowset_to);
-        bark::db::for_each_blob(rows_to, col, wkb_unifier{});
-        REQUIRE(rows_from == rows_to);
-
-        cmd->exec(drop_sql(*pvd_to, tbl_to.name));
-        cmd->commit();
-        pvd_to->refresh();
-        REQUIRE_THROWS(pvd_to->table(tbl_to.name));
+    auto ifs = boost::io::ios_flags_saver{std::cout};
+    auto pvd_src = gdal::provider{"./data/mexico.sqlite"};
+    auto lr_src = pvd_src.dir().begin()->first;
+    auto tbl_src = pvd_src.table(qualifier(lr_src));
+    std::cout << tbl_src << std::endl;
+    REQUIRE(!tbl_src.columns.empty());
+    REQUIRE(!tbl_src.indexes.empty());
+    auto rows_src = fetch_all(pvd_src, select_sql(pvd_src, tbl_src.name, 3, 5));
+    std::cout << rows_src << std::endl;
+    REQUIRE(!rows_src.data.empty());
+    simplify_geometry_column(rows_src, lr_src.back());
+    for (auto& pvd : make_providers()) {
+        auto [tbl_nm, ddl] =
+            pvd->ddl({id(concat("drop_me_", random_index{10000}())),
+                      tbl_src.columns,
+                      tbl_src.indexes});
+        REQUIRE_THROWS(pvd->table(tbl_nm));
+        exec(*pvd, ddl);
+        pvd->refresh();
+        REQUIRE(tbl_src == pvd->table(tbl_nm));
+        exec(*pvd, insert_sql(*pvd, tbl_nm, rows_src));
+        pvd->refresh();
+        auto rows = fetch_all(*pvd, select_sql(*pvd, tbl_nm, 0, 100500));
+        simplify_geometry_column(rows, lr_src.back());
+        REQUIRE(rows_src == rows);
+        exec(*pvd, drop_sql(*pvd, tbl_nm));
+        pvd->refresh();
+        REQUIRE_THROWS(pvd->table(tbl_nm));
     }
-}
-
-TEST_CASE("gdal_raster")
-{
-    using namespace bark;
-    using namespace bark::db;
-
-    gdal::provider pvd(R"(./data/albers27.tif)");
-    auto reg = pvd.dir();
-    REQUIRE(!reg.empty());
-    auto layer = reg.begin()->first;
-    std::cout << layer << '\n'
-              << proj::abbreviation(pvd.projection(layer)) << '\n'
-              << geometry::wkt{pvd.extent(layer)} << std::endl;
 }
 
 #endif  // BARK_TEST_DB_HPP

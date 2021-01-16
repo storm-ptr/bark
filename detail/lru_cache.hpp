@@ -44,7 +44,7 @@ public:
         auto res = mapped_type::result_of(std::forward<F>(f),
                                           std::forward<Args>(args)...);
         insert({scoped_key, res});
-        return res.get();
+        return std::move(res).get();
     }
 
     template <class Key>

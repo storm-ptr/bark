@@ -79,14 +79,6 @@ auto to_upper(const Str& str)
     return unicode::to_string<range_value_t<Str>>(wstr);
 }
 
-struct case_insensitive_equal_to {
-    template <class Lhs, class Rhs>
-    bool operator()(const Lhs& lhs, const Rhs& rhs) const
-    {
-        return to_lower(lhs) == to_lower(rhs);
-    }
-};
-
 }  // namespace bark::unicode
 
 #endif  // BARK_UNICODE_HPP

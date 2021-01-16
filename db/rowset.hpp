@@ -28,19 +28,16 @@ inline auto select(const rowset& from)
 
 /// Returns tuples of @ref variant_t
 template <class Columns>
-auto select(const Columns& columns, const rowset& from)
+auto select(const Columns& cols, const rowset& from)
 {
-    auto cols = as<std::vector<std::string>>(
-        columns, [](const auto& col) { return unicode::to_lower(col); });
-
-    auto idxs = as<std::vector<size_t>>(from.columns, [&](const auto& col) {
-        auto it = std::find(cols.begin(), cols.end(), unicode::to_lower(col));
-        return std::distance(cols.begin(), it);
+    auto idxs = as<std::vector<size_t>>(from.columns, [&](auto&& col) {
+        auto it = std::find(std::begin(cols), std::end(cols), col);
+        return std::distance(std::begin(cols), it);
     });
 
     auto res = std::vector<std::vector<variant_t>>{};
     for (auto is = variant_istream{from.data}; !is.data.empty();) {
-        auto& row = res.emplace_back(cols.size());
+        auto& row = res.emplace_back(idxs.size());
         for (size_t idx : idxs)
             if (idx < row.size())
                 is >> row[idx];

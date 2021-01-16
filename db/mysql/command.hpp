@@ -109,7 +109,7 @@ public:
                                 : nullptr};
         unsigned cols = res ? mysql_num_fields(res.get()) : 0;
 
-        std::vector<std::string> names(cols);
+        auto names = std::vector<std::string>(cols);
         binds_.resize(cols);
         memset(binds_.data(), 0, binds_.size() * sizeof(MYSQL_BIND));
         cols_.resize(cols);

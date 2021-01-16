@@ -68,8 +68,7 @@ private:
                 tbl.columns.push_back(col);
         }
         if (tbl.columns.empty())
-            throw std::runtime_error(
-                "no columns: " + boost::lexical_cast<std::string>(tbl.name));
+            throw std::runtime_error(concat("no columns: ", tbl.name));
     }
 
     void load_indexes(meta::table& tbl)

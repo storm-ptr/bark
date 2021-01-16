@@ -1,13 +1,13 @@
 // Andrew Naplavkov
 
-#ifndef BARK_TEST_WKB_UNIFIER_HPP
-#define BARK_TEST_WKB_UNIFIER_HPP
+#ifndef BARK_TEST_SIMPLIFY_GEOMETRY_HPP
+#define BARK_TEST_SIMPLIFY_GEOMETRY_HPP
 
 #include <bark/detail/wkb.hpp>
 #include <boost/none.hpp>
 
 /// WKB visitor
-class wkb_unifier {
+class simplify_geometry {
 public:
     void operator()(bark::blob_view data)
     {
@@ -16,6 +16,7 @@ public:
         bark::wkb::geometry::accept(is, *this);
     }
 
+    /// reduce precision
     boost::none_t operator()(double x, double y)
     {
         *this << (double)(float)x << (double)(float)y;
@@ -50,7 +51,7 @@ private:
     bark::blob_view data_;
 
     template <class T>
-    wkb_unifier& operator<<(T val)
+    simplify_geometry& operator<<(T val)
     {
         *(T*)data_.data() = val;
         data_.remove_prefix(sizeof(T));
@@ -58,4 +59,4 @@ private:
     }
 };
 
-#endif  // BARK_TEST_WKB_UNIFIER_HPP
+#endif  // BARK_TEST_SIMPLIFY_GEOMETRY_HPP
